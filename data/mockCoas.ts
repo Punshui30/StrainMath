@@ -1,8 +1,4 @@
-"C:\Users\simmo\Downloads\strain_library (1).json"
-
-    * MOCK COA DATASET
-        * Version: 1.0.0
-            * 
+/**
  * Simulated Certificate of Analysis data for GO Calculator demo.
  * Contains realistic cannabinoid and terpene profiles for strain library cultivars.
  * 
@@ -19,7 +15,7 @@
 
 export type MockCOA = {
     strainId: string;
-    strainName: string;
+    strainName?: string;
     batchId: string;
     cannabinoids: {
         thc: number;
@@ -32,6 +28,7 @@ export type MockCOA = {
         percentage: number;
     }[];
     totalTerpenes: number;
+    [key: string]: any;
 };
 
 export const MOCK_COAS: MockCOA[] = [
@@ -138,7 +135,7 @@ export const MOCK_COAS: MockCOA[] = [
         strainId: "strain_008",
         strainName: "Jack Herer",
         batchId: "JH-2024-008",
-        cannoids: { thc: 20.4, cbd: 0.3, cbn: 0.1, cbg: 1.0 },
+        cannabinoids: { thc: 20.4, cbd: 0.3, cbn: 0.1, cbg: 1.0 },
         terpenes: [
             { name: "Terpinolene", percentage: 0.68 },
             { name: "Pinene", percentage: 0.52 },
@@ -584,7 +581,7 @@ export const MOCK_COAS: MockCOA[] = [
     },
     {
         strainId: "strain_040",
-        strainNameContinue8:09 PM: "Headband",
+        "strainNameContinue8:09 PM": "Headband",
         batchId: "HB-2024-040",
         cannabinoids: { thc: 20.8, cbd: 0.1, cbn: 0.3, cbg: 0.8 },
         terpenes: [
