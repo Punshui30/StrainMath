@@ -28,12 +28,15 @@ export function WhyPanel({ isVisible, blend, intent }: WhyPanelProps) {
         {!isExpanded && (
           <motion.button
             type="button"
-            onClick={() => setIsExpanded(true)}
+            onClick={() => {
+              console.log("Blend Breakdown clicked", blend?.id);
+              setIsExpanded(true);
+            }}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed right-8 bottom-8 z-20"
+            className="fixed right-8 bottom-8 z-[200]"
           >
             <div className="px-6 py-4 rounded-2xl backdrop-blur-xl bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_12px_40px_rgba(0,0,0,0.35)] hover:bg-white/[0.12] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3),0_12px_50px_rgba(0,0,0,0.45)] transition-all duration-300">
               <div className="flex items-center gap-3">
@@ -107,10 +110,10 @@ export function WhyPanel({ isVisible, blend, intent }: WhyPanelProps) {
                             {comp.name}
                           </span>
                           <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${comp.role === 'Driver'
-                              ? 'border-[#D4AF37]/30 text-[#D4AF37] bg-[#D4AF37]/10'
-                              : comp.role === 'Modulator'
-                                ? 'border-blue-400/30 text-blue-400 bg-blue-400/10'
-                                : 'border-white/20 text-white/40 bg-white/5'
+                            ? 'border-[#D4AF37]/30 text-[#D4AF37] bg-[#D4AF37]/10'
+                            : comp.role === 'Modulator'
+                              ? 'border-blue-400/30 text-blue-400 bg-blue-400/10'
+                              : 'border-white/20 text-white/40 bg-white/5'
                             }`}>
                             {comp.role}
                           </span>

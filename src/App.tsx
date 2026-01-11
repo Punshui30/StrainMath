@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { AppShell_StateMachine } from './components/AppShell_StateMachine';
 import { MobileBlendView } from './components/MobileBlendView';
 
+
+import { VisualFlyInOverlay } from './components/VisualFlyInOverlay';
+
 export default function App() {
   const [isBlendRoute, setIsBlendRoute] = useState(false);
 
@@ -15,5 +18,10 @@ export default function App() {
     return <MobileBlendView />;
   }
 
-  return <AppShell_StateMachine />;
+  return (
+    <>
+      <AppShell_StateMachine />
+      <VisualFlyInOverlay />
+    </>
+  );
 }
