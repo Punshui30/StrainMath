@@ -558,8 +558,8 @@ export function AppShell_StateMachine() {
                 )}
               </div>
 
-              {/* Blend Result Cards - Show only when animation completes */}
-              {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
+              {/* Blend Result Cards - Show only when animation completes AND calculator not open */}
+              {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && !committedBlend && (
                 <div className="absolute inset-0 flex items-center justify-center pb-32 z-[100] pointer-events-auto">
                   <div className="flex flex-col items-center w-full">
                     <div className="flex gap-6 justify-center mb-12">
