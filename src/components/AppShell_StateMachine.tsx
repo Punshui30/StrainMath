@@ -30,6 +30,7 @@ import { DEMO_STEPS } from '../data/demoSteps';
 // Blend trigger types to prevent LLM contamination
 type BlendTrigger =
   | { type: 'user'; text: string }
+  | { type: 'strain-chase'; strainName: string; lovedEffects?: string }
   | { type: 'system' };
 
 type AppMode = 'voice' | 'operator' | 'business';
@@ -71,6 +72,10 @@ export function AppShell_StateMachine() {
   const [selectedBlendId, setSelectedBlendId] = useState(1);
   const [committedBlend, setCommittedBlend] = useState<any | null>(null);
 
+  // Mobile Strain Chaser UI State
+  const [mobileStrainName, setMobileStrainName] = useState('');
+  const [mobileLovedEffects, setMobileLovedEffects] = useState('');
+
   // LLM States
   const [isInterpreting, setIsInterpreting] = useState(false);
   const [currentIntent, setCurrentIntent] = useState<IntentVectors | null>(null);
@@ -79,6 +84,12 @@ export function AppShell_StateMachine() {
   const [showQR, setShowQR] = useState(false);
   const [blendExplanationText, setBlendExplanationText] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [chaseModeData, setChaseModeData] = useState<{
+    strainName: string;
+    similarityScore: "High" | "Medium" | "Low";
+    explanation: string;
+  } | null>(null);
+
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
   // [CRITICAL] Initial state MUST be empty to ensure only Logo is shown on load.
@@ -110,8 +121,6 @@ export function AppShell_StateMachine() {
     window.addEventListener('resize', updateLogoRect);
     return () => window.removeEventListener('resize', updateLogoRect);
   }, [mode]); // Re-measure when layout might change
-
-
 
   // [CORRECTIVE FIX] Shared Inventory State (Single Source of Truth)
   const [inventory, setInventory] = useState(() => MOCK_COAS.map(coa => ({
@@ -151,38 +160,73 @@ export function AppShell_StateMachine() {
   };
 
   /**
+   * interpretStrainChase
+   * Calls the specialized LLM route for strain chasers
+   */
+  const interpretStrainChase = async (strainName: string, lovedEffects?: string) => {
+    setIsInterpreting(true);
+    try {
+      const response = await fetch('/api/interpret-strain-chase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ strainName, lovedEffects })
+      });
+      const data = await response.json();
+      setChaseModeData({
+        strainName,
+        similarityScore: data.similarityScore,
+        explanation: data.explanation
+      });
+      return data;
+    } catch (error) {
+      console.error("❌ Strain chase failed:", error);
+      return null;
+    } finally {
+      setIsInterpreting(false);
+    }
+  };
+
+  /**
    * startBlendSequence
    * Updated to handle real interpretation or direct intent injection
    */
   const startBlendSequence = useCallback(async (trigger?: BlendTrigger, overrideIntent?: IntentVectors) => {
-    // [CRITICAL FIX] Allow re-triggering from any state (removed idle check)
-    // if (animationState !== 'STATE_0_IDLE') return; 
-
     // [CRITICAL FIX] Force Reset UI State
     if (trigger || overrideIntent) {
       setCommittedBlend(null);
-      // We don't reset animationState immediately here, we let the sequence drive it to STATE_1
     }
 
     let intent: any = null;
     let selectedId = selectedBlendId;
     let activeBlends = visibleBlends;
+    let localChaseData: any = null;
 
     if (overrideIntent) {
       intent = overrideIntent;
+      setChaseModeData(null);
     } else if (trigger?.type === 'user') {
       // Only interpret user-authored language (FIX 3: LLM sanitization)
       setLastUserText(trigger.text);
       intent = await interpretOutcome(trigger.text);
+      setChaseModeData(null); // Clear strain chaser if moving to free text
+    } else if (trigger?.type === 'strain-chase') {
+      const chaseResult = await interpretStrainChase(trigger.strainName, trigger.lovedEffects);
+      if (chaseResult) {
+        intent = chaseResult.intent;
+        localChaseData = {
+          strainName: trigger.strainName,
+          similarityScore: chaseResult.similarityScore,
+          explanation: chaseResult.explanation
+        };
+      }
+      setLastUserText(`Inspired by ${trigger.strainName}`);
     }
-    // System triggers reuse last intent without LLM call
 
     if (intent && typeof intent === 'object') {
       // [CRITICAL FIX] Normalize & Guard Data Shape
       console.log("🛡️ Validating Intent Shape:", intent);
 
       // Score across all 60+ strains in MOCK_COAS
-      // Ensure intent has minimal required keys or fallback
       const safeIntent: IntentVectors = {
         relaxation: intent.relaxation ?? 0.5,
         focus: intent.focus ?? 0.5,
@@ -204,14 +248,26 @@ export function AppShell_StateMachine() {
         return; // Abort - Do not crash UI
       }
 
-      setVisibleBlends(newBlends);
-      activeBlends = newBlends;
-      selectedId = newBlends[0].id;
+      // If in chase mode, inject the similarity metadata into the blends
+      const finalBlends = localChaseData
+        ? newBlends.map(b => ({
+          ...b,
+          name: `${b.name.split(' ').slice(0, 1)} ${localChaseData.strainName} Match`,
+          similarity: {
+            score: localChaseData.similarityScore,
+            explanation: localChaseData.explanation
+          }
+        }))
+        : newBlends;
+
+      setVisibleBlends(finalBlends);
+      activeBlends = finalBlends;
+      selectedId = finalBlends[0].id;
       setSelectedBlendId(selectedId);
     }
 
     // [CRITICAL FIX] Safe Access - using local variable to prevent race condition
-    const blend = activeBlends.find(b => b.id === selectedId) || activeBlends[0] || (userInput ? null : activeBlends[0]);
+    const blend = activeBlends.find(b => b.id === selectedId) || activeBlends[0];
 
     // If we're processing new input but failed to get a blend, abort sequence
     if (!blend || !blend.components) {
@@ -219,10 +275,7 @@ export function AppShell_StateMachine() {
       return;
     }
 
-    // [CRITICAL FIX] Animate ALL Ingredients (Intent Tiles)
-    // Flatten components from all blends to get the full list (usually 9 items)
     const allComponents = activeBlends.flatMap(b => b.components || []);
-
     const cards: IngredientCard[] = allComponents.map(c => ({
       strain: c.name,
       color: getStrainColor(c.name),
@@ -233,25 +286,13 @@ export function AppShell_StateMachine() {
 
     setIngredientCards(cards);
 
-    // Use unique strains for efficient scrolling
     const strainNames = cards.map(c => c.strain);
     const uniqueStrains = Array.from(new Set(strainNames));
 
-    // ========================================
-    // STATE 1: INVENTORY ALIGNMENT & FLY-IN ANIMATION
-    // ========================================
     setAnimationState('STATE_1_INVENTORY_ALIGNED');
-
-    // Scroll inventory to center selected strains (Visual feedback only)
     await inventoryRef.current?.scrollToCenter(uniqueStrains);
-
-    // Fire visual-only fly-in DURING STATE_1 (before results render)
     window.dispatchEvent(new Event('strain-math:trigger-fly-in'));
-
-    // Allow animation to complete
     await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Transition to Results
     setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
 
   }, [animationState, selectedBlendId, inventory]);
@@ -260,14 +301,10 @@ export function AppShell_StateMachine() {
   useEffect(() => {
     if (!isDemoRunning) return;
 
-    // Orchestration Logic: Force UI State based on Step
     if (demoStep <= 4 && mode !== 'operator') {
       setMode('operator');
     } else if (demoStep === 5 && mode !== 'voice') {
-      // Step 5: "Every recommendation can be saved..." -> Show Result
       setMode('voice');
-      // Trigger a clean blend sequence for visual context
-      // We use a small timeout to let the mode switch settle
       setTimeout(() => {
         startBlendSequence({ type: 'system' });
       }, 500);
@@ -292,12 +329,12 @@ export function AppShell_StateMachine() {
     setCurrentLiftingIndex(-1);
     setCardsArrived(0);
     setLiftingCardPositions([]);
+    setChaseModeData(null);
   };
 
   const handleMakeBlend = () => {
     const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
     if (selectedBlend) {
-      console.log("✅ Committing blend:", selectedBlend.name);
       setCommittedBlend(selectedBlend);
     }
   };
@@ -314,11 +351,16 @@ export function AppShell_StateMachine() {
     }
   };
 
-  // ==========================================
-  // SCREEN OWNERSHIP MODEL
-  // ==========================================
-  // When explanation is open, it owns the screen EXCLUSIVELY
-  // Everything else is UNMOUNTED (not hidden, not layered - GONE)
+  const deriveScreenState = (): ScreenState => {
+    if (showExplanation) return 'EXPLANATION';
+    if (committedBlend) return 'CALCULATOR';
+    if (animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && visibleBlends.length > 0) return 'RESULTS';
+    if (animationState !== 'STATE_0_IDLE') return 'PROCESSING';
+    return 'INPUT';
+  };
+
+  const currentScreen = deriveScreenState();
+
   if (showExplanation) {
     const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
     if (!selectedBlend) return null;
@@ -336,24 +378,6 @@ export function AppShell_StateMachine() {
     );
   }
 
-  // ==========================================
-  // SINGLE RENDER AUTHORITY
-  // ==========================================
-  // Derive current screen state from existing state variables
-  const deriveScreenState = (): ScreenState => {
-    if (showExplanation) return 'EXPLANATION';
-    if (committedBlend) return 'CALCULATOR';
-    if (animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && visibleBlends.length > 0) return 'RESULTS';
-    if (animationState !== 'STATE_0_IDLE') return 'PROCESSING';
-    return 'INPUT';
-  };
-
-  const currentScreen = deriveScreenState();
-
-  // Guard clauses for screen ownership
-  // EXPLANATION screen already handled above (lines 322-339)
-
-  // CALCULATOR screen - exclusive render
   if (currentScreen === 'CALCULATOR') {
     const blend = committedBlend!;
     return (
@@ -377,18 +401,12 @@ export function AppShell_StateMachine() {
     );
   }
 
-  // ==========================================
-  // NORMAL RENDER (INPUT, PROCESSING, RESULTS)
-  // ==========================================
-
-  // Determine which strains are highlighted (STATE 1 & 2)
   const highlightedStrains =
     (animationState === 'STATE_1_INVENTORY_ALIGNED' ||
       animationState === 'STATE_2_INGREDIENT_LIFT')
       ? ingredientCards.map(c => c.strain)
       : [];
 
-  // Get logo position for card lifting
   const logoPosition = logoRef.current?.getBoundingClientRect() || new DOMRect();
 
   const handlePresetSelect = (intent: IntentVectors) => {
@@ -403,12 +421,12 @@ export function AppShell_StateMachine() {
       <AgeGateOverlay
         onEnterNewUser={() => {
           setUserTypeSelected(true);
-          setOnboardingComplete(false); // Show Onboarding
+          setOnboardingComplete(false);
           setMode('voice');
         }}
         onEnterReturningUser={() => {
           setUserTypeSelected(true);
-          setOnboardingComplete(true); // Skip Onboarding
+          setOnboardingComplete(true);
           setMode('voice');
         }}
         onEnterOperator={() => {
@@ -419,8 +437,6 @@ export function AppShell_StateMachine() {
       />
     );
   }
-
-
 
   if (!onboardingComplete) {
     return (
@@ -436,7 +452,6 @@ export function AppShell_StateMachine() {
 
   return (
     <div className="w-full h-screen bg-black text-white flex flex-col overflow-hidden relative">
-      {/* Ambient Background */}
       <AmbientBackground
         imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'
           ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
@@ -452,9 +467,7 @@ export function AppShell_StateMachine() {
             src={logoImage}
             alt="GO LINE"
             className="w-12 h-auto"
-            style={{
-              filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
-            }}
+            style={{ filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))' }}
           />
           <h1 className="text-base tracking-[0.3em] uppercase font-light text-white/90">GO LINE™</h1>
         </div>
@@ -476,7 +489,6 @@ export function AppShell_StateMachine() {
             {mode === 'operator' ? 'Exit Console' : 'Console'}
           </button>
 
-          {/* [FLIGHT CHECK] Dev Reset Button */}
           <button
             onClick={() => {
               localStorage.removeItem('hasOnboarded');
@@ -495,6 +507,7 @@ export function AppShell_StateMachine() {
           © 2026. All rights reserved.
         </p>
       </div>
+
       {/* Main Application */}
       {mode === 'voice' && (
         <div className="flex-1 relative overflow-hidden">
@@ -509,70 +522,100 @@ export function AppShell_StateMachine() {
               {/* Scrollable Content Area */}
               <div className="flex-1 w-full overflow-y-auto px-6 pt-4 pb-40 scroll-smooth">
                 {animationState === 'STATE_0_IDLE' ? (
-                  <div className="w-full max-w-[380px] mx-auto flex flex-col gap-6 py-8">
-                    <h2 className="text-center text-sm font-medium text-white/60 leading-relaxed">
-                      Describe the outcome you're looking for
-                    </h2>
+                  <div className="space-y-12">
+                    <div className="w-full max-w-[380px] mx-auto flex flex-col gap-6 py-8">
+                      <h2 className="text-center text-sm font-medium text-white/60 leading-relaxed">
+                        Describe the outcome you're looking for
+                      </h2>
 
-                    <div className="space-y-4">
-                      <input
-                        type="text"
-                        placeholder="Type your desired outcome..."
-                        className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 
-                                       text-base text-white/80 placeholder:text-white/20
-                                       focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
-                                       transition-all duration-300 shadow-inner"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            const value = (e.target as HTMLInputElement).value;
-                            if (value.trim()) {
-                              startBlendSequence({ type: 'user', text: value });
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          placeholder="Type your desired outcome..."
+                          className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-base text-white/80 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none transition-all duration-300 shadow-inner"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const value = (e.target as HTMLInputElement).value;
+                              if (value.trim()) startBlendSequence({ type: 'user', text: value });
                             }
-                          }
-                        }}
-                      />
+                          }}
+                        />
 
-                      <button
-                        onClick={() => {
-                          const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                          if (!Recognition) return;
-                          const recognition = new Recognition();
-                          recognition.lang = 'en-US';
-                          recognition.onresult = (event: any) => {
-                            const transcript = event.results[0][0].transcript;
-                            setTranscribedText(transcript);
-                            startBlendSequence({ type: 'user', text: transcript });
-                          };
-                          recognition.start();
-                        }}
-                        className="w-full flex items-center justify-center gap-3 px-4 py-4
-                                       bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 
-                                       rounded-xl transition-all duration-300 shadow-lg active:scale-95"
-                      >
-                        <span className="text-xl">🎤</span>
-                        <span className="text-xs uppercase tracking-widest text-[#D4AF37] font-bold">
-                          Voice Input
-                        </span>
-                      </button>
+                        <button
+                          onClick={() => {
+                            const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                            if (!Recognition) return;
+                            const recognition = new Recognition();
+                            recognition.lang = 'en-US';
+                            recognition.onresult = (event: any) => {
+                              const transcript = event.results[0][0].transcript;
+                              setTranscribedText(transcript);
+                              startBlendSequence({ type: 'user', text: transcript });
+                            };
+                            recognition.start();
+                          }}
+                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 rounded-xl transition-all duration-300 shadow-lg active:scale-95"
+                        >
+                          <span className="text-xl">🎤</span>
+                          <span className="text-xs uppercase tracking-widest text-[#D4AF37] font-bold">Voice Input</span>
+                        </button>
+                      </div>
+
+                      <div className="space-y-4 mt-4">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium text-center">Or try a preset</p>
+                        <div className="grid grid-cols-1 gap-3">
+                          {['Relaxed & Alert', 'Pain Relief', 'Focus & Creative', 'Sleep Aid'].map((preset) => (
+                            <button
+                              key={preset}
+                              onClick={() => startBlendSequence({ type: 'user', text: preset })}
+                              className="w-full px-4 py-4 text-xs text-white/70 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-2xl rounded-xl transition-all duration-200 border border-white/5 hover:border-white/20 text-center uppercase tracking-widest"
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="space-y-4 mt-4">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium text-center">
-                        Or try a preset
-                      </p>
-                      <div className="grid grid-cols-1 gap-3">
-                        {['Relaxed & Alert', 'Pain Relief', 'Focus & Creative', 'Sleep Aid'].map((preset) => (
-                          <button
-                            key={preset}
-                            onClick={() => startBlendSequence({ type: 'user', text: preset })}
-                            className="w-full px-4 py-4 text-xs text-white/70 hover:text-white
-                                           bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-2xl
-                                           rounded-xl transition-all duration-200
-                                           border border-white/5 hover:border-white/20 text-center uppercase tracking-widest"
-                          >
-                            {preset}
-                          </button>
-                        ))}
+                    {/* Mobile Strain Chaser - Visually Separate */}
+                    <div className="mt-8 pt-6 border-t border-white/[0.08] w-full max-w-[380px] mx-auto">
+                      <div className="mb-5 px-1 text-center">
+                        <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest mb-1.5">Chasing a Strain You Loved?</h3>
+                        <p className="text-[10px] text-white/40 leading-relaxed">Approximate a past experience using chemistry + effects</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[9px] uppercase tracking-[0.2em] text-white/30 ml-1 font-medium">Remembered Strain</label>
+                          <input
+                            type="text"
+                            value={mobileStrainName}
+                            onChange={(e) => setMobileStrainName(e.target.value)}
+                            placeholder='e.g. "White Gummy by Don Murpho"'
+                            className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white/80 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none transition-all duration-300"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[9px] uppercase tracking-[0.2em] text-white/30 ml-1 font-medium">What did you love? (Optional)</label>
+                          <input
+                            type="text"
+                            value={mobileLovedEffects}
+                            onChange={(e) => setMobileLovedEffects(e.target.value)}
+                            placeholder='e.g. "calm, euphoric"'
+                            className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white/80 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none transition-all duration-300"
+                          />
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            startBlendSequence({ type: 'strain-chase', strainName: mobileStrainName, lovedEffects: mobileLovedEffects });
+                          }}
+                          disabled={!mobileStrainName.trim()}
+                          className="w-full py-4 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/20 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-xs uppercase tracking-[0.2em] text-[#D4AF37] font-bold transition-all duration-300 active:scale-95 shadow-lg shadow-[#D4AF37]/5"
+                        >
+                          Find Closest Match
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -580,7 +623,6 @@ export function AppShell_StateMachine() {
                   <div className="w-full max-w-[420px] mx-auto py-4">
                     {animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && visibleBlends.length > 0 ? (
                       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 fill-mode-both">
-                        {/* Option to re-prompt at the top of results */}
                         <div className="px-2 mb-8">
                           <button
                             onClick={handleReset}
@@ -602,31 +644,27 @@ export function AppShell_StateMachine() {
                           ))}
                         </div>
 
+                        {/* Guardrail Microcopy */}
+                        {chaseModeData && (
+                          <p className="text-center text-[10px] text-white/20 italic px-6">
+                            This is an approximation of the experience, not a recreation of the strain.
+                          </p>
+                        )}
+
                         {/* Actions */}
                         <div className="flex flex-col gap-3 pt-6 pb-20">
                           <button
-                            onClick={() => {
-                              const selected = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-                              if (selected) setCommittedBlend(selected);
-                            }}
+                            onClick={handleMakeBlend}
                             className="w-full py-5 rounded-2xl bg-[#D4AF37] text-black font-extrabold tracking-widest uppercase text-base shadow-[0_10px_40px_rgba(212,175,55,0.3)] active:scale-95 transition-all"
                           >
                             Make This Blend
                           </button>
-
                           <button
-                            onClick={() => {
-                              const selected = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-                              if (selected) {
-                                setSelectedBlendId(selected.id);
-                                setShowExplanation(true);
-                              }
-                            }}
+                            onClick={() => setShowExplanation(true)}
                             className="w-full py-4 rounded-xl border border-white/10 text-white/60 hover:text-white/90 text-[11px] uppercase tracking-widest font-bold transition-all"
                           >
                             Why this blend?
                           </button>
-
                           <button
                             onClick={handleReset}
                             className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white/40 text-[11px] uppercase tracking-widest transition-all"
@@ -652,25 +690,18 @@ export function AppShell_StateMachine() {
             </div>
           ) : (
             <div className="w-full h-full flex">
-              {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
-              <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
-                } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
-                }`}>
+              <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'} overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''}`}>
                 <PromptsSidebar
                   onPromptSelect={(text) => startBlendSequence({ type: 'user', text })}
                   onTextSubmit={(text) => startBlendSequence({ type: 'user', text })}
+                  onStrainChase={(strainName, lovedEffects) => startBlendSequence({ type: 'strain-chase', strainName, lovedEffects })}
                   onVoiceActivate={() => {
-                    console.log("🎤 Voice activation triggered");
                     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                    if (!Recognition) {
-                      alert("Speech recognition not supported in this browser.");
-                      return;
-                    }
+                    if (!Recognition) return;
                     const recognition = new Recognition();
                     recognition.lang = 'en-US';
                     recognition.onresult = (event: any) => {
                       const transcript = event.results[0][0].transcript;
-                      console.log("🗣️ Voice Transcript captured:", transcript);
                       setTranscribedText(transcript);
                       startBlendSequence({ type: 'user', text: transcript });
                     };
@@ -679,54 +710,32 @@ export function AppShell_StateMachine() {
                 />
               </div>
 
-              {/* Center Content */}
               <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
-                {committedBlend ? (
-                  /* Committed State - Blend Calculator */
-                  <div className="flex-1 flex items-center justify-center">
-                    <BlendCalculator
-                      blend={committedBlend}
-                      alternateBlends={visibleBlends}
-                      onStartOver={handleReset}
-                      onSwitchBlend={handleSwitchBlendInCalculator}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center relative">
-                    {/* Logo / Processor - HIDDEN in STATE_3 */}
-                    {animationState !== 'STATE_3_RECOMMENDATION_OUTPUT' && (
-                      <div
-                        ref={goLogoRef}
-                        className="transition-all duration-700"
-                      >
-                        <ProcessorStateMachine
-                          state={animationState}
-                          cardsArrived={cardsArrived}
-                          totalCards={ingredientCards.length}
-                          isInterpreting={isInterpreting}
-                        />
-                      </div>
-                    )}
+                <div className="flex-1 flex flex-col items-center justify-center relative">
+                  {animationState !== 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                    <div ref={goLogoRef} className="transition-all duration-700">
+                      <ProcessorStateMachine
+                        state={animationState}
+                        cardsArrived={cardsArrived}
+                        totalCards={ingredientCards.length}
+                        isInterpreting={isInterpreting}
+                      />
+                    </div>
+                  )}
 
-                    {(isInterpreting || transcribedText) && !committedBlend && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.4 }}
-                        className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
-                      >
-                        "{transcribedText || lastUserText}"
-                      </motion.div>
-                    )}
-                  </div>
-                )}
+                  {(isInterpreting || transcribedText) && !committedBlend && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center">
+                      "{transcribedText || lastUserText}"
+                    </motion.div>
+                  )}
+                </div>
               </div>
 
-              {/* Blend Result Cards - Show only when animation completes AND calculator not open */}
               {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && !committedBlend && (
                 <div className="absolute inset-0 flex items-center justify-center pb-32 z-[100] pointer-events-auto">
                   <div className="flex flex-col items-center w-full">
                     <div className="flex gap-6 justify-center mb-12">
-                      {(visibleBlends || []).map((blend, index) => (
+                      {visibleBlends.map((blend, index) => (
                         <BlendResultCard
                           key={blend.id}
                           blend={blend}
@@ -738,45 +747,22 @@ export function AppShell_StateMachine() {
                       ))}
                     </div>
 
-                    <div className="flex gap-4">
-                      {/* View QR Button */}
-                      <button
-                        onClick={() => setShowQR(true)}
-                        className="px-8 py-4 bg-white/5 hover:bg-white/10
-                                    backdrop-blur-xl rounded-2xl
-                                    border border-white/10 hover:border-white/20
-                                    text-white/60 hover:text-white_80 text-sm uppercase tracking-wider font-medium
-                                    transition-all duration-200"
-                      >
-                        View QR
-                      </button>
+                    {/* Desktop Guardrail Microcopy */}
+                    {chaseModeData && (
+                      <p className="mb-8 text-[11px] text-white/30 italic">
+                        This is an approximation of the experience, not a recreation of the strain.
+                      </p>
+                    )}
 
-                      {/* Make Blend Button - Always visible */}
-                      <button
-                        onClick={handleMakeBlend}
-                        className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
-                                     backdrop-blur-2xl rounded-2xl overflow-hidden
-                                     shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
-                                     hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
-                                     text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
-                                     transition-all duration-300 ease-out
-                                     hover:scale-[1.02] active:scale-[0.98]"
-                      >
+                    <div className="flex gap-4">
+                      <button onClick={() => setShowQR(true)} className="px-8 py-4 bg-white/5 hover:bg-white/10 backdrop-blur-xl rounded-2xl border border-white/10 hover:border-white/20 text-white/60 hover:text-white_80 text-sm uppercase tracking-wider font-medium transition-all duration-200">View QR</button>
+                      <button onClick={handleMakeBlend} className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12] backdrop-blur-2xl rounded-2xl overflow-hidden shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)] text-white/90 hover:text-white text-base uppercase tracking-wider font-medium transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98]">
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                         <span className="relative z-10">Make This Blend</span>
                       </button>
-
-                      {/* Why This Blend - Opt-in */}
-                      <button
-                        onClick={() => setShowExplanation(true)}
-                        className="px-6 py-3 text-sm text-white/60 hover:text-white/90 underline underline-offset-4 transition-all duration-200"
-                      >
-                        Why this blend?
-                      </button>
+                      <button onClick={() => setShowExplanation(true)} className="px-6 py-3 text-sm text-white/60 hover:text-white/90 underline underline-offset-4 transition-all duration-200">Why this blend?</button>
                     </div>
                   </div>
-
-
                 </div>
               )}
             </div>
@@ -784,90 +770,8 @@ export function AppShell_StateMachine() {
         </div>
       )}
 
-      {/* Demo Mode Banner (Global) */}
-      <AnimatePresence>
-        {isDemoRunning && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center"
-          >
-            <div className="bg-[#D4AF37] text-black px-6 py-3 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center gap-4 border border-white/20">
-              <span className="font-bold text-xs tracking-wider">DEMO {demoStep + 1}/{DEMO_STEPS.length}</span>
-              <div className="w-px h-4 bg-black/10" />
-              <span className="font-medium text-sm">{DEMO_STEPS[demoStep].text.split('\n')[0]}</span>
-              <button
-                onClick={() => setIsDemoRunning(false)}
-                className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors text-xs font-bold"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="mt-2 text-[10px] text-[#D4AF37]/80 uppercase tracking-widest font-medium bg-black/80 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
-              Visual Walkthrough Active
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* How It Works Modal */}
-      <AnimatePresence>
-        {
-          showHowItWorks && (
-            <HowItWorks onClose={() => setShowHowItWorks(false)} />
-          )
-        }
-      </AnimatePresence >
-
-      {/* Safe Tile Animation (Visual Only) */}
-
-
-      <QRCodeModal
-        isOpen={showQR}
-        onClose={() => setShowQR(false)}
-        blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
-      />
-
-      {/* Visual Fly-In Overlay (isolated, non-blocking) - ONLY during STATE_1 */}
-      {animationState === 'STATE_1_INVENTORY_ALIGNED' && <VisualFlyInOverlay />}
-
-      {/* Inventory Tray */}
-      {
-        mode === 'voice' && !committedBlend && (
-          <ScrollContainer
-            ref={inventoryRef}
-            highlightedStrains={highlightedStrains}
-          />
-        )
-      }
-
-      {
-        mode === 'operator' && (
-          <AdminOverlay
-            mode={mode}
-            onShowBusinessOverview={() => setMode('business')}
-            onPresetSelect={handlePresetSelect}
-            inventory={inventory}
-            onUpdateInventory={setInventory}
-            isDemoRunning={isDemoRunning}
-            demoStep={demoStep}
-            onStartDemo={() => {
-              setDemoStep(0);
-              setIsDemoRunning(true);
-            }}
-            onStopDemo={() => setIsDemoRunning(false)}
-          />
-        )
-      }
-
-      {
-        mode === 'business' && (
-          <BusinessOverview
-            onClose={() => setMode('operator')}
-          />
-        )
-      }
-    </div >
+      {/* Modals */}
+      {showHowItWorks && <HowItWorks isOpen={showHowItWorks} onClose={() => setShowHowItWorks(false)} />}
+    </div>
   );
 }

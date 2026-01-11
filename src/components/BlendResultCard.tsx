@@ -50,17 +50,39 @@ export function BlendResultCard({ blend, isSelected, onSelect, index, animationA
         </p>
       </div>
 
-      {/* Confidence Range Pill */}
+      {/* Confidence / Similarity Indicators */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <div
-          className="px-3 py-1 rounded-full text-xs font-light"
-          style={{
-            background: 'rgba(212, 175, 55, 0.2)',
-            color: '#D4AF37',
-          }}
-        >
-          {blend.confidenceRange} confidence
-        </div>
+        {!blend.similarity ? (
+          <div
+            className="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-medium"
+            style={{
+              background: 'rgba(212, 175, 55, 0.15)',
+              color: '#D4AF37',
+              border: '1px solid rgba(212, 175, 55, 0.2)'
+            }}
+          >
+            {blend.confidenceRange} confidence
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex items-center gap-2">
+              <div
+                className="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-medium"
+                style={{
+                  background: 'rgba(212, 175, 55, 0.2)',
+                  color: '#D4AF37',
+                  border: '1px solid rgba(212, 175, 55, 0.3)'
+                }}
+              >
+                {blend.similarity.score} Similarity Match
+              </div>
+              <span className="text-[10px] text-[#D4AF37]/60 italic font-light">Inspired by Reference</span>
+            </div>
+            <p className="text-[10px] text-white/40 font-light italic leading-tight">
+              {blend.similarity.explanation}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Component breakdown */}

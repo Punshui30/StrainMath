@@ -1,16 +1,21 @@
+import { useState } from 'react';
 import { Mic, Keyboard } from 'lucide-react';
 
 interface PromptsSidebarProps {
   onPromptSelect: (text: string) => void;
   onTextSubmit?: (text: string) => void;
   onVoiceActivate?: () => void;
+  onStrainChase?: (strainName: string, lovedEffects: string) => void;
 }
 
 export function PromptsSidebar({
   onPromptSelect,
   onTextSubmit,
-  onVoiceActivate
+  onVoiceActivate,
+  onStrainChase
 }: PromptsSidebarProps) {
+  const [strainName, setStrainName] = useState('');
+  const [lovedEffects, setLovedEffects] = useState('');
   const prompts = [
     '"Relaxed but alert, no anxiety"',
     '"Pain relief and anti-nausea, but no jitters"',
@@ -56,6 +61,59 @@ export function PromptsSidebar({
               Voice Input
             </span>
           </button>
+        </div>
+
+        {/* Strain Chaser Section - Visually Separate */}
+        <div className="mt-10 pt-8 border-t border-white/[0.08]">
+          <div className="mb-4">
+            <h3 className="text-xs font-semibold text-[#D4AF37] uppercase tracking-wider mb-1">
+              Chasing a Strain You Loved?
+            </h3>
+            <p className="text-[10px] text-white/40 leading-relaxed">
+              Approximate a past experience using chemistry + effects
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-[9px] uppercase tracking-widest text-white/30 ml-1">The Strain You Remember</label>
+              <input
+                type="text"
+                value={strainName}
+                onChange={(e) => setStrainName(e.target.value)}
+                placeholder='e.g. "White Gummy by Don Murpho"'
+                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 
+                           text-xs text-white/80 placeholder:text-white/20
+                           focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
+                           transition-all duration-300"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[9px] uppercase tracking-widest text-white/30 ml-1">What did you love about it? (Optional)</label>
+              <input
+                type="text"
+                value={lovedEffects}
+                onChange={(e) => setLovedEffects(e.target.value)}
+                placeholder='e.g. "calm, euphoric, creative"'
+                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 
+                           text-xs text-white/80 placeholder:text-white/20
+                           focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
+                           transition-all duration-300"
+              />
+            </div>
+
+            <button
+              onClick={() => onStrainChase && onStrainChase(strainName, lovedEffects)}
+              disabled={!strainName.trim()}
+              className="w-full py-3 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/20 
+                         disabled:opacity-30 disabled:pointer-events-none
+                         rounded-xl text-[10px] uppercase tracking-[0.2em] text-[#D4AF37] font-bold
+                         transition-all duration-300 active:scale-95"
+            >
+              Find Similar Blend
+            </button>
+          </div>
         </div>
 
         <div className="mt-8">

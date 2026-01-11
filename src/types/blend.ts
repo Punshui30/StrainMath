@@ -18,6 +18,10 @@ export interface BlendRecommendation {
     isPrimary: boolean;
     description?: string;
     components: BlendComponent[];
+    similarity?: {
+        score: "High" | "Medium" | "Low";
+        explanation: string;
+    };
     targets: {
         relaxation: number;
         focus: number;
