@@ -58,7 +58,7 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
         height: '88px',
       }}
       animate={{
-        y: isHovered ? -3 : 0,
+        y: (isHovered && !isExpanded) ? -3 : 0,
         opacity: isDimmed ? 0.4 : 1,
       }}
       transition={{
@@ -165,9 +165,10 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-lg bg-[#1C2023]/90 border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+              className="relative w-full max-w-lg bg-[#1C2023]/90 border border-white/10 rounded-3xl overflow-y-auto shadow-2xl"
               style={{
                 boxShadow: `0 0 40px ${accentGlow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+                maxHeight: '90vh',
               }}
             >
               {/* Header */}
