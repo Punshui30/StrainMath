@@ -7,7 +7,7 @@ import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
 import { WhyPanel } from './WhyPanel';
 import { PromptsSidebar } from './PromptsSidebar';
-import { AdminOverlay } from './AdminOverlay';
+import { SystemEvaluationAnimation } from './SystemEvaluationAnimation';
 import { BusinessOverview } from './BusinessOverview';
 import { HowItWorks } from './HowItWorks';
 import { AgeGateOverlay } from './AgeGateOverlay';
@@ -405,9 +405,10 @@ export function AppShell_StateMachine() {
       <div className="flex-1 relative overflow-hidden">
         {mode === 'voice' ? (
           <div className="w-full h-full flex">
-            {/* Left Sidebar - Hidden when not idle */}
-            <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
-              } overflow-hidden`}>
+            {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
+            <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' || animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'w-80' : 'w-0'
+              } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
+              }`}>
               <PromptsSidebar
                 onPromptSelect={(text) => startBlendSequence(text)}
                 onTextSubmit={(text) => startBlendSequence(text)}
@@ -534,6 +535,8 @@ export function AppShell_StateMachine() {
         ) : mode === 'operator' ? (
           <AdminOverlay
             onShowBusinessOverview={() => setMode('business')}
+            inventory={inventory}
+            onUpdateInventory={setInventory}
           />
         ) : (
           <BusinessOverview
@@ -549,22 +552,10 @@ export function AppShell_StateMachine() {
         )}
       </AnimatePresence>
 
-      {/* STATE 2: Lifting Cards (Sequential) */}
-      {
-        animationState === 'STATE_2_INGREDIENT_LIFT' &&
-        currentLiftingIndex >= 0 &&
-        currentLiftingIndex < ingredientCards.length &&
-        liftingCardPositions[currentLiftingIndex] && (
-          <IngredientCardLifting
-            key={`lifting-${currentLiftingIndex}-${ingredientCards[currentLiftingIndex].strain}`}
-            ingredient={ingredientCards[currentLiftingIndex]}
-            startPosition={liftingCardPositions[currentLiftingIndex]}
-            logoPosition={logoPosition}
-            isLifting={true}
-            onArrival={handleCardArrival}
-          />
-        )
-      }
+      {/* Abstract System Scan Animation */}
+      {animationState === 'STATE_2_INGREDIENT_LIFT' && (
+        <SystemEvaluationAnimation />
+      )}
 
       {/* Floating Why Panel */}
       {
