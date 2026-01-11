@@ -1,6 +1,6 @@
 {
       "name": "voice-driven-ai-interface-design",
-      "version": "1.3.40",
+      "version": "1.3.41",
       "private": true,
       "type": "module",
       "dependencies": {

@@ -17,30 +17,25 @@ export const VisualFlyInOverlay = () => {
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
     useEffect(() => {
-        // OPTION B: Passive DOM Observation (Strict V2)
-        // Watch for "Make This Blend" button or Result Card container
+        // OPTION B: Passive DOM Observation - Watch for blend cards appearing
         let hasFired = false;
 
-        const observer = new MutationObserver((mutations) => {
+        const observer = new MutationObserver(() => {
             if (hasFired) return;
 
-            // Robust check for Result State
-            // 1. Check for "Make This Blend" text
-            const makeBlendBtn = document.evaluate(
-                "//span[contains(text(), 'Make This Blend')]",
-                document,
-                null,
-                XPathResult.FIRST_ORDERED_NODE_TYPE,
-                null
-            ).singleNodeValue;
+            // Check for BlendResultCard containers (they have specific classes)
+            // Look for the "flex gap-6 justify-center" container that holds result cards
+            const resultCards = document.querySelectorAll('[class*="BlendResultCard"], .blend-result-card, button[class*="max-w-\\[320px\\]"]');
 
-            // 2. Check for "Make This Blend" button class if text fails (fallback)
-            const makeBlendBtnClass = document.querySelector('button[class*="Make This Blend"]');
+            // More robust: look for the specific "Make This Blend" button which signals results are rendered
+            const makeBlendBtn = Array.from(document.querySelectorAll('button')).find(btn =>
+                btn.textContent?.includes('Make This Blend')
+            );
 
-            if (makeBlendBtn || makeBlendBtnClass) {
-                // Double check we haven't already fired effectively
+            if (makeBlendBtn || resultCards.length >= 3) {
                 hasFired = true;
-                handleTrigger();
+                // Small delay to ensure cards are fully rendered  
+                setTimeout(handleTrigger, 100);
             }
         });
 
@@ -56,7 +51,7 @@ export const VisualFlyInOverlay = () => {
 
             trayCards.forEach(card => {
                 const rect = card.getBoundingClientRect();
-                // Strict Visibility check: Must be in viewport and visible
+                // Strict Visibility check
                 if (rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight && rect.bottom > 0) {
                     uniqueCards.set(card.getAttribute('data-strain-id') || '', card);
                 }
@@ -64,13 +59,14 @@ export const VisualFlyInOverlay = () => {
 
             if (uniqueCards.size === 0) return;
 
-            // 2. Find Target Element (GO Logo)
-            // Robust Selector: ID or Alt Text
-            const logo = document.getElementById('go-logo') || document.querySelector('img[alt="GO LINE"]');
-            if (!logo) return;
+            // 2. Find Target Element (Center of screen where logo would be)
+            // Since logo is now hidden in STATE_3, we'll animate to screen center
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
 
-            const logoBounds = logo.getBoundingClientRect();
-            setTargetRect(logoBounds);
+            // Create a virtual target rect at screen center
+            const targetRect = new DOMRect(centerX - 100, centerY - 100, 200, 200);
+            setTargetRect(targetRect);
 
             // 3. Create Flyer Objects
             const newFlyers: Flyer[] = [];
@@ -91,12 +87,14 @@ export const VisualFlyInOverlay = () => {
             }, 2000);
         };
 
-        // Also support manual event trigger if needed later
+        // Also support manual event trigger
         window.addEventListener('strain-math:trigger-fly-in', handleTrigger);
+        window.addEventListener('strain-math:blends-ready', handleTrigger);
 
         return () => {
             observer.disconnect();
             window.removeEventListener('strain-math:trigger-fly-in', handleTrigger);
+            window.removeEventListener('strain-math:blends-ready', handleTrigger);
         };
     }, []);
 

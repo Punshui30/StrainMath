@@ -6,6 +6,7 @@ import { IngredientCardLifting } from './IngredientCardLifting';
 import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
 import { WhyPanel } from './WhyPanel';
+import { BlendExplanationPanel } from './BlendExplanationPanel';
 import { PromptsSidebar } from './PromptsSidebar';
 import { BusinessOverview } from './BusinessOverview';
 import { AdminOverlay } from './AdminOverlay';
@@ -63,6 +64,7 @@ export function AppShell_StateMachine() {
   const [lastUserText, setLastUserText] = useState("");
   const [transcribedText, setTranscribedText] = useState("");
   const [showQR, setShowQR] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
   // [CRITICAL] Initial state MUST be empty to ensure only Logo is shown on load.
@@ -273,13 +275,20 @@ export function AppShell_StateMachine() {
 
   const handleMakeBlend = () => {
     console.log("🛠️ Make Blend Clicked. Selected ID:", selectedBlendId);
-    console.log("🛠️ Visible Blends:", visibleBlends);
     const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
     if (selectedBlend) {
-      console.log("✅ Setting committed blend:", selectedBlend.name);
-      setCommittedBlend(selectedBlend);
+      console.log("✅ Showing explanation for:", selectedBlend.name);
+      setShowExplanation(true);
     } else {
       console.error("❌ No blend found for ID:", selectedBlendId);
+    }
+  };
+
+  const handleCommitBlend = () => {
+    const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
+    if (selectedBlend) {
+      setCommittedBlend(selectedBlend);
+      setShowExplanation(false);
     }
   };
 
@@ -491,18 +500,20 @@ export function AppShell_StateMachine() {
                   </div>
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center relative">
-                    {/* Logo / Processor */}
-                    <div
-                      ref={goLogoRef}
-                      className={`transition-all duration-700 ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'scale-75 -translate-y-8' : 'scale-100'}`}
-                    >
-                      <ProcessorStateMachine
-                        state={animationState}
-                        cardsArrived={cardsArrived}
-                        totalCards={ingredientCards.length}
-                        isInterpreting={isInterpreting}
-                      />
-                    </div>
+                    {/* Logo / Processor - HIDDEN in STATE_3 */}
+                    {animationState !== 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                      <div
+                        ref={goLogoRef}
+                        className="transition-all duration-700"
+                      >
+                        <ProcessorStateMachine
+                          state={animationState}
+                          cardsArrived={cardsArrived}
+                          totalCards={ingredientCards.length}
+                          isInterpreting={isInterpreting}
+                        />
+                      </div>
+                    )}
 
                     {(isInterpreting || transcribedText) && !committedBlend && (
                       <motion.div
@@ -675,6 +686,23 @@ export function AppShell_StateMachine() {
           />
         )
       }
+
+      {/* Blend Explanation Panel */}
+      <AnimatePresence>
+        {showExplanation && (() => {
+          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+          if (!selectedBlend) return null;
+          return (
+            <BlendExplanationPanel
+              blend={selectedBlend}
+              intent={currentIntent}
+              userText={lastUserText}
+              onProceed={handleCommitBlend}
+              onCancel={() => setShowExplanation(false)}
+            />
+          );
+        })()}
+      </AnimatePresence>
     </div >
   );
 }
