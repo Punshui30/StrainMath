@@ -95,33 +95,7 @@ export function AppShell_StateMachine() {
     return () => window.removeEventListener('resize', updateLogoRect);
   }, [mode]); // Re-measure when layout might change
 
-  // Demo Lifecycle Loop
-  useEffect(() => {
-    if (!isDemoRunning) return;
 
-    // Orchestration Logic: Force UI State based on Step
-    if (demoStep <= 4 && mode !== 'operator') {
-      setMode('operator');
-    } else if (demoStep === 5 && mode !== 'voice') {
-      // Step 5: "Every recommendation can be saved..." -> Show Result
-      setMode('voice');
-      // Trigger a clean blend sequence for visual context
-      // We use a small timeout to let the mode switch settle
-      setTimeout(() => {
-        startBlendSequence('Visual Demonstration');
-      }, 500);
-    }
-
-    const timer = setTimeout(() => {
-      if (demoStep < DEMO_STEPS.length - 1) {
-        setDemoStep(prev => prev + 1);
-      } else {
-        setIsDemoRunning(false); // End demo
-      }
-    }, 6000); // Step Duration
-
-    return () => clearTimeout(timer);
-  }, [isDemoRunning, demoStep, mode, startBlendSequence]);
 
   // [CORRECTIVE FIX] Shared Inventory State (Single Source of Truth)
   const [inventory, setInventory] = useState(() => MOCK_COAS.map(coa => ({
@@ -258,6 +232,34 @@ export function AppShell_StateMachine() {
     setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
 
   }, [animationState, selectedBlendId, inventory]);
+
+  // Demo Lifecycle Loop
+  useEffect(() => {
+    if (!isDemoRunning) return;
+
+    // Orchestration Logic: Force UI State based on Step
+    if (demoStep <= 4 && mode !== 'operator') {
+      setMode('operator');
+    } else if (demoStep === 5 && mode !== 'voice') {
+      // Step 5: "Every recommendation can be saved..." -> Show Result
+      setMode('voice');
+      // Trigger a clean blend sequence for visual context
+      // We use a small timeout to let the mode switch settle
+      setTimeout(() => {
+        startBlendSequence('Visual Demonstration');
+      }, 500);
+    }
+
+    const timer = setTimeout(() => {
+      if (demoStep < DEMO_STEPS.length - 1) {
+        setDemoStep(prev => prev + 1);
+      } else {
+        setIsDemoRunning(false); // End demo
+      }
+    }, 6000); // Step Duration
+
+    return () => clearTimeout(timer);
+  }, [isDemoRunning, demoStep, mode, startBlendSequence]);
 
   const handleReset = () => {
     setAnimationState('STATE_0_IDLE');
