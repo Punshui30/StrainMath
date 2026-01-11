@@ -331,8 +331,6 @@ export function AppShell_StateMachine() {
           explanation={blendExplanationText}
           userText={lastUserText}
           onClose={() => setShowExplanation(false)}
-          onStartOver={handleReset}
-          onPrintLabel={() => setShowQR(true)}
         />
       </div>
     );

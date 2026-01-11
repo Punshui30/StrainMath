@@ -8,8 +8,6 @@ interface BlendExplanationPanelProps {
     explanation: string | null;
     userText: string;
     onClose: () => void;
-    onStartOver?: () => void;
-    onPrintLabel?: () => void;
 }
 
 export function BlendExplanationPanel({
@@ -17,9 +15,7 @@ export function BlendExplanationPanel({
     intent,
     explanation,
     userText,
-    onClose,
-    onStartOver,
-    onPrintLabel
+    onClose
 }: BlendExplanationPanelProps) {
 
     return (
@@ -77,30 +73,8 @@ export function BlendExplanationPanel({
                         </div>
                     </div>
 
-                    {/* Action - Single Close Button */}
-                    <div className="flex gap-3 justify-center">
-                        {onStartOver && (
-                            <button
-                                onClick={onStartOver}
-                                className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10
-                                         border border-white/10 hover:border-white/20
-                                         text-white/60 hover:text-white/90 text-sm uppercase tracking-wider
-                                         transition-all duration-200"
-                            >
-                                Start Over
-                            </button>
-                        )}
-                        {onPrintLabel && (
-                            <button
-                                onClick={onPrintLabel}
-                                className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10
-                                         border border-white/10 hover:border-white/20
-                                         text-white/60 hover:text-white/90 text-sm uppercase tracking-wider
-                                         transition-all duration-200"
-                            >
-                                Print Label
-                            </button>
-                        )}
+                    {/* Action - Single Dismiss Button */}
+                    <div className="flex justify-center">
                         <button
                             onClick={onClose}
                             className="px-12 py-4 rounded-2xl
