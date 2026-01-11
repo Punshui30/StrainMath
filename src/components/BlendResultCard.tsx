@@ -33,7 +33,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index, animationA
         times: animationAnchor ? [0, 0.6, 1] : undefined
       }}
       onClick={onSelect}
-      className={`relative group w-full max-w-[420px] px-4 p-8 rounded-3xl backdrop-blur-xl border border-white/5
+      className={`relative group w-full max-w-[420px] p-8 rounded-3xl backdrop-blur-xl border border-white/5
                  transition-all duration-300 ease-out
                  ${isSelected
           ? 'bg-[#080808]/90 shadow-[0_20px_60px_rgba(0,0,0,0.6),0_0_0_1px_rgba(212,175,55,0.5)] scale-[1.02]'
