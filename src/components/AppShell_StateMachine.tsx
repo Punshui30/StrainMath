@@ -58,6 +58,7 @@ export function AppShell_StateMachine() {
   const [currentIntent, setCurrentIntent] = useState<IntentVectors | null>(null);
   const [lastUserText, setLastUserText] = useState("");
   const [transcribedText, setTranscribedText] = useState("");
+  const [showQR, setShowQR] = useState(false);
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
   // [CRITICAL] Initial state MUST be empty to ensure only Logo is shown on load.
@@ -432,20 +433,34 @@ export function AppShell_StateMachine() {
                           ))}
                         </div>
 
-                        {/* Make Blend Button - Always visible */}
-                        <button
-                          onClick={handleMakeBlend}
-                          className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
-                                   backdrop-blur-2xl rounded-2xl overflow-hidden
-                                   shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
-                                   hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
-                                   text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
-                                   transition-all duration-300 ease-out
-                                   hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                          <span className="relative z-10">Make This Blend</span>
-                        </button>
+                        <div className="flex gap-4">
+                          {/* View QR Button */}
+                          <button
+                            onClick={() => setShowQR(true)}
+                            className="px-8 py-4 bg-white/5 hover:bg-white/10
+                                    backdrop-blur-xl rounded-2xl
+                                    border border-white/10 hover:border-white/20
+                                    text-white/60 hover:text-white_80 text-sm uppercase tracking-wider font-medium
+                                    transition-all duration-200"
+                          >
+                            View QR
+                          </button>
+
+                          {/* Make Blend Button - Always visible */}
+                          <button
+                            onClick={handleMakeBlend}
+                            className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
+                                     backdrop-blur-2xl rounded-2xl overflow-hidden
+                                     shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
+                                     hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
+                                     text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
+                                     transition-all duration-300 ease-out
+                                     hover:scale-[1.02] active:scale-[0.98]"
+                          >
+                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                            <span className="relative z-10">Make This Blend</span>
+                          </button>
+                        </div>
                       </div>
 
                       {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
@@ -514,6 +529,12 @@ export function AppShell_StateMachine() {
         })()
       }
 
+      <QRCodeModal
+        isOpen={showQR}
+        onClose={() => setShowQR(false)}
+        blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
+      />
+
       {/* Inventory Tray */}
       {
         mode === 'voice' && !committedBlend && (
@@ -523,6 +544,8 @@ export function AppShell_StateMachine() {
           />
         )
       }
-    </div >
+
+      <AdminOverlay mode={mode} />
+    </div>
   );
 }
