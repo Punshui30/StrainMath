@@ -103,449 +103,459 @@ export function AppShell_StateMachine() {
 
   /**
    * startBlendSequence
-   * Updated to handle real interpretation
+   * Updated to handle real interpretation or direct intent injection
    */
-  const startBlendSequence = useCallback(async (userInput?: string) => {
+  const startBlendSequence = useCallback(async (userInput?: string, overrideIntent?: IntentVectors) => {
     if (animationState !== 'STATE_0_IDLE') return;
 
     let intent: any = null;
     let selectedId = selectedBlendId;
     let activeBlends = visibleBlends;
 
-    if (userInput) {
+    if (overrideIntent) {
+      intent = overrideIntent;
+    } else if (userInput) {
       intent = await interpretOutcome(userInput);
-
-      if (intent && typeof intent === 'object') {
-        // [CRITICAL FIX] Normalize & Guard Data Shape
-        console.log("🛡️ Validating Intent Shape:", intent);
-
-        // Score across all 60+ strains in MOCK_COAS
-        // Ensure intent has minimal required keys or fallback
-        const safeIntent: IntentVectors = {
-          relaxation: intent.relaxation ?? 0.5,
-          focus: intent.focus ?? 0.5,
-          energy: intent.energy ?? 0.5,
-          creativity: intent.creativity ?? 0.5,
-          pain_relief: intent.pain_relief ?? 0.5,
-          anti_anxiety: intent.anti_anxiety ?? 0.5
-        };
-
-        const scored = MOCK_COAS.map(coa => scoreStrain(coa, safeIntent));
-
-        // Assemble 3 unique blends from top scores
-        const newBlends = assembleBlends(scored);
-
-        // [CRITICAL FIX] Validate Output Shape
-        if (!newBlends || newBlends.length === 0 || !newBlends[0].components) {
-          console.error("❌ CRTICAL ERROR: Engine produced malformed blends", newBlends);
-          return; // Abort - Do not crash UI
-        }
-
-        setVisibleBlends(newBlends);
-        activeBlends = newBlends;
-        selectedId = newBlends[0].id;
-        setSelectedBlendId(selectedId);
-      }
     }
+
+    if (intent && typeof intent === 'object') {
+      // [CRITICAL FIX] Normalize & Guard Data Shape
+      console.log("🛡️ Validating Intent Shape:", intent);
+
+      // Score across all 60+ strains in MOCK_COAS
+      // Ensure intent has minimal required keys or fallback
+      const safeIntent: IntentVectors = {
+        relaxation: intent.relaxation ?? 0.5,
+        focus: intent.focus ?? 0.5,
+        energy: intent.energy ?? 0.5,
+        creativity: intent.creativity ?? 0.5,
+        pain_relief: intent.pain_relief ?? 0.5,
+        anti_anxiety: intent.anti_anxiety ?? 0.5
+      };
+
+      const scored = MOCK_COAS.map(coa => scoreStrain(coa, safeIntent));
+
+      // Assemble 3 unique blends from top scores
+      const newBlends = assembleBlends(scored);
+
+      // [CRITICAL FIX] Validate Output Shape
+      if (!newBlends || newBlends.length === 0 || !newBlends[0].components) {
+        console.error("❌ CRTICAL ERROR: Engine produced malformed blends", newBlends);
+        return; // Abort - Do not crash UI
+      }
+
+      setVisibleBlends(newBlends);
+      activeBlends = newBlends;
+      selectedId = newBlends[0].id;
+      setSelectedBlendId(selectedId);
+    }
+  }
 
     // [CRITICAL FIX] Safe Access - using local variable to prevent race condition
     const blend = activeBlends.find(b => b.id === selectedId) || activeBlends[0] || (userInput ? null : activeBlends[0]);
 
-    // If we're processing new input but failed to get a blend, abort sequence
-    if (!blend || !blend.components) {
-      console.error("❌ No valid blend found to animate in active set", activeBlends);
-      return;
+  // If we're processing new input but failed to get a blend, abort sequence
+  if (!blend || !blend.components) {
+    console.error("❌ No valid blend found to animate in active set", activeBlends);
+    return;
+  }
+
+  // Prepare ingredient cards
+  const cards: IngredientCard[] = blend.components.map(c => ({
+    strain: c.name,
+    color: getStrainColor(c.name),
+    percentage: c.percentage,
+    role: c.role,
+    category: c.type as 'Hybrid' | 'Indica' | 'Sativa',
+  }));
+
+  setIngredientCards(cards);
+  const strainNames = cards.map(c => c.strain);
+
+  // ========================================
+  // STATE 1: INVENTORY ALIGNMENT
+  // ========================================
+  setAnimationState('STATE_1_INVENTORY_ALIGNED');
+
+  // Scroll inventory to center selected strains
+  await inventoryRef.current?.scrollToCenter(strainNames);
+
+  // Wait for scroll settle
+  await new Promise(resolve => setTimeout(resolve, ANIMATION_TIMINGS.SCROLL_SETTLE));
+
+  // Capture card positions from DOM
+  const positions: DOMRect[] = [];
+  for (const strainName of strainNames) {
+    const pos = inventoryRef.current?.getStrainPosition(strainName);
+    if (pos) positions.push(pos);
+  }
+  setLiftingCardPositions(positions);
+
+  // Hold state to show highlighted cards
+  await new Promise(resolve => setTimeout(resolve, 800));
+
+  // ========================================
+  // STATE 2: INGREDIENT LIFT (SEQUENTIAL)
+  // ========================================
+  setAnimationState('STATE_2_INGREDIENT_LIFT');
+  setCardsArrived(0);
+  setCurrentLiftingIndex(0);
+
+  // Cards will lift sequentially via handleCardArrival
+
+}, [animationState, selectedBlendId]);
+
+/**
+ * STATE 2: Handle individual card arrival
+ * Triggers next card to lift
+ */
+const handleCardArrival = useCallback(() => {
+  setCardsArrived(prev => {
+    const newCount = prev + 1;
+
+    if (newCount < ingredientCards.length) {
+      // Lift next card after delay
+      setTimeout(() => {
+        setCurrentLiftingIndex(newCount);
+      }, ANIMATION_TIMINGS.CARD_LIFT_DELAY);
+    } else {
+      // All cards arrived - transition to STATE 3
+      setTimeout(() => {
+        setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
+        setCurrentLiftingIndex(-1);
+      }, ANIMATION_TIMINGS.CARD_LIFT_DELAY);
     }
 
-    // Prepare ingredient cards
-    const cards: IngredientCard[] = blend.components.map(c => ({
-      strain: c.name,
-      color: getStrainColor(c.name),
-      percentage: c.percentage,
-      role: c.role,
-      category: c.type as 'Hybrid' | 'Indica' | 'Sativa',
-    }));
+    return newCount;
+  });
+}, [ingredientCards.length]);
 
-    setIngredientCards(cards);
-    const strainNames = cards.map(c => c.strain);
+const handleReset = () => {
+  setAnimationState('STATE_0_IDLE');
+  setSelectedBlendId(1);
+  setCommittedBlend(null);
+  setIngredientCards([]);
+  setCurrentLiftingIndex(-1);
+  setCardsArrived(0);
+  setLiftingCardPositions([]);
+};
 
-    // ========================================
-    // STATE 1: INVENTORY ALIGNMENT
-    // ========================================
-    setAnimationState('STATE_1_INVENTORY_ALIGNED');
+const handleMakeBlend = () => {
+  const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
+  if (selectedBlend) {
+    setCommittedBlend(selectedBlend);
+  }
+};
 
-    // Scroll inventory to center selected strains
-    await inventoryRef.current?.scrollToCenter(strainNames);
+const handleSelectBlend = (id: number) => {
+  setSelectedBlendId(id);
+};
 
-    // Wait for scroll settle
-    await new Promise(resolve => setTimeout(resolve, ANIMATION_TIMINGS.SCROLL_SETTLE));
-
-    // Capture card positions from DOM
-    const positions: DOMRect[] = [];
-    for (const strainName of strainNames) {
-      const pos = inventoryRef.current?.getStrainPosition(strainName);
-      if (pos) positions.push(pos);
-    }
-    setLiftingCardPositions(positions);
-
-    // Hold state to show highlighted cards
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // ========================================
-    // STATE 2: INGREDIENT LIFT (SEQUENTIAL)
-    // ========================================
-    setAnimationState('STATE_2_INGREDIENT_LIFT');
-    setCardsArrived(0);
-    setCurrentLiftingIndex(0);
-
-    // Cards will lift sequentially via handleCardArrival
-
-  }, [animationState, selectedBlendId]);
-
-  /**
-   * STATE 2: Handle individual card arrival
-   * Triggers next card to lift
-   */
-  const handleCardArrival = useCallback(() => {
-    setCardsArrived(prev => {
-      const newCount = prev + 1;
-
-      if (newCount < ingredientCards.length) {
-        // Lift next card after delay
-        setTimeout(() => {
-          setCurrentLiftingIndex(newCount);
-        }, ANIMATION_TIMINGS.CARD_LIFT_DELAY);
-      } else {
-        // All cards arrived - transition to STATE 3
-        setTimeout(() => {
-          setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
-          setCurrentLiftingIndex(-1);
-        }, ANIMATION_TIMINGS.CARD_LIFT_DELAY);
-      }
-
-      return newCount;
-    });
-  }, [ingredientCards.length]);
-
-  const handleReset = () => {
-    setAnimationState('STATE_0_IDLE');
-    setSelectedBlendId(1);
-    setCommittedBlend(null);
-    setIngredientCards([]);
-    setCurrentLiftingIndex(-1);
-    setCardsArrived(0);
-    setLiftingCardPositions([]);
-  };
-
-  const handleMakeBlend = () => {
-    const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
-    if (selectedBlend) {
-      setCommittedBlend(selectedBlend);
-    }
-  };
-
-  const handleSelectBlend = (id: number) => {
+const handleSwitchBlendInCalculator = (id: number) => {
+  const newBlend = visibleBlends.find(b => b.id === id);
+  if (newBlend) {
     setSelectedBlendId(id);
-  };
-
-  const handleSwitchBlendInCalculator = (id: number) => {
-    const newBlend = visibleBlends.find(b => b.id === id);
-    if (newBlend) {
-      setSelectedBlendId(id);
-      setCommittedBlend(newBlend);
-    }
-  };
-
-  // Determine which strains are highlighted (STATE 1 & 2)
-  const highlightedStrains =
-    (animationState === 'STATE_1_INVENTORY_ALIGNED' ||
-      animationState === 'STATE_2_INGREDIENT_LIFT')
-      ? ingredientCards.map(c => c.strain)
-      : [];
-
-  // Get logo position for card lifting
-  const logoPosition = logoRef.current?.getBoundingClientRect() || new DOMRect();
-
-  if (!ageVerified) {
-    return <AgeGateOverlay onVerify={() => setAgeVerified(true)} />;
+    setCommittedBlend(newBlend);
   }
+};
 
-  if (!userTypeSelected) {
-    return (
-      <UserTypeGate
-        onFirstTime={() => setUserTypeSelected(true)}
-        onReturning={() => {
-          setUserTypeSelected(true);
-          setOnboardingComplete(true); // Skip onboarding
-        }}
-      />
-    );
-  }
+// Determine which strains are highlighted (STATE 1 & 2)
+const highlightedStrains =
+  (animationState === 'STATE_1_INVENTORY_ALIGNED' ||
+    animationState === 'STATE_2_INGREDIENT_LIFT')
+    ? ingredientCards.map(c => c.strain)
+    : [];
 
-  if (!onboardingComplete) {
-    return (
-      <OnboardingScreen
-        onComplete={() => {
-          localStorage.setItem('hasOnboarded', 'true');
-          setOnboardingComplete(true);
-        }}
-      />
-    );
-  }
+// Get logo position for card lifting
+const logoPosition = logoRef.current?.getBoundingClientRect() || new DOMRect();
 
+const handlePresetSelect = (intent: IntentVectors) => {
+  setMode('voice');
+  setLastUserText("Production Preset Active");
+  setCurrentIntent(intent);
+  startBlendSequence(undefined, intent);
+};
+
+if (!ageVerified) {
+  return <AgeGateOverlay onVerify={() => setAgeVerified(true)} />;
+}
+
+if (!userTypeSelected) {
   return (
-    <div className="w-full h-screen bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] text-white flex flex-col overflow-hidden relative">
-      {/* Ambient Background */}
-      <AmbientBackground
-        imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'
-          ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-          : "https://images.unsplash.com/photo-1714065712817-af7d54710a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-        }
-        opacity={animationState === 'STATE_0_IDLE' ? 0.04 : 0.06}
-      />
+    <UserTypeGate
+      onFirstTime={() => setUserTypeSelected(true)}
+      onReturning={() => {
+        setUserTypeSelected(true);
+        setOnboardingComplete(true); // Skip onboarding
+      }}
+    />
+  );
+}
 
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-8 flex-shrink-0 relative z-10">
-        <div className="flex items-center gap-3">
-          <img
-            src={logoImage}
-            alt="GO LINE"
-            className="w-12 h-auto"
-            style={{
-              filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
-            }}
-          />
-          <h1 className="text-base tracking-[0.3em] uppercase font-light text-white/90">GO LINE</h1>
-        </div>
+if (!onboardingComplete) {
+  return (
+    <OnboardingScreen
+      onComplete={() => {
+        localStorage.setItem('hasOnboarded', 'true');
+        setOnboardingComplete(true);
+      }}
+    />
+  );
+}
 
-        <div className="flex items-center gap-4">
-          {mode === 'voice' && animationState === 'STATE_0_IDLE' && (
-            <button
-              onClick={() => setShowHowItWorks(true)}
-              className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
-            >
-              How It Works
-            </button>
-          )}
+return (
+  <div className="w-full h-screen bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] text-white flex flex-col overflow-hidden relative">
+    {/* Ambient Background */}
+    <AmbientBackground
+      imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'
+        ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+        : "https://images.unsplash.com/photo-1714065712817-af7d54710a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+      }
+      opacity={animationState === 'STATE_0_IDLE' ? 0.04 : 0.06}
+    />
 
-          <button
-            onClick={() => setMode(mode === 'operator' ? 'voice' : 'operator')}
-            className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
-          >
-            {mode === 'operator' ? 'Exit Console' : 'Console'}
-          </button>
-
-          {/* [FLIGHT CHECK] Dev Reset Button */}
-          <button
-            onClick={() => {
-              localStorage.removeItem('hasOnboarded');
-              window.location.reload();
-            }}
-            className="text-[10px] uppercase tracking-wider text-red-500/40 hover:text-red-500/80 transition-colors"
-          >
-            RESET
-          </button>
-        </div>
+    {/* Header */}
+    <div className="h-16 flex items-center justify-between px-8 flex-shrink-0 relative z-10">
+      <div className="flex items-center gap-3">
+        <img
+          src={logoImage}
+          alt="GO LINE"
+          className="w-12 h-auto"
+          style={{
+            filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
+          }}
+        />
+        <h1 className="text-base tracking-[0.3em] uppercase font-light text-white/90">GO LINE</h1>
       </div>
 
-      {/* Main Application */}
-      <div className="flex-1 relative overflow-hidden">
-        {mode === 'voice' ? (
-          <div className="w-full h-full flex">
-            {/* Left Sidebar - Hidden when not idle */}
-            <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
-              } overflow-hidden`}>
-              <PromptsSidebar
-                onPromptSelect={(text) => startBlendSequence(text)}
-                onTextSubmit={(text) => startBlendSequence(text)}
-                onVoiceActivate={() => {
-                  console.log("🎤 Voice activation triggered");
-                  const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                  if (!Recognition) {
-                    alert("Speech recognition not supported in this browser.");
-                    return;
-                  }
-                  const recognition = new Recognition();
-                  recognition.lang = 'en-US';
-                  recognition.onresult = (event: any) => {
-                    const transcript = event.results[0][0].transcript;
-                    console.log("🗣️ Voice Transcript captured:", transcript);
-                    setTranscribedText(transcript);
-                    startBlendSequence(transcript);
-                  };
-                  recognition.start();
-                }}
-              />
-            </div>
+      <div className="flex items-center gap-4">
+        {mode === 'voice' && animationState === 'STATE_0_IDLE' && (
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
+          >
+            How It Works
+          </button>
+        )}
 
-            {/* Center Content */}
-            <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
-              {committedBlend ? (
-                /* Committed State - Blend Calculator */
-                <div className="flex-1 flex items-center justify-center">
-                  <BlendCalculator
-                    blend={committedBlend}
-                    alternateBlends={visibleBlends}
-                    onStartOver={handleReset}
-                    onSwitchBlend={handleSwitchBlendInCalculator}
-                  />
+        <button
+          onClick={() => setMode(mode === 'operator' ? 'voice' : 'operator')}
+          className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
+        >
+          {mode === 'operator' ? 'Exit Console' : 'Console'}
+        </button>
+
+        {/* [FLIGHT CHECK] Dev Reset Button */}
+        <button
+          onClick={() => {
+            localStorage.removeItem('hasOnboarded');
+            window.location.reload();
+          }}
+          className="text-[10px] uppercase tracking-wider text-red-500/40 hover:text-red-500/80 transition-colors"
+        >
+          RESET
+        </button>
+      </div>
+    </div>
+
+    {/* Main Application */}
+    <div className="flex-1 relative overflow-hidden">
+      {mode === 'voice' ? (
+        <div className="w-full h-full flex">
+          {/* Left Sidebar - Hidden when not idle */}
+          <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
+            } overflow-hidden`}>
+            <PromptsSidebar
+              onPromptSelect={(text) => startBlendSequence(text)}
+              onTextSubmit={(text) => startBlendSequence(text)}
+              onVoiceActivate={() => {
+                console.log("🎤 Voice activation triggered");
+                const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                if (!Recognition) {
+                  alert("Speech recognition not supported in this browser.");
+                  return;
+                }
+                const recognition = new Recognition();
+                recognition.lang = 'en-US';
+                recognition.onresult = (event: any) => {
+                  const transcript = event.results[0][0].transcript;
+                  console.log("🗣️ Voice Transcript captured:", transcript);
+                  setTranscribedText(transcript);
+                  startBlendSequence(transcript);
+                };
+                recognition.start();
+              }}
+            />
+          </div>
+
+          {/* Center Content */}
+          <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
+            {committedBlend ? (
+              /* Committed State - Blend Calculator */
+              <div className="flex-1 flex items-center justify-center">
+                <BlendCalculator
+                  blend={committedBlend}
+                  alternateBlends={visibleBlends}
+                  onStartOver={handleReset}
+                  onSwitchBlend={handleSwitchBlendInCalculator}
+                />
+              </div>
+            ) : (
+              <>
+                {/* Logo / Processor */}
+                <div className="flex-1 flex flex-col items-center justify-center gap-6">
+                  {(animationState === 'STATE_0_IDLE' ||
+                    animationState === 'STATE_1_INVENTORY_ALIGNED' ||
+                    animationState === 'STATE_2_INGREDIENT_LIFT') && (
+                      <div ref={logoRef} className="flex flex-col items-center">
+                        <ProcessorStateMachine
+                          state={animationState}
+                          cardsArrived={cardsArrived}
+                          totalCards={ingredientCards.length}
+                          isInterpreting={isInterpreting}
+                        />
+                        {(isInterpreting || transcribedText) && !committedBlend && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.4 }}
+                            className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
+                          >
+                            "{transcribedText || lastUserText}"
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
                 </div>
-              ) : (
-                <>
-                  {/* Logo / Processor */}
-                  <div className="flex-1 flex flex-col items-center justify-center gap-6">
-                    {(animationState === 'STATE_0_IDLE' ||
-                      animationState === 'STATE_1_INVENTORY_ALIGNED' ||
-                      animationState === 'STATE_2_INGREDIENT_LIFT') && (
-                        <div ref={logoRef} className="flex flex-col items-center">
-                          <ProcessorStateMachine
-                            state={animationState}
-                            cardsArrived={cardsArrived}
-                            totalCards={ingredientCards.length}
-                            isInterpreting={isInterpreting}
+
+                {/* Blend Result Cards - Show only when animation completes */}
+                {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                  <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
+                    <div className="flex flex-col items-center w-full">
+                      <div className="flex gap-6 justify-center mb-12">
+                        {visibleBlends.map((blend, index) => (
+                          <BlendResultCard
+                            key={blend.id}
+                            blend={blend}
+                            isSelected={blend.id === selectedBlendId}
+                            onSelect={() => handleSelectBlend(blend.id)}
+                            index={index}
                           />
-                          {(isInterpreting || transcribedText) && !committedBlend && (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 0.4 }}
-                              className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
-                            >
-                              "{transcribedText || lastUserText}"
-                            </motion.div>
-                          )}
-                        </div>
-                      )}
-                  </div>
+                        ))}
+                      </div>
 
-                  {/* Blend Result Cards - Show only when animation completes */}
-                  {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
-                    <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
-                      <div className="flex flex-col items-center w-full">
-                        <div className="flex gap-6 justify-center mb-12">
-                          {visibleBlends.map((blend, index) => (
-                            <BlendResultCard
-                              key={blend.id}
-                              blend={blend}
-                              isSelected={blend.id === selectedBlendId}
-                              onSelect={() => handleSelectBlend(blend.id)}
-                              index={index}
-                            />
-                          ))}
-                        </div>
-
-                        <div className="flex gap-4">
-                          {/* View QR Button */}
-                          <button
-                            onClick={() => setShowQR(true)}
-                            className="px-8 py-4 bg-white/5 hover:bg-white/10
+                      <div className="flex gap-4">
+                        {/* View QR Button */}
+                        <button
+                          onClick={() => setShowQR(true)}
+                          className="px-8 py-4 bg-white/5 hover:bg-white/10
                                     backdrop-blur-xl rounded-2xl
                                     border border-white/10 hover:border-white/20
                                     text-white/60 hover:text-white_80 text-sm uppercase tracking-wider font-medium
                                     transition-all duration-200"
-                          >
-                            View QR
-                          </button>
+                        >
+                          View QR
+                        </button>
 
-                          {/* Make Blend Button - Always visible */}
-                          <button
-                            onClick={handleMakeBlend}
-                            className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
+                        {/* Make Blend Button - Always visible */}
+                        <button
+                          onClick={handleMakeBlend}
+                          className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
                                      backdrop-blur-2xl rounded-2xl overflow-hidden
                                      shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
                                      hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
                                      text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
                                      transition-all duration-300 ease-out
                                      hover:scale-[1.02] active:scale-[0.98]"
-                          >
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                            <span className="relative z-10">Make This Blend</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
-                      <div className="mt-4 flex justify-center">
-                        <button
-                          onClick={() => startBlendSequence('Refresh blends')}
-                          className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
                         >
-                          ↻ Refresh Blends
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                          <span className="relative z-10">Make This Blend</span>
                         </button>
                       </div>
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+
+                    {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        onClick={() => startBlendSequence('Refresh blends')}
+                        className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
+                      >
+                        ↻ Refresh Blends
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        ) : mode === 'operator' ? (
-          <AdminOverlay
-            onShowBusinessOverview={() => setMode('business')}
-          />
-        ) : (
-          <BusinessOverview
-            onClose={() => setMode('operator')}
-          />
-        )}
-      </div>
-
-      {/* How It Works Modal */}
-      <AnimatePresence>
-        {showHowItWorks && (
-          <HowItWorks onClose={() => setShowHowItWorks(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* STATE 2: Lifting Cards (Sequential) */}
-      {
-        animationState === 'STATE_2_INGREDIENT_LIFT' &&
-        currentLiftingIndex >= 0 &&
-        currentLiftingIndex < ingredientCards.length &&
-        liftingCardPositions[currentLiftingIndex] && (
-          <IngredientCardLifting
-            key={`lifting-${currentLiftingIndex}-${ingredientCards[currentLiftingIndex].strain}`}
-            ingredient={ingredientCards[currentLiftingIndex]}
-            startPosition={liftingCardPositions[currentLiftingIndex]}
-            logoPosition={logoPosition}
-            isLifting={true}
-            onArrival={handleCardArrival}
-          />
-        )
-      }
-
-      {/* Floating Why Panel */}
-      {
-        animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
-          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-          return (
-            <WhyPanel
-              confidence={currentIntent ? "98.4" : "92.1"}
-              explanation={generateExplanation(lastUserText, currentIntent, selectedBlend)}
-              intent={currentIntent}
-              userText={lastUserText}
-              isVisible={true}
-            />
-          );
-        })()
-      }
-
-      <QRCodeModal
-        isOpen={showQR}
-        onClose={() => setShowQR(false)}
-        blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
-      />
-
-      {/* Inventory Tray */}
-      {
-        mode === 'voice' && !committedBlend && (
-          <ScrollContainer
-            ref={inventoryRef}
-            highlightedStrains={highlightedStrains}
-          />
-        )
-      }
-
-      <AdminOverlay mode={mode} />
+        </div>
+      ) : mode === 'operator' ? (
+        <AdminOverlay
+          onShowBusinessOverview={() => setMode('business')}
+        />
+      ) : (
+        <BusinessOverview
+          onClose={() => setMode('operator')}
+        />
+      )}
     </div>
-  );
+
+    {/* How It Works Modal */}
+    <AnimatePresence>
+      {showHowItWorks && (
+        <HowItWorks onClose={() => setShowHowItWorks(false)} />
+      )}
+    </AnimatePresence>
+
+    {/* STATE 2: Lifting Cards (Sequential) */}
+    {
+      animationState === 'STATE_2_INGREDIENT_LIFT' &&
+      currentLiftingIndex >= 0 &&
+      currentLiftingIndex < ingredientCards.length &&
+      liftingCardPositions[currentLiftingIndex] && (
+        <IngredientCardLifting
+          key={`lifting-${currentLiftingIndex}-${ingredientCards[currentLiftingIndex].strain}`}
+          ingredient={ingredientCards[currentLiftingIndex]}
+          startPosition={liftingCardPositions[currentLiftingIndex]}
+          logoPosition={logoPosition}
+          isLifting={true}
+          onArrival={handleCardArrival}
+        />
+      )
+    }
+
+    {/* Floating Why Panel */}
+    {
+      animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
+        const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+        return (
+          <WhyPanel
+            confidence={currentIntent ? "98.4" : "92.1"}
+            explanation={generateExplanation(lastUserText, currentIntent, selectedBlend)}
+            intent={currentIntent}
+            userText={lastUserText}
+            isVisible={true}
+          />
+        );
+      })()
+    }
+
+    <QRCodeModal
+      isOpen={showQR}
+      onClose={() => setShowQR(false)}
+      blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
+    />
+
+    {/* Inventory Tray */}
+    {
+      mode === 'voice' && !committedBlend && (
+        <ScrollContainer
+          ref={inventoryRef}
+          highlightedStrains={highlightedStrains}
+        />
+      )
+    }
+
+    <AdminOverlay mode={mode} onPresetSelect={handlePresetSelect} />
+  </div>
+);
 }
