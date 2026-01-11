@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { StrainCard } from './StrainCard';
 

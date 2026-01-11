@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { ProcessorStateMachine } from './GoLogo/ProcessorStateMachine';
 import { IngredientCardLifting } from './IngredientCardLifting';
