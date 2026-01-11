@@ -30,7 +30,7 @@ type AppMode = 'voice' | 'operator' | 'business';
  * AppShell_StateMachine
  */
 export function AppShell_StateMachine() {
-  const [ageVerified, setAgeVerified] = useState(false);
+
   const [userTypeSelected, setUserTypeSelected] = useState(false);
   /* 
    * [FLIGHT CHECK] Fix 1: Do NOT read onboardingComplete on app init 
@@ -298,345 +298,334 @@ export function AppShell_StateMachine() {
     startBlendSequence(undefined, intent);
   };
 
-  if (!ageVerified) {
-    return (
-      <AgeGateOverlay
-        onEnterNewUser={() => {
-          setAgeVerified(true);
-          setUserTypeSelected(true);
-          setOnboardingComplete(false); // Trigger Onboarding
-          setMode('voice');
-        }}
-        onEnterReturningUser={() => {
-          setAgeVerified(true);
-          setUserTypeSelected(true);
-          setOnboardingComplete(true); // Skip Onboarding
-          setMode('voice');
-        }}
-        onEnterOperator={() => {
-          setAgeVerified(true);
-          setUserTypeSelected(true);
-          setOnboardingComplete(true);
-          setMode('operator');
-        }}
+  setUserTypeSelected(true);
+  setOnboardingComplete(true); // Skip Onboarding
+  setMode('voice');
+}}
+onEnterOperator = {() => {
+  setAgeVerified(true);
+  setUserTypeSelected(true);
+  setOnboardingComplete(true);
+  setMode('operator');
+}}
       />
     );
   }
 
-  if (!userTypeSelected) {
-    return (
-      <UserTypeGate
-        onFirstTime={() => setUserTypeSelected(true)}
-        onReturning={() => {
-          setUserTypeSelected(true);
-          setOnboardingComplete(true); // Skip onboarding
-        }}
-      />
-    );
-  }
-
-  if (!onboardingComplete) {
-    return (
-      <OnboardingScreen
-        onComplete={() => {
-          localStorage.setItem('hasOnboarded', 'true');
-          setOnboardingComplete(true);
-        }}
-      />
-    );
-  }
-
+if (!userTypeSelected) {
   return (
-    <div className="w-full h-screen bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] text-white flex flex-col overflow-hidden relative">
-      {/* Ambient Background */}
-      <AmbientBackground
-        imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'
-          ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-          : "https://images.unsplash.com/photo-1714065712817-af7d54710a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
-        }
-        opacity={animationState === 'STATE_0_IDLE' ? 0.04 : 0.06}
-      />
+    <UserTypeGate
+      onFirstTime={() => setUserTypeSelected(true)}
+      onReturning={() => {
+        setUserTypeSelected(true);
+        setOnboardingComplete(true); // Skip onboarding
+      }}
+    />
+  );
+}
 
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-8 flex-shrink-0 relative z-10">
-        <div className="flex items-center gap-3">
-          <img
-            src={logoImage}
-            alt="GO LINE"
-            className="w-12 h-auto"
-            style={{
-              filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
-            }}
-          />
-          <h1 className="text-base tracking-[0.3em] uppercase font-light text-white/90">GO LINE</h1>
-        </div>
+if (!onboardingComplete) {
+  return (
+    <OnboardingScreen
+      onComplete={() => {
+        localStorage.setItem('hasOnboarded', 'true');
+        setOnboardingComplete(true);
+      }}
+    />
+  );
+}
 
-        <div className="flex items-center gap-4">
-          {mode === 'voice' && animationState === 'STATE_0_IDLE' && (
-            <button
-              onClick={() => setShowHowItWorks(true)}
-              className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
-            >
-              How It Works
-            </button>
-          )}
+return (
+  <div className="w-full h-screen bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] text-white flex flex-col overflow-hidden relative">
+    {/* Ambient Background */}
+    <AmbientBackground
+      imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'
+        ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+        : "https://images.unsplash.com/photo-1714065712817-af7d54710a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+      }
+      opacity={animationState === 'STATE_0_IDLE' ? 0.04 : 0.06}
+    />
 
-          <button
-            onClick={() => setMode(mode === 'operator' ? 'voice' : 'operator')}
-            className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
-          >
-            {mode === 'operator' ? 'Exit Console' : 'Console'}
-          </button>
-
-          {/* [FLIGHT CHECK] Dev Reset Button */}
-          <button
-            onClick={() => {
-              localStorage.removeItem('hasOnboarded');
-              window.location.reload();
-            }}
-            className="text-[10px] uppercase tracking-wider text-red-500/40 hover:text-red-500/80 transition-colors"
-          >
-            RESET
-          </button>
-        </div>
+    {/* Header */}
+    <div className="h-16 flex items-center justify-between px-8 flex-shrink-0 relative z-10">
+      <div className="flex items-center gap-3">
+        <img
+          src={logoImage}
+          alt="GO LINE"
+          className="w-12 h-auto"
+          style={{
+            filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
+          }}
+        />
+        <h1 className="text-base tracking-[0.3em] uppercase font-light text-white/90">GO LINE</h1>
       </div>
 
-      {/* Main Application */}
-      <div className="flex-1 relative overflow-hidden">
-        {isMobile ? (
-          <div className="w-full h-full flex flex-col items-center justify-between p-6 pb-12 relative z-10">
-            <div className="flex flex-col items-center mt-4">
-              <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
-              <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 mt-3">Mobile Viewer</div>
-            </div>
-            <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
-              {visibleBlends.length > 0 ? (
-                <div className="w-full max-w-[320px] flex flex-col gap-6 animate-in fade-in zoom-in duration-500">
-                  <BlendResultCard
-                    blend={visibleBlends[0]}
-                    isSelected={true}
-                    index={0}
-                    onSelect={() => { }}
-                  />
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleReset}
-                      className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs uppercase"
-                    >
-                      Reset
-                    </button>
-                    <button
-                      className="flex-[2] py-4 rounded-xl bg-[#D4AF37] text-black font-bold tracking-wide uppercase text-sm shadow-[0_0_30px_rgba(212,175,55,0.4)]"
-                    >
-                      Share
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-6">
-                  <button
-                    onClick={() => startBlendSequence("I want to feel relaxed and creative")}
-                    className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
-                  >
-                    <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
-                  </button>
-                  <p className="text-white/40 text-xs uppercase tracking-widest">Tap to Analyze</p>
-                </div>
-              )}
-            </div>
+      <div className="flex items-center gap-4">
+        {mode === 'voice' && animationState === 'STATE_0_IDLE' && (
+          <button
+            onClick={() => setShowHowItWorks(true)}
+            className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
+          >
+            How It Works
+          </button>
+        )}
+
+        <button
+          onClick={() => setMode(mode === 'operator' ? 'voice' : 'operator')}
+          className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
+        >
+          {mode === 'operator' ? 'Exit Console' : 'Console'}
+        </button>
+
+        {/* [FLIGHT CHECK] Dev Reset Button */}
+        <button
+          onClick={() => {
+            localStorage.removeItem('hasOnboarded');
+            window.location.reload();
+          }}
+          className="text-[10px] uppercase tracking-wider text-red-500/40 hover:text-red-500/80 transition-colors"
+        >
+          RESET
+        </button>
+      </div>
+    </div>
+
+    {/* Main Application */}
+    <div className="flex-1 relative overflow-hidden">
+      {isMobile ? (
+        <div className="w-full h-full flex flex-col items-center justify-between p-6 pb-12 relative z-10">
+          <div className="flex flex-col items-center mt-4">
+            <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
+            <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 mt-3">Mobile Viewer</div>
           </div>
-        ) : mode === 'voice' ? (
-          <div className="w-full h-full flex">
-            {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
-            <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' || animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'w-80' : 'w-0'
-              } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
-              }`}>
-              <PromptsSidebar
-                onPromptSelect={(text) => startBlendSequence(text)}
-                onTextSubmit={(text) => startBlendSequence(text)}
-                onVoiceActivate={() => {
-                  console.log("🎤 Voice activation triggered");
-                  const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                  if (!Recognition) {
-                    alert("Speech recognition not supported in this browser.");
-                    return;
-                  }
-                  const recognition = new Recognition();
-                  recognition.lang = 'en-US';
-                  recognition.onresult = (event: any) => {
-                    const transcript = event.results[0][0].transcript;
-                    console.log("🗣️ Voice Transcript captured:", transcript);
-                    setTranscribedText(transcript);
-                    startBlendSequence(transcript);
-                  };
-                  recognition.start();
-                }}
-              />
-            </div>
-
-            {/* Center Content */}
-            <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
-              {committedBlend ? (
-                /* Committed State - Blend Calculator */
-                <div className="flex-1 flex items-center justify-center">
-                  <BlendCalculator
-                    blend={committedBlend}
-                    alternateBlends={visibleBlends}
-                    onStartOver={handleReset}
-                    onSwitchBlend={handleSwitchBlendInCalculator}
-                  />
+          <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
+            {visibleBlends.length > 0 ? (
+              <div className="w-full max-w-[320px] flex flex-col gap-6 animate-in fade-in zoom-in duration-500">
+                <BlendResultCard
+                  blend={visibleBlends[0]}
+                  isSelected={true}
+                  index={0}
+                  onSelect={() => { }}
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleReset}
+                    className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs uppercase"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    className="flex-[2] py-4 rounded-xl bg-[#D4AF37] text-black font-bold tracking-wide uppercase text-sm shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                  >
+                    Share
+                  </button>
                 </div>
-              ) : (
-                <>
-                  {/* Logo / Processor */}
-                  <div className="flex-1 flex flex-col items-center justify-center gap-6">
-                    {(animationState === 'STATE_0_IDLE' ||
-                      animationState === 'STATE_1_INVENTORY_ALIGNED' ||
-                      animationState === 'STATE_2_INGREDIENT_LIFT') && (
-                        <div ref={logoRef} className="flex flex-col items-center">
-                          <ProcessorStateMachine
-                            state={animationState}
-                            cardsArrived={cardsArrived}
-                            totalCards={ingredientCards.length}
-                            isInterpreting={isInterpreting}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-6">
+                <button
+                  onClick={() => startBlendSequence("I want to feel relaxed and creative")}
+                  className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
+                >
+                  <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
+                </button>
+                <p className="text-white/40 text-xs uppercase tracking-widest">Tap to Analyze</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : mode === 'voice' ? (
+        <div className="w-full h-full flex">
+          {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
+          <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' || animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'w-80' : 'w-0'
+            } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
+            }`}>
+            <PromptsSidebar
+              onPromptSelect={(text) => startBlendSequence(text)}
+              onTextSubmit={(text) => startBlendSequence(text)}
+              onVoiceActivate={() => {
+                console.log("🎤 Voice activation triggered");
+                const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                if (!Recognition) {
+                  alert("Speech recognition not supported in this browser.");
+                  return;
+                }
+                const recognition = new Recognition();
+                recognition.lang = 'en-US';
+                recognition.onresult = (event: any) => {
+                  const transcript = event.results[0][0].transcript;
+                  console.log("🗣️ Voice Transcript captured:", transcript);
+                  setTranscribedText(transcript);
+                  startBlendSequence(transcript);
+                };
+                recognition.start();
+              }}
+            />
+          </div>
+
+          {/* Center Content */}
+          <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
+            {committedBlend ? (
+              /* Committed State - Blend Calculator */
+              <div className="flex-1 flex items-center justify-center">
+                <BlendCalculator
+                  blend={committedBlend}
+                  alternateBlends={visibleBlends}
+                  onStartOver={handleReset}
+                  onSwitchBlend={handleSwitchBlendInCalculator}
+                />
+              </div>
+            ) : (
+              <>
+                {/* Logo / Processor */}
+                <div className="flex-1 flex flex-col items-center justify-center gap-6">
+                  {(animationState === 'STATE_0_IDLE' ||
+                    animationState === 'STATE_1_INVENTORY_ALIGNED' ||
+                    animationState === 'STATE_2_INGREDIENT_LIFT') && (
+                      <div ref={logoRef} className="flex flex-col items-center">
+                        <ProcessorStateMachine
+                          state={animationState}
+                          cardsArrived={cardsArrived}
+                          totalCards={ingredientCards.length}
+                          isInterpreting={isInterpreting}
+                        />
+                        {(isInterpreting || transcribedText) && !committedBlend && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.4 }}
+                            className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
+                          >
+                            "{transcribedText || lastUserText}"
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
+                </div>
+
+                {/* Blend Result Cards - Show only when animation completes */}
+                {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                  <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
+                    <div className="flex flex-col items-center w-full">
+                      <div className="flex gap-6 justify-center mb-12">
+                        {(visibleBlends || []).map((blend, index) => (
+                          <BlendResultCard
+                            key={blend.id}
+                            blend={blend}
+                            isSelected={blend.id === selectedBlendId}
+                            onSelect={() => handleSelectBlend(blend.id)}
+                            index={index}
                           />
-                          {(isInterpreting || transcribedText) && !committedBlend && (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 0.4 }}
-                              className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
-                            >
-                              "{transcribedText || lastUserText}"
-                            </motion.div>
-                          )}
-                        </div>
-                      )}
-                  </div>
+                        ))}
+                      </div>
 
-                  {/* Blend Result Cards - Show only when animation completes */}
-                  {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
-                    <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
-                      <div className="flex flex-col items-center w-full">
-                        <div className="flex gap-6 justify-center mb-12">
-                          {(visibleBlends || []).map((blend, index) => (
-                            <BlendResultCard
-                              key={blend.id}
-                              blend={blend}
-                              isSelected={blend.id === selectedBlendId}
-                              onSelect={() => handleSelectBlend(blend.id)}
-                              index={index}
-                            />
-                          ))}
-                        </div>
-
-                        <div className="flex gap-4">
-                          {/* View QR Button */}
-                          <button
-                            onClick={() => setShowQR(true)}
-                            className="px-8 py-4 bg-white/5 hover:bg-white/10
+                      <div className="flex gap-4">
+                        {/* View QR Button */}
+                        <button
+                          onClick={() => setShowQR(true)}
+                          className="px-8 py-4 bg-white/5 hover:bg-white/10
                                     backdrop-blur-xl rounded-2xl
                                     border border-white/10 hover:border-white/20
                                     text-white/60 hover:text-white_80 text-sm uppercase tracking-wider font-medium
                                     transition-all duration-200"
-                          >
-                            View QR
-                          </button>
+                        >
+                          View QR
+                        </button>
 
-                          {/* Make Blend Button - Always visible */}
-                          <button
-                            onClick={handleMakeBlend}
-                            className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
+                        {/* Make Blend Button - Always visible */}
+                        <button
+                          onClick={handleMakeBlend}
+                          className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
                                      backdrop-blur-2xl rounded-2xl overflow-hidden
                                      shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
                                      hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
                                      text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
                                      transition-all duration-300 ease-out
                                      hover:scale-[1.02] active:scale-[0.98]"
-                          >
-                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                            <span className="relative z-10">Make This Blend</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
-                      <div className="mt-4 flex justify-center">
-                        <button
-                          onClick={() => startBlendSequence('Refresh blends')}
-                          className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
                         >
-                          ↻ Refresh Blends
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                          <span className="relative z-10">Make This Blend</span>
                         </button>
                       </div>
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+
+                    {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        onClick={() => startBlendSequence('Refresh blends')}
+                        className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
+                      >
+                        ↻ Refresh Blends
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        ) : mode === 'operator' ? (
-          <AdminOverlay
-            onShowBusinessOverview={() => setMode('business')}
-            inventory={inventory}
-            onUpdateInventory={setInventory}
-          />
-        ) : (
-          <BusinessOverview
-            onClose={() => setMode('operator')}
-          />
-        )}
-      </div>
-
-      {/* How It Works Modal */}
-      <AnimatePresence>
-        {showHowItWorks && (
-          <HowItWorks onClose={() => setShowHowItWorks(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* Safe Tile Animation (Visual Only) */}
-      {animationState === 'STATE_2_INGREDIENT_LIFT' && (
-        <SafeTileAnimation cards={ingredientCards} />
-      )}
-
-      {/* Floating Why Panel */}
-      {
-        animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
-          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-          return (
-            <WhyPanel
-              isVisible={true}
-              blend={selectedBlend}
-              intent={currentIntent}
-            />
-          );
-        })()
-      }
-
-      <QRCodeModal
-        isOpen={showQR}
-        onClose={() => setShowQR(false)}
-        blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
-      />
-
-      {/* Inventory Tray */}
-      {
-        mode === 'voice' && !committedBlend && (
-          <ScrollContainer
-            ref={inventoryRef}
-            highlightedStrains={highlightedStrains}
-          />
-        )
-      }
-
-      {mode === 'operator' && (
+        </div>
+      ) : mode === 'operator' ? (
         <AdminOverlay
-          mode={mode}
-          onPresetSelect={handlePresetSelect}
+          onShowBusinessOverview={() => setMode('business')}
           inventory={inventory}
           onUpdateInventory={setInventory}
         />
+      ) : (
+        <BusinessOverview
+          onClose={() => setMode('operator')}
+        />
       )}
     </div>
-  );
+
+    {/* How It Works Modal */}
+    <AnimatePresence>
+      {showHowItWorks && (
+        <HowItWorks onClose={() => setShowHowItWorks(false)} />
+      )}
+    </AnimatePresence>
+
+    {/* Safe Tile Animation (Visual Only) */}
+    {animationState === 'STATE_2_INGREDIENT_LIFT' && (
+      <SafeTileAnimation cards={ingredientCards} />
+    )}
+
+    {/* Floating Why Panel */}
+    {
+      animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
+        const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+        return (
+          <WhyPanel
+            isVisible={true}
+            blend={selectedBlend}
+            intent={currentIntent}
+          />
+        );
+      })()
+    }
+
+    <QRCodeModal
+      isOpen={showQR}
+      onClose={() => setShowQR(false)}
+      blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
+    />
+
+    {/* Inventory Tray */}
+    {
+      mode === 'voice' && !committedBlend && (
+        <ScrollContainer
+          ref={inventoryRef}
+          highlightedStrains={highlightedStrains}
+        />
+      )
+    }
+
+    {mode === 'operator' && (
+      <AdminOverlay
+        mode={mode}
+        onPresetSelect={handlePresetSelect}
+        inventory={inventory}
+        onUpdateInventory={setInventory}
+      />
+    )}
+  </div>
+);
 }
