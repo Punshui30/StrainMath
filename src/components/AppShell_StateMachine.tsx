@@ -306,6 +306,34 @@ export function AppShell_StateMachine() {
     }
   };
 
+  // ==========================================
+  // SCREEN OWNERSHIP MODEL
+  // ==========================================
+  // When explanation is open, it owns the screen EXCLUSIVELY
+  // Everything else is UNMOUNTED (not hidden, not layered - GONE)
+  if (showExplanation) {
+    const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+    if (!selectedBlend) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black z-[9999]">
+        <BlendExplanationPanel
+          blend={selectedBlend}
+          intent={currentIntent}
+          explanation={blendExplanationText}
+          userText={lastUserText}
+          onClose={() => setShowExplanation(false)}
+          onStartOver={handleReset}
+          onPrintLabel={() => setShowQR(true)}
+        />
+      </div>
+    );
+  }
+
+  // ==========================================
+  // NORMAL RENDER (Only executes when explanation is closed)
+  // ==========================================
+
   // Determine which strains are highlighted (STATE 1 & 2)
   const highlightedStrains =
     (animationState === 'STATE_1_INVENTORY_ALIGNED' ||
