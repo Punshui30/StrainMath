@@ -7,12 +7,11 @@ import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
 import { WhyPanel } from './WhyPanel';
 import { PromptsSidebar } from './PromptsSidebar';
-import { SafeTileAnimation } from './SafeTileAnimation';
 import { BusinessOverview } from './BusinessOverview';
 import { AdminOverlay } from './AdminOverlay';
 import { HowItWorks } from './HowItWorks';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { UserTypeGate } from './UserTypeGate';
+import { AgeGateOverlay } from './AgeGateOverlay';
 import { OnboardingScreen } from './OnboardingScreen';
 import { AmbientBackground } from './AmbientBackground';
 import { QRCodeModal } from './QRCodeModal';
@@ -197,36 +196,17 @@ export function AppShell_StateMachine() {
     const uniqueStrains = Array.from(new Set(strainNames));
 
     // ========================================
-    // STATE 1: INVENTORY ALIGNMENT
+    // STATE 1: INVENTORY ALIGNMENT & IMMEDIATE RESULT
     // ========================================
     setAnimationState('STATE_1_INVENTORY_ALIGNED');
 
-    // Scroll inventory to center selected strains
+    // Scroll inventory to center selected strains (Visual feedback only)
     await inventoryRef.current?.scrollToCenter(uniqueStrains);
 
-    // Wait for scroll settle
-    await new Promise(resolve => setTimeout(resolve, ANIMATION_TIMINGS.SCROLL_SETTLE));
+    // Short processing delay for "Compute" feel
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-    // Capture card positions from DOM (One position per CARD instance)
-    const positions: DOMRect[] = [];
-    for (const strainName of strainNames) {
-      const pos = inventoryRef.current?.getStrainPosition(strainName);
-      if (pos) positions.push(pos);
-    }
-    setLiftingCardPositions(positions);
-
-    // Hold state to show highlighted cards
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // ========================================
-    // STATE 2: INGREDIENT LIFT (VISUAL ONLY)
-    // ========================================
-    setAnimationState('STATE_2_INGREDIENT_LIFT');
-
-    // [CRITICAL FAILSAFE] Force Advance to Presentation Layer
-    // Does not rely on animation callbacks. Guaranteed to render results.
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
+    // Direct transition to Results - NO Assembly Animation
     setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
 
   }, [animationState, selectedBlendId, inventory]);
@@ -279,11 +259,21 @@ export function AppShell_StateMachine() {
 
   if (!userTypeSelected) {
     return (
-      <UserTypeGate
-        onFirstTime={() => setUserTypeSelected(true)}
-        onReturning={() => {
+      <AgeGateOverlay
+        onEnterNewUser={() => {
           setUserTypeSelected(true);
-          setOnboardingComplete(true); // Skip onboarding
+          setOnboardingComplete(false); // Show Onboarding
+          setMode('voice');
+        }}
+        onEnterReturningUser={() => {
+          setUserTypeSelected(true);
+          setOnboardingComplete(true); // Skip Onboarding
+          setMode('voice');
+        }}
+        onEnterOperator={() => {
+          setUserTypeSelected(true);
+          setOnboardingComplete(true);
+          setMode('operator');
         }}
       />
     );
@@ -552,9 +542,7 @@ export function AppShell_StateMachine() {
       </AnimatePresence>
 
       {/* Safe Tile Animation (Visual Only) */}
-      {animationState === 'STATE_2_INGREDIENT_LIFT' && (
-        <SafeTileAnimation cards={ingredientCards} />
-      )}
+
 
       {/* Floating Why Panel */}
       {
