@@ -83,7 +83,7 @@ export function MobileBlendView() {
                     index={0}
                 />
 
-                <div className="w-full max-w-[320px] mt-8 grid grid-cols-2 gap-4">
+                <div className="w-full max-w-[420px] px-4 mt-8 grid grid-cols-2 gap-4">
                     <button
                         onClick={handleRecreate}
                         className="flex flex-col items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/5 text-center"
