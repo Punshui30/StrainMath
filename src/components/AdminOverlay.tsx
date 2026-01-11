@@ -10,49 +10,25 @@ interface AdminOverlayProps {
   onPresetSelect?: (intent: any) => void;
   inventory: any[];
   onUpdateInventory: (inv: any[]) => void;
+  isDemoRunning: boolean;
+  demoStep: number;
+  onStartDemo: () => void;
+  onStopDemo: () => void;
 }
 
-const DEMO_STEPS = [
-  { target: 'header', text: 'Guided Outcomes increases average cart size by making recommendations additive, not substitutive.\nCustomers don’t replace products — they layer outcomes.' },
-  { target: 'inventory', text: 'The system always finds a sellable solution using what’s in stock.\nNo more dead inventory. No more ‘we’re out of that.’' },
-  { target: 'inventory', text: 'Low-velocity and sale inventory is quietly absorbed into guided blends.\nProducts move without discounting the brand.' },
-  { target: 'presets', text: 'Customers come back for outcomes they can reliably reproduce.\nNot strain names. Not hype. Results.' },
-  { target: 'modes', text: 'Staff no longer need encyclopedic strain knowledge to deliver premium experiences.\nThe system standardizes expertise without dumbing it down.' },
-  { target: 'stats', text: 'Every recommendation can be saved, shared, and repeated — without friction.\nLoyalty emerges naturally from consistency.' },
-];
-
-export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect, inventory, onUpdateInventory }: AdminOverlayProps) {
+export function AdminOverlay({
+  mode,
+  onShowBusinessOverview,
+  onPresetSelect,
+  inventory,
+  onUpdateInventory,
+  isDemoRunning,
+  demoStep,
+  onStartDemo,
+  onStopDemo
+}: AdminOverlayProps) {
   const [isScanning, setIsScanning] = useState(false);
-
-  // Demo State
-  const [isDemoRunning, setIsDemoRunning] = useState(false);
-  const [demoStep, setDemoStep] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Demo Auto-Advance
-  useEffect(() => {
-    if (!isDemoRunning) return;
-
-    const timer = setTimeout(() => {
-      if (demoStep < DEMO_STEPS.length - 1) {
-        setDemoStep(prev => prev + 1);
-      } else {
-        setIsDemoRunning(false); // End demo
-      }
-    }, 6000); // Increased time for reading business copy
-
-    return () => clearTimeout(timer);
-  }, [isDemoRunning, demoStep]);
-  // ...
-
-  const startDemo = () => {
-    setDemoStep(0);
-    setIsDemoRunning(true);
-  };
-
-  const skipDemo = () => {
-    setIsDemoRunning(false);
-  };
 
   // Inventory Logic
   const updateStatus = (qty: number) => {
@@ -66,11 +42,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect, inv
     if (!strain) return;
     const qtyStr = prompt("Enter Quantity (g):");
     const qty = parseInt(qtyStr || '0');
-    // We assume MOCK format or simple format.
-    // If inventory items are full COAs, we might be pushin a partial object.
-    // But since display is just Strain/Qty/Status, we can push a partial.
-    // For scoring, "scoreStrain" needs "terpenes".
-    // If we push a manual entry without terpenes, the engine might choke.
+
     // [SAFETY] For manual entry in this demo, let's clone an existing terpene profile randomly so it works in engine.
     const template = inventory[0] || {};
 
@@ -129,32 +101,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect, inv
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="w-full h-full bg-[#0A0A0B] overflow-y-auto relative"
     >
-      {/* Visual-Only Demo Banner (Non-Blocking) */}
-      <AnimatePresence>
-        {isDemoRunning && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center"
-          >
-            <div className="bg-[#D4AF37] text-black px-6 py-3 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center gap-4 border border-white/20">
-              <span className="font-bold text-xs tracking-wider">DEMO {demoStep + 1}/{DEMO_STEPS.length}</span>
-              <div className="w-px h-4 bg-black/10" />
-              <span className="font-medium text-sm">{DEMO_STEPS[demoStep].text.split('\n')[0]}</span>
-              <button
-                onClick={skipDemo}
-                className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors text-xs font-bold"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="mt-2 text-[10px] text-[#D4AF37]/80 uppercase tracking-widest font-medium bg-black/80 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
-              Visual Walkthrough Active
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Banner removed - lifted to AppShell */}
 
       <div className="max-w-7xl mx-auto p-8">
         {/* Header with Business Overview link */}
@@ -174,7 +121,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect, inv
             </div>
           </div>
           <button
-            onClick={startDemo}
+            onClick={onStartDemo}
             disabled={isDemoRunning}
             className="px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sm text-white/80 hover:text-white transition-all disabled:opacity-50"
           >

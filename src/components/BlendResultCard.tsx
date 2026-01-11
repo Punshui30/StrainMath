@@ -7,31 +7,31 @@ interface BlendResultCardProps {
   isSelected: boolean;
   onSelect: () => void;
   index: number;
+  animationAnchor?: DOMRect | null;
 }
 
-/**
- * BlendResultCard
- * 
- * FRAME C: blend_output
- * Individual recommendation card that appears after blending is complete.
- * Part of the three-card recommendation set.
- * Uses strain color tokens for visual correlation with ring segments.
- */
-export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendResultCardProps) {
+export function BlendResultCard({ blend, isSelected, onSelect, index, animationAnchor }: BlendResultCardProps) {
   // Safeguard: Ensure blend has required properties
   if (!blend || !blend.components) {
     return null;
   }
 
+  // If anchor exists, we simulate a trajectory from "tray" (bottom) "towards logo" (top-ish) then "settle"
+  // y: [start, overshoot_towards_logo, final]
+  const yKeyframes = animationAnchor
+    ? [300, -40, 0] // Stronger pull upwards if we know where logo is
+    : [100, 0];      // Fallback simple slide
+
   return (
     <motion.button
-      initial={{ opacity: 0, y: 100, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scrollBehavior: 'smooth', y: yKeyframes, scale: 1 }}
       whileHover={{ y: -6 }}
       transition={{
         duration: 0.8,
-        delay: index * 0.15, // Staggered arrival
-        ease: [0.2, 0.8, 0.2, 1], // Custom easeOut
+        delay: index * 0.12,
+        ease: [0.19, 1, 0.22, 1], // Exponential ease out
+        times: animationAnchor ? [0, 0.6, 1] : undefined
       }}
       onClick={onSelect}
       className={`relative group w-full max-w-[320px] p-8 rounded-3xl backdrop-blur-xl border border-white/5
