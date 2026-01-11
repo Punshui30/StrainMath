@@ -42,13 +42,13 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-12">
+    <div className="w-full max-w-6xl mx-auto px-4 md:px-12 py-6 md:py-8 overflow-y-auto h-full">
       {/* Alternate Interpretations Row */}
       <div className="mb-6">
-        <div className="text-[9px] uppercase tracking-[0.2em] text-white/30 mb-3 font-medium">
+        <div className="text-[9px] uppercase tracking-[0.2em] text-white/30 mb-3 font-medium px-2">
           Other Interpretations
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide px-2">
           {alternateBlends.map((alt) => {
             const isActive = alt.id === blend.id;
             return (
@@ -56,7 +56,7 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
                 key={alt.id}
                 type="button"
                 onClick={() => onSwitchBlend(alt.id)}
-                className={`px-5 py-2.5 rounded-xl backdrop-blur-xl transition-all duration-200 text-sm font-light
+                className={`px-5 py-2.5 rounded-xl backdrop-blur-xl transition-all duration-200 text-sm font-light whitespace-nowrap
                   ${isActive
                     ? 'bg-white/[0.12] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4)] text-white/90'
                     : 'bg-white/[0.05] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] text-white/50 hover:bg-white/[0.08] hover:text-white/70'
@@ -70,14 +70,14 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
       </div>
 
       {/* Main Calculator Card */}
-      <div className="rounded-3xl backdrop-blur-2xl bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_20px_60px_rgba(0,0,0,0.4)] p-10">
+      <div className="rounded-3xl backdrop-blur-2xl bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_20px_60px_rgba(0,0,0,0.4)] p-6 md:p-10 mb-20">
         {/* Top - Blend Info */}
         <div className="mb-8 pb-8 border-b border-white/[0.08]">
           <div className="text-[10px] uppercase tracking-[0.25em] text-white/30 mb-3 font-medium">
             Committed Blend
           </div>
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-3xl font-light text-white/95">{blend.name}</h2>
+          <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-2">
+            <h2 className="text-2xl md:text-3xl font-light text-white/95">{blend.name}</h2>
             <div className="text-sm text-[#D4AF37]/80 font-light">
               {blend.confidenceRange}
             </div>
@@ -91,11 +91,11 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
             Configure Batch
           </div>
 
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Size Selector */}
-            <div>
-              <div className="text-xs text-white/50 mb-3 font-light">Pre-roll Size</div>
-              <div className="flex gap-2">
+            <div className="space-y-4">
+              <div className="text-xs text-white/50 font-light">Pre-roll Size</div>
+              <div className="flex flex-wrap gap-2">
                 {[0.35, 0.5, 1.0, 'custom'].map((size) => {
                   const isActive = size === 'custom' ? isCustom : !isCustom && preRollSize === size;
                   return (

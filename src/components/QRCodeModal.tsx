@@ -60,6 +60,7 @@ export function QRCodeModal({ isOpen, onClose, blend }: QRCodeModalProps) {
                     </div>
 
                     {/* Caption */}
+                    <h3 className="text-sm uppercase tracking-[0.3em] text-white/60 font-light">GO LINE™</h3>
                     <h3 className="text-white font-light text-lg mb-2">Scan to view strain math</h3>
                     <p className="text-white/40 text-xs uppercase tracking-widest font-medium">Verified Blend</p>
 

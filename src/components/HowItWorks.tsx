@@ -39,7 +39,7 @@ export function HowItWorks({ onClose }: HowItWorksProps) {
           <div className="space-y-8">
             <div>
               <h2 className="text-3xl font-light text-white/95 mb-4 tracking-tight">
-                How GO LINE Works
+                How GO LINE™ Works
               </h2>
               <p className="text-base text-white/50 font-light leading-relaxed">
                 A guided outcome calculator that helps you find the right blend for your needs
@@ -67,7 +67,7 @@ export function HowItWorks({ onClose }: HowItWorksProps) {
                 <div>
                   <h3 className="text-lg text-white/90 font-light mb-2">Get multiple options</h3>
                   <p className="text-sm text-white/50 font-light leading-relaxed">
-                    You'll always receive multiple valid interpretations of your request, not a single "correct" answer. 
+                    You'll always receive multiple valid interpretations of your request, not a single "correct" answer.
                     Browse and choose what resonates.
                   </p>
                 </div>
@@ -80,7 +80,7 @@ export function HowItWorks({ onClose }: HowItWorksProps) {
                 <div>
                   <h3 className="text-lg text-white/90 font-light mb-2">Precision blending</h3>
                   <p className="text-sm text-white/50 font-light leading-relaxed">
-                    Every recommendation is grounded in real lab-tested data from the available inventory. 
+                    Every recommendation is grounded in real lab-tested data from the available inventory.
                     You'll see exact gram ratios for each blend.
                   </p>
                 </div>
