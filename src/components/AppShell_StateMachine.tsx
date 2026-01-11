@@ -522,15 +522,80 @@ export function AppShell_StateMachine() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center gap-6">
-                    <button
-                      onClick={() => startBlendSequence({ type: 'user', text: "I want to feel relaxed and creative" })}
-                      className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
-                    >
-                      <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
-                    </button>
-                    <p className="text-white/40 text-xs uppercase tracking-widest">Tap to Analyze</p>
-                  </div>
+                  animationState === 'STATE_0_IDLE' ? (
+                    <div className="w-full max-w-[380px] px-6 flex flex-col gap-5">
+                      <h2 className="text-center text-sm font-medium text-white/60 leading-relaxed">
+                        Describe the outcome you're looking for
+                      </h2>
+
+                      <input
+                        type="text"
+                        placeholder="Type your desired outcome..."
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/10 
+                                   text-sm text-white/80 placeholder:text-white/20
+                                   focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
+                                   transition-all duration-300"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const value = (e.target as HTMLInputElement).value;
+                            if (value.trim()) {
+                              startBlendSequence({ type: 'user', text: value });
+                            }
+                          }
+                        }}
+                      />
+
+                      <button
+                        onClick={() => {
+                          const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                          if (!Recognition) return;
+                          const recognition = new Recognition();
+                          recognition.lang = 'en-US';
+                          recognition.onresult = (event: any) => {
+                            const transcript = event.results[0][0].transcript;
+                            setTranscribedText(transcript);
+                            startBlendSequence({ type: 'user', text: transcript });
+                          };
+                          recognition.start();
+                        }}
+                        className="w-full flex items-center justify-center gap-3 px-4 py-3 
+                                   bg-[#D4AF37]/5 hover:bg-[#D4AF37]/10 border border-[#D4AF37]/10 
+                                   hover:border-[#D4AF37]/30 rounded-xl transition-all duration-300"
+                      >
+                        <span className="text-2xl">🎤</span>
+                        <span className="text-xs uppercase tracking-widest text-[#D4AF37]/60">
+                          Voice Input
+                        </span>
+                      </button>
+
+                      <div className="space-y-2">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium text-center">
+                          Quick Presets
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {['Relaxed & Alert', 'Pain Relief', 'Focus & Creative', 'Sleep Aid'].map((preset) => (
+                            <button
+                              key={preset}
+                              onClick={() => startBlendSequence({ type: 'user', text: preset })}
+                              className="px-3 py-2.5 text-xs text-white/60 hover:text-white/90 
+                                         bg-white/[0.02] hover:bg-white/[0.06] backdrop-blur-2xl
+                                         rounded-xl transition-all duration-200
+                                         border border-white/5 hover:border-white/10"
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-6">
+                      <div className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)]">
+                        <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
+                      </div>
+                      <p className="text-white/40 text-xs uppercase tracking-widest">Analyzing...</p>
+                    </div>
+                  )
                 )}
               </div>
             </div>
