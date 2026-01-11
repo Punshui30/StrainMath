@@ -241,14 +241,6 @@ export function AppShell_StateMachine() {
 
   }, [animationState, selectedBlendId, inventory]);
 
-  // Auto-open explanation when results first appear
-  useEffect(() => {
-    if (animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && visibleBlends.length > 0 && !showExplanation && !committedBlend) {
-      // Auto-open explanation on first results render
-      setShowExplanation(true);
-    }
-  }, [animationState, visibleBlends.length, showExplanation, committedBlend]);
-
   // Demo Lifecycle Loop
   useEffect(() => {
     if (!isDemoRunning) return;
@@ -574,6 +566,15 @@ export function AppShell_StateMachine() {
                       >
                         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                         <span className="relative z-10">Make This Blend</span>
+                      </button>
+
+                      {/* Why This Blend - Opt-in */}
+                      <button
+                        onClick={() => setShowExplanation(true)}
+                        className="px-6 py-3 text-sm text-white/60 hover:text-white/90 underline underline-offset-4
+                                   transition-all duration-200"
+                      >
+                        Why this blend?
                       </button>
                     </div>
                   </div>
