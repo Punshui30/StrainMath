@@ -1,7 +1,7 @@
 import { Mic, Keyboard } from 'lucide-react';
 
 interface PromptsSidebarProps {
-  onPromptSelect: () => void;
+  onPromptSelect: (text: string) => void;
   onTextSubmit?: (text: string) => void;
   onVoiceActivate?: () => void;
 }
@@ -70,7 +70,7 @@ export function PromptsSidebar({
         {prompts.map((prompt) => (
           <button
             key={prompt}
-            onClick={onPromptSelect}
+            onClick={() => onPromptSelect(prompt)}
             className="w-full text-left px-5 py-4 text-sm text-white/60 hover:text-white/90 
                        bg-white/[0.02] hover:bg-white/[0.06] backdrop-blur-2xl
                        rounded-xl transition-all duration-200 ease-out

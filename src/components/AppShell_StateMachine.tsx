@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { ProcessorStateMachine } from './GoLogo/ProcessorStateMachine';
@@ -31,12 +31,25 @@ type AppMode = 'voice' | 'operator' | 'business';
 export function AppShell_StateMachine() {
   const [ageVerified, setAgeVerified] = useState(false);
   const [userTypeSelected, setUserTypeSelected] = useState(false);
-  const [onboardingComplete, setOnboardingComplete] = useState(() => {
-    return localStorage.getItem('hasOnboarded') === 'true';
-  });
+  /* 
+   * [FLIGHT CHECK] Fix 1: Do NOT read onboardingComplete on app init 
+   * logic: User must explicitly choose First Time or Returning in session
+   */
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
   const [animationState, setAnimationState] = useState<AnimationState>('STATE_0_IDLE');
   const [mode, setMode] = useState<AppMode>('voice');
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+
+  // Reset onboarding via URL query param (e.g., ?resetOnboarding=true)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('resetOnboarding') === 'true') {
+      localStorage.removeItem('hasOnboarded');
+      setOnboardingComplete(false);
+      setUserTypeSelected(false);
+      console.log('Onboarding reset via query param');
+    }
+  }, []);
   const [selectedBlendId, setSelectedBlendId] = useState(1);
   const [committedBlend, setCommittedBlend] = useState<any | null>(null);
 
@@ -294,6 +307,17 @@ export function AppShell_StateMachine() {
           >
             {mode === 'operator' ? 'Exit Console' : 'Console'}
           </button>
+
+          {/* [FLIGHT CHECK] Dev Reset Button */}
+          <button
+            onClick={() => {
+              localStorage.removeItem('hasOnboarded');
+              window.location.reload();
+            }}
+            className="text-[10px] uppercase tracking-wider text-red-500/40 hover:text-red-500/80 transition-colors"
+          >
+            RESET
+          </button>
         </div>
       </div>
 
@@ -305,7 +329,7 @@ export function AppShell_StateMachine() {
             <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
               } overflow-hidden`}>
               <PromptsSidebar
-                onPromptSelect={() => startBlendSequence()}
+                onPromptSelect={(text) => startBlendSequence(text)}
                 onTextSubmit={(text) => startBlendSequence(text)}
                 onVoiceActivate={() => {
                   console.log("🎤 Voice activation triggered");
@@ -395,6 +419,16 @@ export function AppShell_StateMachine() {
                           Make This Blend
                         </button>
                       </div>
+
+                      {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
+                      <div className="mt-4 flex justify-center">
+                        <button
+                          onClick={() => startBlendSequence('Refresh blends')}
+                          className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
+                        >
+                          ↻ Refresh Blends
+                        </button>
+                      </div>
                     </div>
                   )}
                 </>
@@ -420,7 +454,8 @@ export function AppShell_StateMachine() {
       </AnimatePresence>
 
       {/* STATE 2: Lifting Cards (Sequential) */}
-      {animationState === 'STATE_2_INGREDIENT_LIFT' &&
+      {
+        animationState === 'STATE_2_INGREDIENT_LIFT' &&
         currentLiftingIndex >= 0 &&
         currentLiftingIndex < ingredientCards.length &&
         liftingCardPositions[currentLiftingIndex] && (
@@ -432,29 +467,34 @@ export function AppShell_StateMachine() {
             isLifting={true}
             onArrival={handleCardArrival}
           />
-        )}
+        )
+      }
 
       {/* Floating Why Panel */}
-      {animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
-        const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-        return (
-          <WhyPanel
-            confidence={currentIntent ? "98.4" : "92.1"}
-            explanation={generateExplanation(lastUserText, currentIntent, selectedBlend)}
-            intent={currentIntent}
-            userText={lastUserText}
-            isVisible={true}
-          />
-        );
-      })()}
+      {
+        animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
+          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+          return (
+            <WhyPanel
+              confidence={currentIntent ? "98.4" : "92.1"}
+              explanation={generateExplanation(lastUserText, currentIntent, selectedBlend)}
+              intent={currentIntent}
+              userText={lastUserText}
+              isVisible={true}
+            />
+          );
+        })()
+      }
 
       {/* Inventory Tray */}
-      {mode === 'voice' && !committedBlend && (
-        <ScrollContainer
-          ref={inventoryRef}
-          highlightedStrains={highlightedStrains}
-        />
-      )}
-    </div>
+      {
+        mode === 'voice' && !committedBlend && (
+          <ScrollContainer
+            ref={inventoryRef}
+            highlightedStrains={highlightedStrains}
+          />
+        )
+      }
+    </div >
   );
 }
