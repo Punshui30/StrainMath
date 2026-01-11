@@ -14,6 +14,7 @@ import { AgeGateOverlay } from './AgeGateOverlay';
 import { UserTypeGate } from './UserTypeGate';
 import { OnboardingScreen } from './OnboardingScreen';
 import { AmbientBackground } from './AmbientBackground';
+import { QRCodeModal } from './QRCodeModal';
 import logoImage from '../assets/logo.png';
 import { MOCK_COAS } from '../../data/mockCoas';
 import { scoreStrain, assembleBlends, type IntentVectors } from '../engine/scoring';
