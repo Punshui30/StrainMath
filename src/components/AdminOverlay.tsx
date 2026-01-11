@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { CameraScanner } from './CameraScanner';
 import logoImage from '../assets/logo.png';
 
 interface AdminOverlayProps {
@@ -6,6 +9,8 @@ interface AdminOverlayProps {
 }
 
 export function AdminOverlay({ onShowBusinessOverview }: AdminOverlayProps) {
+  const [isScanning, setIsScanning] = useState(false);
+
   const inventory = [
     { strain: 'Green Crack', qty: 245, status: 'In Stock' },
     { strain: 'Durban Poison', qty: 180, status: 'In Stock' },
@@ -15,7 +20,13 @@ export function AdminOverlay({ onShowBusinessOverview }: AdminOverlayProps) {
   ];
 
   return (
-    <div className="w-full h-full bg-[#0A0A0B] overflow-y-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="w-full h-full bg-[#0A0A0B] overflow-y-auto"
+    >
       <div className="max-w-7xl mx-auto p-8">
         {/* Header with Business Overview link */}
         <div className="mb-6 pb-4 border-b border-white/10 flex items-center justify-between">
@@ -79,7 +90,10 @@ export function AdminOverlay({ onShowBusinessOverview }: AdminOverlayProps) {
             <div className="flex items-center justify-between mb-6">
               <div className="text-xs uppercase tracking-widest text-white/40">Inventory</div>
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sm text-white/80 hover:text-white transition-all">
+                <button
+                  onClick={() => setIsScanning(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sm text-white/80 hover:text-white transition-all"
+                >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60">
                     <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
                     <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
@@ -154,6 +168,18 @@ export function AdminOverlay({ onShowBusinessOverview }: AdminOverlayProps) {
           </div>
         </div>
       </div>
-    </div>
+
+      <AnimatePresence>
+        {isScanning && (
+          <CameraScanner
+            onClose={() => setIsScanning(false)}
+            onCapture={(data) => {
+              console.log("Captured COA Image data length:", data.length);
+              setIsScanning(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

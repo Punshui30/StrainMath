@@ -59,11 +59,8 @@ export function AppShell_StateMachine() {
   const [lastUserText, setLastUserText] = useState("");
   const [transcribedText, setTranscribedText] = useState("");
   // Initialize with top 3 strains based on a neutral intent
-  const [visibleBlends, setVisibleBlends] = useState<BlendRecommendation[]>(() => {
-    const neutral: IntentVectors = { relaxation: 0.5, focus: 0.5, energy: 0.5, creativity: 0.5, pain_relief: 0.5, anti_anxiety: 0.5 };
-    const scored = MOCK_COAS.map(coa => scoreStrain(coa, neutral));
-    return assembleBlends(scored);
-  });
+  // Initialize empty - waiting for user intent
+  const [visibleBlends, setVisibleBlends] = useState<BlendRecommendation[]>([]);
 
   // STATE 2 tracking
   const [ingredientCards, setIngredientCards] = useState<IngredientCard[]>([]);
@@ -390,9 +387,9 @@ export function AppShell_StateMachine() {
                       )}
                   </div>
 
-                  {/* Blend Result Cards - Always show when blends exist */}
-                  {visibleBlends.length > 0 && (
-                    <div className="flex-shrink-0 pb-8 px-12">
+                  {/* Blend Result Cards - Show only when animation completes */}
+                  {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                    <div className="flex-shrink-0 pb-8 px-12 relative z-50">
                       <div className="flex flex-col items-center w-full">
                         <div className="flex gap-6 justify-center mb-12">
                           {visibleBlends.map((blend, index) => (
@@ -409,14 +406,16 @@ export function AppShell_StateMachine() {
                         {/* Make Blend Button - Always visible */}
                         <button
                           onClick={handleMakeBlend}
-                          className="px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
-                                   backdrop-blur-2xl rounded-2xl
+                          className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
+                                   backdrop-blur-2xl rounded-2xl overflow-hidden
                                    shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
-                                   hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.5),0_8px_32px_rgba(212,175,55,0.2)]
+                                   hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
                                    text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
-                                   transition-all duration-200 ease-out"
+                                   transition-all duration-300 ease-out
+                                   hover:scale-[1.02] active:scale-[0.98]"
                         >
-                          Make This Blend
+                          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                          <span className="relative z-10">Make This Blend</span>
                         </button>
                       </div>
 
