@@ -298,28 +298,20 @@ export function AppShell_StateMachine() {
     startBlendSequence(undefined, intent);
   };
 
-  setUserTypeSelected(true);
-  setOnboardingComplete(true); // Skip Onboarding
-  setMode('voice');
-}}
-onEnterOperator = {() => {
-  setAgeVerified(true);
-  setUserTypeSelected(true);
-  setOnboardingComplete(true);
-  setMode('operator');
-}}
+  if (!userTypeSelected) {
+    return (
+      <UserTypeGate
+        onFirstTime={() => setUserTypeSelected(true)}
+        onReturning={() => {
+          setUserTypeSelected(true);
+          setOnboardingComplete(true); // Skip onboarding
+        }}
       />
     );
   }
 
-if (!userTypeSelected) {
-  return (
-    <UserTypeGate
-      onFirstTime={() => setUserTypeSelected(true)}
-      onReturning={() => {
-        setUserTypeSelected(true);
-        setOnboardingComplete(true); // Skip onboarding
-      }}
+  setOnboardingComplete(true); // Skip onboarding
+}}
     />
   );
 }
@@ -330,6 +322,7 @@ if (!onboardingComplete) {
       onComplete={() => {
         localStorage.setItem('hasOnboarded', 'true');
         setOnboardingComplete(true);
+        setUserTypeSelected(true);
       }}
     />
   );
