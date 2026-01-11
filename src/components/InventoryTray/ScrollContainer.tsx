@@ -162,6 +162,8 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-x',
             }}
           >
             {inventoryItems.map((item) => (
