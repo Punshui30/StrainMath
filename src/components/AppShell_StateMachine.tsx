@@ -147,12 +147,12 @@ export function AppShell_StateMachine() {
       }
     }
 
-    // [CRITICAL FIX] Safe Access
-    const blend = visibleBlends.find(b => b.id === selectedId) || visibleBlends[0] || (userInput ? null : visibleBlends[0]);
+    // [CRITICAL FIX] Safe Access - using local variable to prevent race condition
+    const blend = activeBlends.find(b => b.id === selectedId) || activeBlends[0] || (userInput ? null : activeBlends[0]);
 
     // If we're processing new input but failed to get a blend, abort sequence
     if (!blend || !blend.components) {
-      console.error("❌ No valid blend found to animate");
+      console.error("❌ No valid blend found to animate in active set", activeBlends);
       return;
     }
 
