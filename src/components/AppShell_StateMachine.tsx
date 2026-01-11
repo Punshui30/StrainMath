@@ -11,6 +11,7 @@ import { PromptsSidebar } from './PromptsSidebar';
 import { BusinessOverview } from './BusinessOverview';
 import { AdminOverlay } from './AdminOverlay';
 import { HowItWorks } from './HowItWorks';
+import { BusinessImpactScreen } from './BusinessImpactScreen';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { AgeGateOverlay } from './AgeGateOverlay';
 import { OnboardingScreen } from './OnboardingScreen';
@@ -89,6 +90,9 @@ export function AppShell_StateMachine() {
     similarityScore: "High" | "Medium" | "Low";
     explanation: string;
   } | null>(null);
+
+  const [showBusinessImpact, setShowBusinessImpact] = useState(false);
+  const [showBusinessOverview, setShowBusinessOverview] = useState(false);
 
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
@@ -315,6 +319,7 @@ export function AppShell_StateMachine() {
         setDemoStep(prev => prev + 1);
       } else {
         setIsDemoRunning(false); // End demo
+        setShowBusinessImpact(true); // Show impact screen after walkthrough
       }
     }, 6000); // Step Duration
 
@@ -587,13 +592,34 @@ export function AppShell_StateMachine() {
                       <div className="space-y-4">
                         <div className="space-y-1.5">
                           <label className="text-[9px] uppercase tracking-[0.2em] text-white/30 ml-1 font-medium">Remembered Strain</label>
-                          <input
-                            type="text"
-                            value={mobileStrainName}
-                            onChange={(e) => setMobileStrainName(e.target.value)}
-                            placeholder='e.g. "White Gummy by Don Murpho"'
-                            className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white/80 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none transition-all duration-300"
-                          />
+                          <div className="relative group">
+                            <input
+                              type="text"
+                              value={mobileStrainName}
+                              onChange={(e) => setMobileStrainName(e.target.value)}
+                              placeholder='e.g. "White Gummy by Don Murpho"'
+                              className="w-full px-4 py-4 pr-12 rounded-xl bg-white/[0.03] border border-white/10 
+                                         text-sm text-white/80 placeholder:text-white/20
+                                         focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
+                                         transition-all duration-300"
+                            />
+                            <button
+                              onClick={() => {
+                                const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                                if (!Recognition) return;
+                                const recognition = new Recognition();
+                                recognition.lang = 'en-US';
+                                recognition.onresult = (event: any) => {
+                                  const transcript = event.results[0][0].transcript;
+                                  setMobileStrainName(transcript);
+                                };
+                                recognition.start();
+                              }}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-[#D4AF37]/10 rounded-full transition-colors"
+                            >
+                              <span className="text-lg opacity-60">🎤</span>
+                            </button>
+                          </div>
                         </div>
 
                         <div className="space-y-1.5">
@@ -770,8 +796,40 @@ export function AppShell_StateMachine() {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Modals & Overlays */}
       {showHowItWorks && <HowItWorks isOpen={showHowItWorks} onClose={() => setShowHowItWorks(false)} />}
+
+      {mode === 'operator' && (
+        <AdminOverlay
+          isDemoRunning={isDemoRunning}
+          demoStep={demoStep}
+          onStartDemo={() => setIsDemoRunning(true)}
+          onStopDemo={() => setIsDemoRunning(false)}
+          inventory={inventory}
+          onUpdateInventory={setInventory}
+          onPresetSelect={handlePresetSelect}
+          onShowBusinessOverview={() => setShowBusinessOverview(true)}
+        />
+      )}
+
+      {showBusinessOverview && (
+        <div className="fixed inset-0 z-[100]">
+          <BusinessOverview onClose={() => setShowBusinessOverview(false)} />
+        </div>
+      )}
+
+      {showBusinessImpact && (
+        <BusinessImpactScreen
+          onRestart={() => {
+            setShowBusinessImpact(false);
+            setDemoStep(0);
+            setIsDemoRunning(true);
+          }}
+          onSchedule={() => {
+            window.open('https://calendly.com/golinesystems', '_blank');
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -38,11 +38,16 @@ export default async function handler(
                     
 Goal: Create a "Reference Shadow Profile" for a remembered strain to approximate its experience.
 
-Constraint: 
-1. Treat this as PROBABILISTIC and DIRECTIONAL.
-2. Translate the strain's known public profile + user's remembered effects into normalized target vectors (0-1).
-3. Provide a Similarity Score (High, Medium, or Low) based on how well-defined the strain is.
-4. Provide a Match Explanation explaining the translation (e.g., "Matched based on terpene dominance", "Adjusted for effect arc").
+INPUT WEIGHTING (CRITICAL):
+1. PRIMARY DRIVER: The "Strain I remember" (+ Brand if provided) is the absolute reference point. Use its known chemical pedigree, public terpene data, and lineage as the base.
+2. SECONDARY MODIFIER: The "What I loved about it" field should only be used to nudge or refine the profile, NOT replace it.
+3. TRANSLATION: Map the resulting profile into our 6 normalized effect vectors (0-1).
+
+RULES:
+- If you recognize the strain: Base the intent on its known genetics + user's refinements.
+- If you DO NOT recognize the strain: Use the user's "loved effects" but label the Similarity Score as "Low".
+- If the strain is known but the user's effects conflict (e.g., they say a heavy Indica made them energized): Nudge towards the user's experience but keep the core strain identity as the base.
+- NEVER ignore the strain name.
 
 Axes: relaxation, focus, energy, creativity, pain_relief, anti_anxiety.
 
@@ -58,7 +63,7 @@ Schema:
     "pain_relief": number,
     "anti_anxiety": number
   },
-  "explanation": string,
+  "explanation": "Briefly explain the lookup logic (e.g., 'Identified as a high-myrcene profile with user-requested focus refinements')",
   "similarityScore": "High" | "Medium" | "Low"
 }`,
                 },

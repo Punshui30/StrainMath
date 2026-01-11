@@ -77,16 +77,34 @@ export function PromptsSidebar({
           <div className="space-y-3">
             <div className="space-y-1.5">
               <label className="text-[9px] uppercase tracking-widest text-white/30 ml-1">The Strain You Remember</label>
-              <input
-                type="text"
-                value={strainName}
-                onChange={(e) => setStrainName(e.target.value)}
-                placeholder='e.g. "White Gummy by Don Murpho"'
-                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 
-                           text-xs text-white/80 placeholder:text-white/20
-                           focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
-                           transition-all duration-300"
-              />
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={strainName}
+                  onChange={(e) => setStrainName(e.target.value)}
+                  placeholder='e.g. "White Gummy by Don Murpho"'
+                  className="w-full px-4 py-2.5 pr-10 rounded-xl bg-white/[0.03] border border-white/10 
+                             text-xs text-white/80 placeholder:text-white/20
+                             focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
+                             transition-all duration-300"
+                />
+                <button
+                  onClick={() => {
+                    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                    if (!Recognition) return;
+                    const recognition = new Recognition();
+                    recognition.lang = 'en-US';
+                    recognition.onresult = (event: any) => {
+                      const transcript = event.results[0][0].transcript;
+                      setStrainName(transcript);
+                    };
+                    recognition.start();
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-[#D4AF37]/10 rounded-full transition-colors group"
+                >
+                  <Mic className="w-3 h-3 text-white/20 group-hover:text-[#D4AF37]/60" />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1.5">
