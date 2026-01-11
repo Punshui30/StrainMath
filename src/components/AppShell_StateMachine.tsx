@@ -70,9 +70,15 @@ export function AppShell_StateMachine() {
   }, []);
 
   // [ENTRY CONVERGENCE] Ensure all entry paths converge to STATE_0_IDLE
+  // and explicitly trigger UI bootstrap
   useEffect(() => {
-    if (onboardingComplete && userTypeSelected && animationState !== 'STATE_0_IDLE') {
-      setAnimationState('STATE_0_IDLE');
+    if (onboardingComplete && userTypeSelected) {
+      if (animationState !== 'STATE_0_IDLE') {
+        setAnimationState('STATE_0_IDLE');
+      }
+      // Explicitly trigger UI bootstrap (tiles + fly-in) after entry
+      // This ensures animations appear regardless of entry path
+      window.dispatchEvent(new Event('strain-math:trigger-fly-in'));
     }
   }, [onboardingComplete, userTypeSelected, animationState]);
   const [selectedBlendId, setSelectedBlendId] = useState(1);
