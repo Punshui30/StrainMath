@@ -211,7 +211,7 @@ export function AppShell_StateMachine() {
           <img
             src={logoImage}
             alt="GO LINE"
-            className="w-10 h-auto"
+            className="w-12 h-auto"
             style={{
               filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
             }}
@@ -249,7 +249,7 @@ export function AppShell_StateMachine() {
             </div>
 
             {/* Center Content */}
-            <div className="flex-1 flex flex-col" style={{ paddingBottom: '40px' }}>
+            <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
               {committedBlend ? (
                 /* Committed State - Blend Calculator */
                 <div className="flex-1 flex items-center justify-center">

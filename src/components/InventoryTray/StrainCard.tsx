@@ -1,6 +1,8 @@
-import { motion } from 'motion/react';
-import { forwardRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useState, forwardRef } from 'react';
+import { X } from 'lucide-react';
 import { getStrainColor, getStrainGlow } from '../../utils/strainColors';
+import type { MockCOA } from '../../../data/mockCoas';
 
 interface StrainCardProps {
   strain: string;
@@ -13,6 +15,7 @@ interface StrainCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onClick?: () => void;
+  coa?: MockCOA;
 }
 
 /**
@@ -33,7 +36,9 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
   onMouseEnter,
   onMouseLeave,
   onClick,
+  coa,
 }, ref) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const accentColor = getStrainColor(strain);
   const accentGlow = getStrainGlow(strain, 0.6);
 
@@ -43,7 +48,10 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
       type="button"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={onClick}
+      onClick={() => {
+        setIsExpanded(true);
+        onClick?.();
+      }}
       className="flex-shrink-0 relative"
       style={{
         width: '190px',
@@ -147,6 +155,85 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
           />
         )}
       </div>
+
+      {/* Expanded Detail Overlay */}
+      <AnimatePresence>
+        {isExpanded && coa && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-lg bg-[#1C2023]/90 border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+              style={{
+                boxShadow: `0 0 40px ${accentGlow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+              }}
+            >
+              {/* Header */}
+              <div className="p-8 pb-4 flex justify-between items-start">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] font-medium mb-2"
+                    style={{ color: accentColor }}>
+                    {category} Full Profile
+                  </div>
+                  <h3 className="text-3xl font-light text-white tracking-tight">
+                    {strain}
+                  </h3>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded(false);
+                  }}
+                  className="p-2 rounded-full hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-6 h-6 text-white/40" />
+                </button>
+              </div>
+
+              {/* Stats Row */}
+              <div className="px-8 flex gap-8 mb-8">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-white/30 mb-1">THC</span>
+                  <span className="text-xl font-medium text-white/90">{coa.cannabinoids.thc}%</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-white/30 mb-1">CBD</span>
+                  <span className="text-xl font-medium text-white/90">{coa.cannabinoids.cbd}%</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-white/30 mb-1">Total Terpenes</span>
+                  <span className="text-xl font-medium text-white/90">{coa.totalTerpenes}%</span>
+                </div>
+              </div>
+
+              {/* Terpenes List */}
+              <div className="px-8 pb-8">
+                <div className="text-[10px] uppercase tracking-widest text-white/30 mb-4 font-medium border-b border-white/5 pb-2">
+                  Complete Terpene Analysis
+                </div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                  {coa.terpenes.map((terp: { name: string; percentage: number }, idx: number) => (
+                    <div key={idx} className="flex justify-between items-center group">
+                      <span className="text-sm font-light text-white/60 group-hover:text-white/80 transition-colors">
+                        {terp.name}
+                      </span>
+                      <span className="text-sm font-medium text-white/90">
+                        {terp.percentage}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Accents */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-full h-1" style={{ background: accentColor }} />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.button>
   );
 });

@@ -22,7 +22,8 @@ const inventoryItems = MOCK_COAS.map((item, index) => {
     id: index + 1,
     strain: name,
     category: getCategory(name),
-    descriptor: dominantTerp ? `${dominantTerp.name} ${dominantTerp.percentage}%` : 'Balanced profile'
+    descriptor: dominantTerp ? `${dominantTerp.name} ${dominantTerp.percentage}%` : 'Balanced profile',
+    coa: item
   };
 });
 
@@ -134,6 +135,13 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
 
         {/* Inventory Rail Container */}
         <div className="relative h-full px-6 pt-4 pb-4 flex items-center">
+          {/* Live Menu Label */}
+          <div className="absolute top-2 left-6 pointer-events-none z-20">
+            <span className="text-[9px] uppercase tracking-[0.4em] text-white/20 font-bold">
+              LIVE MENU
+            </span>
+          </div>
+
           {/* Left fade mask */}
           <div
             className="absolute left-0 top-0 bottom-0 w-8 pointer-events-none z-10"
@@ -164,6 +172,7 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
                 onMouseEnter={() => handleMouseEnter(item.strain)}
                 onMouseLeave={handleMouseLeave}
                 onClick={() => onStrainSelect?.(item.strain)}
+                coa={item.coa}
                 ref={(el) => {
                   if (el) {
                     cardRefs.current.set(item.strain, el);
