@@ -2,11 +2,12 @@ import { useState } from 'react';
 import logoImage from '../assets/logo.png';
 
 interface AgeGateOverlayProps {
-  onEnterConsumer: () => void;
+  onEnterNewUser: () => void;
+  onEnterReturningUser: () => void;
   onEnterOperator: () => void;
 }
 
-export function AgeGateOverlay({ onEnterConsumer, onEnterOperator }: AgeGateOverlayProps) {
+export function AgeGateOverlay({ onEnterNewUser, onEnterReturningUser, onEnterOperator }: AgeGateOverlayProps) {
   const [hasVerifiedAge, setHasVerifiedAge] = useState(false);
 
   return (
@@ -38,7 +39,7 @@ export function AgeGateOverlay({ onEnterConsumer, onEnterOperator }: AgeGateOver
                          text-white/80 hover:text-white text-sm uppercase tracking-wider font-medium
                          transition-all duration-200"
             >
-              Verify Age
+              I'm of Age
             </button>
 
             <button
@@ -49,24 +50,34 @@ export function AgeGateOverlay({ onEnterConsumer, onEnterOperator }: AgeGateOver
             </button>
           </div>
         ) : (
-          /* Step 2: Role Selection (Explicit Routing) */
-          <div className="w-full flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-forwards">
+          /* Step 2: Role Selection (3-Way Split) */
+          <div className="w-full flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-forwards">
             <button
-              onClick={onEnterConsumer}
-              className="w-full py-5 bg-white/[0.06] hover:bg-white/[0.10]
-                         border border-white/5 rounded-xl
-                         text-white/90 text-sm uppercase tracking-wider font-medium
-                         transition-all hover:border-white/20"
+              onClick={onEnterNewUser}
+              className="w-full py-4 bg-white/[0.08] hover:bg-white/[0.12]
+                         border border-white/10 rounded-xl
+                         text-white/95 text-sm uppercase tracking-wider font-medium
+                         transition-all"
             >
-              Return User
+              New User
+            </button>
+
+            <button
+              onClick={onEnterReturningUser}
+              className="w-full py-4 bg-white/[0.04] hover:bg-white/[0.08]
+                         border border-white/5 rounded-xl
+                         text-white/80 hover:text-white text-sm uppercase tracking-wider font-medium
+                         transition-all"
+            >
+              Returning User
             </button>
 
             <button
               onClick={onEnterOperator}
-              className="w-full py-5 bg-transparent hover:bg-white/[0.03]
-                         border border-white/10 rounded-xl
-                         text-[#D4AF37]/80 hover:text-[#D4AF37] text-sm uppercase tracking-wider font-medium
-                         transition-all hover:border-[#D4AF37]/30"
+              className="w-full py-4 bg-transparent hover:bg-white/[0.03]
+                         border border-white/5 rounded-xl
+                         text-[#D4AF37]/60 hover:text-[#D4AF37] text-sm uppercase tracking-wider font-medium
+                         transition-all hover:border-[#D4AF37]/20 mt-2"
             >
               Operator Console
             </button>

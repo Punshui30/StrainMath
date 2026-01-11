@@ -279,10 +279,16 @@ export function AppShell_StateMachine() {
   if (!ageVerified) {
     return (
       <AgeGateOverlay
-        onEnterConsumer={() => {
+        onEnterNewUser={() => {
           setAgeVerified(true);
           setUserTypeSelected(true);
-          setOnboardingComplete(true);
+          setOnboardingComplete(false); // Trigger Onboarding
+          setMode('voice');
+        }}
+        onEnterReturningUser={() => {
+          setAgeVerified(true);
+          setUserTypeSelected(true);
+          setOnboardingComplete(true); // Skip Onboarding
           setMode('voice');
         }}
         onEnterOperator={() => {
