@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import type { BlendRecommendation } from '../types/blend';
 import { getStrainColor } from '../utils/strainColors';
+import { ShareActions } from './ShareActions';
 
 interface BlendCalculatorProps {
   blend: BlendRecommendation;
@@ -257,6 +258,11 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
         >
           Print Label
         </button>
+      </div>
+
+      {/* Share Actions */}
+      <div className="mt-6">
+        <ShareActions blend={blend} />
       </div>
     </div>
   );

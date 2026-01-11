@@ -21,6 +21,7 @@ import { getStrainColor } from '../utils/strainColors';
 import type { AnimationState, IngredientCard } from '../types/animationStates';
 import { ANIMATION_TIMINGS } from '../types/animationStates';
 import type { BlendRecommendation } from '../types/blend';
+import { generateExplanation } from '../utils/explanationGenerator';
 
 type AppMode = 'voice' | 'operator' | 'business';
 
@@ -434,18 +435,18 @@ export function AppShell_StateMachine() {
         )}
 
       {/* Floating Why Panel */}
-      {animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (
-        <WhyPanel
-          confidence={currentIntent ? "98.4" : "92.1"}
-          explanation={currentIntent
-            ? `Based on your request "${lastUserText}", we optimized for ${Object.entries(currentIntent).filter(([_, v]: any) => v > 0.5).map(([k]) => k).join(', ')}. This selection prioritizes terpenes that align with your specific goals.`
-            : "This recommendation is driven primarily by myrcene, which provides deep physical relaxation. Caryophyllene acts as a stabilizer, helping to reduce physical tension and anxiety."
-          }
-          intent={currentIntent}
-          userText={lastUserText}
-          isVisible={true}
-        />
-      )}
+      {animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
+        const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+        return (
+          <WhyPanel
+            confidence={currentIntent ? "98.4" : "92.1"}
+            explanation={generateExplanation(lastUserText, currentIntent, selectedBlend)}
+            intent={currentIntent}
+            userText={lastUserText}
+            isVisible={true}
+          />
+        );
+      })()}
 
       {/* Inventory Tray */}
       {mode === 'voice' && !committedBlend && (
