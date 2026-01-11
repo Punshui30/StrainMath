@@ -68,6 +68,13 @@ export function AppShell_StateMachine() {
       console.log('Onboarding reset via query param');
     }
   }, []);
+
+  // [ENTRY CONVERGENCE] Ensure all entry paths converge to STATE_0_IDLE
+  useEffect(() => {
+    if (onboardingComplete && userTypeSelected && animationState !== 'STATE_0_IDLE') {
+      setAnimationState('STATE_0_IDLE');
+    }
+  }, [onboardingComplete, userTypeSelected, animationState]);
   const [selectedBlendId, setSelectedBlendId] = useState(1);
   const [committedBlend, setCommittedBlend] = useState<any | null>(null);
 
