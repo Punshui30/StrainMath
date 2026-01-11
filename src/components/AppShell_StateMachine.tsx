@@ -15,10 +15,12 @@ import { UserTypeGate } from './UserTypeGate';
 import { OnboardingScreen } from './OnboardingScreen';
 import { AmbientBackground } from './AmbientBackground';
 import logoImage from '../assets/logo.png';
-import { blendRecommendations } from '../data/blendRecommendations';
+import { MOCK_COAS } from '../../data/mockCoas';
+import { scoreStrain, assembleBlends, type IntentVectors } from '../engine/scoring';
 import { getStrainColor } from '../utils/strainColors';
 import type { AnimationState, IngredientCard } from '../types/animationStates';
 import { ANIMATION_TIMINGS } from '../types/animationStates';
+import type { BlendRecommendation } from '../types/blend';
 
 type AppMode = 'voice' | 'operator' | 'business';
 
@@ -39,10 +41,15 @@ export function AppShell_StateMachine() {
 
   // LLM States
   const [isInterpreting, setIsInterpreting] = useState(false);
-  const [currentIntent, setCurrentIntent] = useState<any | null>(null);
+  const [currentIntent, setCurrentIntent] = useState<IntentVectors | null>(null);
   const [lastUserText, setLastUserText] = useState("");
   const [transcribedText, setTranscribedText] = useState("");
-  const [visibleBlends, setVisibleBlends] = useState(blendRecommendations.slice(0, 3));
+  // Initialize with top 3 strains based on a neutral intent
+  const [visibleBlends, setVisibleBlends] = useState<BlendRecommendation[]>(() => {
+    const neutral: IntentVectors = { relaxation: 0.5, focus: 0.5, energy: 0.5, creativity: 0.5, pain_relief: 0.5, anti_anxiety: 0.5 };
+    const scored = MOCK_COAS.map(coa => scoreStrain(coa, neutral));
+    return assembleBlends(scored);
+  });
 
   // STATE 2 tracking
   const [ingredientCards, setIngredientCards] = useState<IngredientCard[]>([]);
@@ -95,30 +102,19 @@ export function AppShell_StateMachine() {
       intent = await interpretOutcome(userInput);
 
       if (intent) {
-        // Advanced scoring logic
-        const scored = blendRecommendations.map(blend => {
-          let score = 0;
-          const bTargets = (blend as any).targets || {};
+        // Score across all 60+ strains in MOCK_COAS
+        const scored = MOCK_COAS.map(coa => scoreStrain(coa, intent));
 
-          // Weighted dot product
-          score += (intent.relaxation || 0) * (bTargets.relaxation || 0);
-          score += (intent.focus || 0) * (bTargets.focus || 0);
-          score += (intent.energy || 0) * (bTargets.energy || 0);
-          score += (intent.creativity || 0) * (bTargets.creativity || 0);
-          score += (intent.pain_relief || 0) * (bTargets.pain_relief || 0);
-          score += (intent.anti_anxiety || 0) * (bTargets.anti_anxiety || 0);
+        // Assemble 3 unique blends from top scores
+        const newBlends = assembleBlends(scored);
 
-          return { ...blend, matchScore: score };
-        }).sort((a, b) => b.matchScore - a.matchScore);
-
-        const topBlends = scored.slice(0, 3);
-        setVisibleBlends(topBlends);
-        selectedId = topBlends[0].id;
+        setVisibleBlends(newBlends);
+        selectedId = newBlends[0].id;
         setSelectedBlendId(selectedId);
       }
     }
 
-    const blend = blendRecommendations.find(b => b.id === selectedId) || blendRecommendations[0];
+    const blend = visibleBlends.find(b => b.id === selectedId) || visibleBlends[0];
 
     // Prepare ingredient cards
     const cards: IngredientCard[] = blend.components.map(c => ({
@@ -201,7 +197,7 @@ export function AppShell_StateMachine() {
   };
 
   const handleMakeBlend = () => {
-    const selectedBlend = blendRecommendations.find(b => b.id === selectedBlendId);
+    const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
     if (selectedBlend) {
       setCommittedBlend(selectedBlend);
     }
@@ -212,7 +208,7 @@ export function AppShell_StateMachine() {
   };
 
   const handleSwitchBlendInCalculator = (id: number) => {
-    const newBlend = blendRecommendations.find(b => b.id === id);
+    const newBlend = visibleBlends.find(b => b.id === id);
     if (newBlend) {
       setSelectedBlendId(id);
       setCommittedBlend(newBlend);
@@ -337,7 +333,7 @@ export function AppShell_StateMachine() {
                 <div className="flex-1 flex items-center justify-center">
                   <BlendCalculator
                     blend={committedBlend}
-                    alternateBlends={blendRecommendations}
+                    alternateBlends={visibleBlends}
                     onStartOver={handleReset}
                     onSwitchBlend={handleSwitchBlendInCalculator}
                   />

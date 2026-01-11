@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
-import type { BlendRecommendation } from '../data/blendRecommendations';
+import type { BlendRecommendation } from '../types/blend';
 import { getStrainColor } from '../utils/strainColors';
 
 interface BlendCalculatorProps {
@@ -56,8 +56,8 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
                 type="button"
                 onClick={() => onSwitchBlend(alt.id)}
                 className={`px-5 py-2.5 rounded-xl backdrop-blur-xl transition-all duration-200 text-sm font-light
-                  ${isActive 
-                    ? 'bg-white/[0.12] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4)] text-white/90' 
+                  ${isActive
+                    ? 'bg-white/[0.12] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4)] text-white/90'
                     : 'bg-white/[0.05] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] text-white/50 hover:bg-white/[0.08] hover:text-white/70'
                   }`}
               >
@@ -89,7 +89,7 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
           <div className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-5 font-medium">
             Configure Batch
           </div>
-          
+
           <div className="grid grid-cols-3 gap-8">
             {/* Size Selector */}
             <div>
@@ -186,39 +186,39 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
           <div className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-5 font-medium">
             Exact Measurements
           </div>
-          
+
           <div className="space-y-4 mb-6">
             {blend.components.map((comp) => {
               const grams = calculateGrams(comp.percentage);
               const strainColor = getStrainColor(comp.name);
-              
+
               return (
                 <div key={comp.id} className="flex items-center justify-between group">
                   {/* Left: Role + Strain + Color Indicator */}
                   <div className="flex items-center gap-4">
                     {/* Color Indicator */}
-                    <div 
+                    <div
                       className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ 
+                      style={{
                         backgroundColor: strainColor,
                         boxShadow: `0 0 8px ${strainColor}80`
                       }}
                     />
-                    
+
                     {/* Role Label */}
-                    <div 
+                    <div
                       className="text-[10px] uppercase tracking-[0.15em] font-medium w-24"
                       style={{ color: strainColor }}
                     >
                       {comp.role}
                     </div>
-                    
+
                     {/* Strain Name */}
                     <div className="text-base font-light text-white/90">
                       {comp.name}
                     </div>
                   </div>
-                  
+
                   {/* Right: Gram Amount */}
                   <div className="text-xl font-light text-white/95 tabular-nums">
                     {grams.toFixed(2)}g
@@ -250,7 +250,7 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
         >
           Start Over
         </button>
-        
+
         <button
           type="button"
           className="px-8 py-3 rounded-xl backdrop-blur-xl bg-[#D4AF37]/20 shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3),0_0_30px_rgba(212,175,55,0.15)] text-sm uppercase tracking-wider text-[#D4AF37]/90 hover:bg-[#D4AF37]/30 hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.5),0_0_40px_rgba(212,175,55,0.25)] transition-all duration-300 font-medium"

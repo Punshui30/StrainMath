@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import type { BlendRecommendation } from '../data/blendRecommendations';
+import type { BlendRecommendation } from '../types/blend';
 import { getStrainColor } from '../utils/strainColors';
 
 interface BlendResultCardProps {
@@ -36,10 +36,10 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
       onClick={onSelect}
       className={`relative group w-80 p-8 rounded-3xl backdrop-blur-2xl
                  transition-all duration-200 ease-out
-                 ${isSelected 
-                   ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4),0_16px_48px_rgba(0,0,0,0.5)]' 
-                   : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
-                 }`}
+                 ${isSelected
+          ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4),0_16px_48px_rgba(0,0,0,0.5)]'
+          : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
+        }`}
     >
       {/* Name & Descriptor */}
       <div className="mb-8">
@@ -70,12 +70,12 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
           const strainColor = getStrainColor(component.name);
           const isAnchor = component.role.toLowerCase() === 'anchor';
           const dotColor = isAnchor ? '#D4AF37' : strainColor;
-          
+
           return (
             <div key={component.name} className="flex justify-between items-center text-xs">
               <div className="flex items-center gap-2">
                 {/* Strain-specific color indicator - matches ring segment */}
-                <div 
+                <div
                   className="w-2 h-2 rounded-full"
                   style={{
                     background: dotColor,
@@ -105,7 +105,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
             stroke="rgba(255,255,255,0.05)"
             strokeWidth="8"
           />
-          
+
           {/* Colored segments */}
           {(() => {
             let currentAngle = 0;
@@ -117,9 +117,9 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
               const circumference = 2 * Math.PI * radius;
               const segmentLength = (segmentAngle / 360) * circumference;
               const offset = (currentAngle / 360) * circumference;
-              
+
               currentAngle += segmentAngle;
-              
+
               return (
                 <circle
                   key={component.name}

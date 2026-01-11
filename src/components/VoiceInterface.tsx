@@ -2,8 +2,7 @@ import { motion } from 'motion/react';
 import logoImage from '../assets/logo.png';
 import { CircularVisualization } from './CircularVisualization';
 import { TapToSpeakArrows } from './TapToSpeakArrows';
-import type { BlendRecommendation } from '../data/blendRecommendations';
-import { resolvedVibe } from '../data/blendRecommendations';
+import type { BlendRecommendation } from '../types/blend';
 
 type VoiceState = 'idle' | 'listening' | 'analyzing' | 'resolved' | 'assembling' | 'committed';
 
@@ -217,7 +216,7 @@ export function VoiceInterface({ state, onActivate, selectedBlend }: VoiceInterf
               Vibe Match
             </div>
             <div className="text-xl text-white/75 font-light tracking-wide">
-              {resolvedVibe}
+              {"Relaxed, alert, socially fluid"}
             </div>
           </motion.div>
         )}

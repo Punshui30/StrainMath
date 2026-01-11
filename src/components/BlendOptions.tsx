@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import type { BlendRecommendation } from '../data/blendRecommendations';
+import type { BlendRecommendation } from '../types/blend';
 
 interface BlendOptionsProps {
   blends: BlendRecommendation[];
@@ -14,7 +14,7 @@ export function BlendOptions({ blends, selectedBlendId, onSelectBlend, onMakeBle
       <div className="flex gap-6 justify-center mb-12">
         {blends.map((blend, index) => {
           const isSelected = blend.id === selectedBlendId;
-          
+
           return (
             <motion.button
               key={blend.id}
@@ -29,14 +29,14 @@ export function BlendOptions({ blends, selectedBlendId, onSelectBlend, onMakeBle
               onClick={() => onSelectBlend(blend.id)}
               className={`relative group w-80 p-8 rounded-3xl backdrop-blur-2xl
                          transition-all duration-200 ease-out
-                         ${isSelected 
-                           ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4),0_16px_48px_rgba(0,0,0,0.5)]' 
-                           : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
-                         }`}
+                         ${isSelected
+                  ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4),0_16px_48px_rgba(0,0,0,0.5)]'
+                  : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
+                }`}
             >
               {/* Ambient glow for selected - Gold */}
               {isSelected && (
-                <div 
+                <div
                   className="absolute inset-0 blur-3xl opacity-20 rounded-3xl pointer-events-none"
                   style={{
                     background: 'radial-gradient(circle at top, rgba(212,175,55,0.4) 0%, transparent 70%)'
