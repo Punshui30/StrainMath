@@ -115,7 +115,14 @@ export function AppShell_StateMachine() {
    * Updated to handle real interpretation or direct intent injection
    */
   const startBlendSequence = useCallback(async (userInput?: string, overrideIntent?: IntentVectors) => {
-    if (animationState !== 'STATE_0_IDLE') return;
+    // [CRITICAL FIX] Allow re-triggering from any state (removed idle check)
+    // if (animationState !== 'STATE_0_IDLE') return; 
+
+    // [CRITICAL FIX] Force Reset UI State
+    if (userInput || overrideIntent) {
+      setCommittedBlend(null);
+      // We don't reset animationState immediately here, we let the sequence drive it to STATE_1
+    }
 
     let intent: any = null;
     let selectedId = selectedBlendId;
@@ -169,8 +176,11 @@ export function AppShell_StateMachine() {
       return;
     }
 
-    // Prepare ingredient cards
-    const cards: IngredientCard[] = blend.components.map(c => ({
+    // [CRITICAL FIX] Animate ALL Ingredients (Intent Tiles)
+    // Flatten components from all blends to get the full list (usually 9 items)
+    const allComponents = activeBlends.flatMap(b => b.components || []);
+
+    const cards: IngredientCard[] = allComponents.map(c => ({
       strain: c.name,
       color: getStrainColor(c.name),
       percentage: c.percentage,
@@ -179,7 +189,10 @@ export function AppShell_StateMachine() {
     }));
 
     setIngredientCards(cards);
+
+    // Use unique strains for efficient scrolling
     const strainNames = cards.map(c => c.strain);
+    const uniqueStrains = Array.from(new Set(strainNames));
 
     // ========================================
     // STATE 1: INVENTORY ALIGNMENT
@@ -187,12 +200,12 @@ export function AppShell_StateMachine() {
     setAnimationState('STATE_1_INVENTORY_ALIGNED');
 
     // Scroll inventory to center selected strains
-    await inventoryRef.current?.scrollToCenter(strainNames);
+    await inventoryRef.current?.scrollToCenter(uniqueStrains);
 
     // Wait for scroll settle
     await new Promise(resolve => setTimeout(resolve, ANIMATION_TIMINGS.SCROLL_SETTLE));
 
-    // Capture card positions from DOM
+    // Capture card positions from DOM (One position per CARD instance)
     const positions: DOMRect[] = [];
     for (const strainName of strainNames) {
       const pos = inventoryRef.current?.getStrainPosition(strainName);
@@ -462,7 +475,7 @@ export function AppShell_StateMachine() {
                     <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
                       <div className="flex flex-col items-center w-full">
                         <div className="flex gap-6 justify-center mb-12">
-                          {visibleBlends.map((blend, index) => (
+                          {(visibleBlends || []).map((blend, index) => (
                             <BlendResultCard
                               key={blend.id}
                               blend={blend}

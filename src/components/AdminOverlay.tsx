@@ -266,7 +266,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect, inv
               </div>
               {/* Rows */}
               <div className="max-h-64 overflow-y-auto pr-2">
-                {inventory.map((item, idx) => (
+                {(inventory || []).map((item, idx) => (
                   <div
                     key={`${item.strain || item.name}-${idx}`}
                     className="grid grid-cols-4 gap-4 py-2 border-b border-white/5 hover:bg-white/5 transition-colors text-sm items-center"

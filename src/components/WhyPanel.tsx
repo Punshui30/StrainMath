@@ -101,16 +101,16 @@ export function WhyPanel({ isVisible, blend, intent }: WhyPanelProps) {
                       Architecture
                     </div>
                     <div className="flex flex-col gap-3">
-                      {blend.components.map(comp => (
+                      {(blend?.components || []).map(comp => (
                         <div key={comp.name} className="flex items-center justify-between group">
                           <span className="text-sm text-white/80 group-hover:text-white transition-colors">
                             {comp.name}
                           </span>
                           <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${comp.role === 'Driver'
-                            ? 'border-[#D4AF37]/30 text-[#D4AF37] bg-[#D4AF37]/10'
-                            : comp.role === 'Modulator'
-                              ? 'border-blue-400/30 text-blue-400 bg-blue-400/10'
-                              : 'border-white/20 text-white/40 bg-white/5'
+                              ? 'border-[#D4AF37]/30 text-[#D4AF37] bg-[#D4AF37]/10'
+                              : comp.role === 'Modulator'
+                                ? 'border-blue-400/30 text-blue-400 bg-blue-400/10'
+                                : 'border-white/20 text-white/40 bg-white/5'
                             }`}>
                             {comp.role}
                           </span>
@@ -120,7 +120,7 @@ export function WhyPanel({ isVisible, blend, intent }: WhyPanelProps) {
                   </div>
 
                   {/* Intent Drivers */}
-                  {topFactors.length > 0 && (
+                  {topFactors && topFactors.length > 0 && (
                     <div>
                       <div className="text-[10px] uppercase tracking-[0.25em] text-white/30 mb-4 font-medium">
                         Targeting
