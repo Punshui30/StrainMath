@@ -137,9 +137,14 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
         <div className="relative h-full px-6 pt-4 pb-4 flex items-center">
           {/* Live Menu Label */}
           <div className="absolute top-2 left-6 pointer-events-none z-20">
-            <span className="text-[9px] uppercase tracking-[0.4em] text-white/20 font-bold">
-              LIVE MENU
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] uppercase tracking-[0.4em] text-white/30 font-bold">
+                LIVE MENU
+              </span>
+              <span className="text-[8px] text-[#D4AF37]/40 font-mono px-1.5 py-0.5 rounded border border-[#D4AF37]/20 uppercase">
+                v1.0.1
+              </span>
+            </div>
           </div>
 
           {/* Left fade mask */}
