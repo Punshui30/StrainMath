@@ -10,7 +10,7 @@ import { PromptsSidebar } from './PromptsSidebar';
 import { SafeTileAnimation } from './SafeTileAnimation';
 import { BusinessOverview } from './BusinessOverview';
 import { HowItWorks } from './HowItWorks';
-import { AgeGateOverlay } from './AgeGateOverlay';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { UserTypeGate } from './UserTypeGate';
 import { OnboardingScreen } from './OnboardingScreen';
 import { AmbientBackground } from './AmbientBackground';
@@ -403,7 +403,49 @@ export function AppShell_StateMachine() {
 
       {/* Main Application */}
       <div className="flex-1 relative overflow-hidden">
-        {mode === 'voice' ? (
+        {isMobile ? (
+          <div className="w-full h-full flex flex-col items-center justify-between p-6 pb-12 relative z-10">
+            <div className="flex flex-col items-center mt-4">
+              <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
+              <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 mt-3">Mobile Viewer</div>
+            </div>
+            <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
+              {visibleBlends.length > 0 ? (
+                <div className="w-full max-w-[320px] flex flex-col gap-6 animate-in fade-in zoom-in duration-500">
+                  <BlendResultCard
+                    blend={visibleBlends[0]}
+                    isSelected={true}
+                    index={0}
+                    onSelect={() => { }}
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleReset}
+                      className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs uppercase"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      className="flex-[2] py-4 rounded-xl bg-[#D4AF37] text-black font-bold tracking-wide uppercase text-sm shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                    >
+                      Share
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-6">
+                  <button
+                    onClick={() => startBlendSequence("I want to feel relaxed and creative")}
+                    className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
+                  >
+                    <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
+                  </button>
+                  <p className="text-white/40 text-xs uppercase tracking-widest">Tap to Analyze</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : mode === 'voice' ? (
           <div className="w-full h-full flex">
             {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
             <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' || animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'w-80' : 'w-0'
