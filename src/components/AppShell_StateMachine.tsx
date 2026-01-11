@@ -631,25 +631,6 @@ export function AppShell_StateMachine() {
         blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
       />
 
-      {/* Blend Explanation Panel - Global Overlay */}
-      <AnimatePresence>
-        {showExplanation && (() => {
-          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-          if (!selectedBlend) return null;
-          return (
-            <BlendExplanationPanel
-              blend={selectedBlend}
-              intent={currentIntent}
-              explanation={blendExplanationText}
-              userText={lastUserText}
-              onClose={() => setShowExplanation(false)}
-              onStartOver={handleReset}
-              onPrintLabel={() => setShowQR(true)}
-            />
-          );
-        })()}
-      </AnimatePresence>
-
       {/* Visual Fly-In Overlay (isolated, non-blocking) - ONLY during STATE_1 */}
       {animationState === 'STATE_1_INVENTORY_ALIGNED' && <VisualFlyInOverlay />}
 
