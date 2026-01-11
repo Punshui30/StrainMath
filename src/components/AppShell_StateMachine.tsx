@@ -625,20 +625,6 @@ export function AppShell_StateMachine() {
       {/* Safe Tile Animation (Visual Only) */}
 
 
-      {/* Floating Why Panel */}
-      {
-        animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
-          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-          return (
-            <WhyPanel
-              isVisible={true}
-              blend={selectedBlend}
-              intent={currentIntent}
-            />
-          );
-        })()
-      }
-
       <QRCodeModal
         isOpen={showQR}
         onClose={() => setShowQR(false)}
