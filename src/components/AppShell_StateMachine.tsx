@@ -42,6 +42,7 @@ export function AppShell_StateMachine() {
   const [currentIntent, setCurrentIntent] = useState<any | null>(null);
   const [lastUserText, setLastUserText] = useState("");
   const [transcribedText, setTranscribedText] = useState("");
+  const [visibleBlends, setVisibleBlends] = useState(blendRecommendations.slice(0, 3));
 
   // STATE 2 tracking
   const [ingredientCards, setIngredientCards] = useState<IngredientCard[]>([]);
@@ -87,22 +88,32 @@ export function AppShell_StateMachine() {
   const startBlendSequence = useCallback(async (userInput?: string) => {
     if (animationState !== 'STATE_0_IDLE') return;
 
-    let intent = null;
+    let intent: any = null;
     let selectedId = selectedBlendId;
 
     if (userInput) {
       intent = await interpretOutcome(userInput);
 
       if (intent) {
-        // Simple heuristic to pick a blend
-        // 1: Focus, 2: Calm, 3: Jack Focus
-        if (intent.relaxation > 0.6 || intent.anti_anxiety > 0.6) {
-          selectedId = 2;
-        } else if (intent.energy > 0.6) {
-          selectedId = 3;
-        } else if (intent.focus > 0.6 || intent.creativity > 0.6) {
-          selectedId = 1;
-        }
+        // Advanced scoring logic
+        const scored = blendRecommendations.map(blend => {
+          let score = 0;
+          const bTargets = (blend as any).targets || {};
+
+          // Weighted dot product
+          score += (intent.relaxation || 0) * (bTargets.relaxation || 0);
+          score += (intent.focus || 0) * (bTargets.focus || 0);
+          score += (intent.energy || 0) * (bTargets.energy || 0);
+          score += (intent.creativity || 0) * (bTargets.creativity || 0);
+          score += (intent.pain_relief || 0) * (bTargets.pain_relief || 0);
+          score += (intent.anti_anxiety || 0) * (bTargets.anti_anxiety || 0);
+
+          return { ...blend, matchScore: score };
+        }).sort((a, b) => b.matchScore - a.matchScore);
+
+        const topBlends = scored.slice(0, 3);
+        setVisibleBlends(topBlends);
+        selectedId = topBlends[0].id;
         setSelectedBlendId(selectedId);
       }
     }
@@ -363,7 +374,7 @@ export function AppShell_StateMachine() {
                     <div className="flex-shrink-0 pb-8 px-12">
                       <div className="flex flex-col items-center w-full">
                         <div className="flex gap-6 justify-center mb-12">
-                          {blendRecommendations.map((blend, index) => (
+                          {visibleBlends.map((blend, index) => (
                             <BlendResultCard
                               key={blend.id}
                               blend={blend}
