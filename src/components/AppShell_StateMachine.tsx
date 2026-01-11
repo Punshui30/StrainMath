@@ -5,7 +5,6 @@ import { ProcessorStateMachine } from './GoLogo/ProcessorStateMachine';
 import { IngredientCardLifting } from './IngredientCardLifting';
 import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
-import { WhyPanel } from './WhyPanel';
 import { BlendExplanationPanel } from './BlendExplanationPanel';
 import { VisualFlyInOverlay } from './VisualFlyInOverlay';
 import { PromptsSidebar } from './PromptsSidebar';
@@ -27,6 +26,11 @@ import type { BlendRecommendation } from '../types/blend';
 import { generateExplanation } from '../utils/explanationGenerator';
 
 import { DEMO_STEPS } from '../data/demoSteps';
+
+// Blend trigger types to prevent LLM contamination
+type BlendTrigger =
+  | { type: 'user'; text: string }
+  | { type: 'system' };
 
 type AppMode = 'voice' | 'operator' | 'business';
 
@@ -142,12 +146,12 @@ export function AppShell_StateMachine() {
    * startBlendSequence
    * Updated to handle real interpretation or direct intent injection
    */
-  const startBlendSequence = useCallback(async (userInput?: string, overrideIntent?: IntentVectors) => {
+  const startBlendSequence = useCallback(async (trigger?: BlendTrigger, overrideIntent?: IntentVectors) => {
     // [CRITICAL FIX] Allow re-triggering from any state (removed idle check)
     // if (animationState !== 'STATE_0_IDLE') return; 
 
     // [CRITICAL FIX] Force Reset UI State
-    if (userInput || overrideIntent) {
+    if (trigger || overrideIntent) {
       setCommittedBlend(null);
       // We don't reset animationState immediately here, we let the sequence drive it to STATE_1
     }
@@ -158,9 +162,12 @@ export function AppShell_StateMachine() {
 
     if (overrideIntent) {
       intent = overrideIntent;
-    } else if (userInput) {
-      intent = await interpretOutcome(userInput);
+    } else if (trigger?.type === 'user') {
+      // Only interpret user-authored language (FIX 3: LLM sanitization)
+      setLastUserText(trigger.text);
+      intent = await interpretOutcome(trigger.text);
     }
+    // System triggers reuse last intent without LLM call
 
     if (intent && typeof intent === 'object') {
       // [CRITICAL FIX] Normalize & Guard Data Shape
@@ -254,7 +261,7 @@ export function AppShell_StateMachine() {
       // Trigger a clean blend sequence for visual context
       // We use a small timeout to let the mode switch settle
       setTimeout(() => {
-        startBlendSequence('Visual Demonstration');
+        startBlendSequence({ type: 'system' });
       }, 500);
     }
 
@@ -442,7 +449,7 @@ export function AppShell_StateMachine() {
                 ) : (
                   <div className="flex flex-col items-center gap-6">
                     <button
-                      onClick={() => startBlendSequence("I want to feel relaxed and creative")}
+                      onClick={() => startBlendSequence({ type: 'user', text: "I want to feel relaxed and creative" })}
                       className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
                     >
                       <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
@@ -459,8 +466,8 @@ export function AppShell_StateMachine() {
                 } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
                 }`}>
                 <PromptsSidebar
-                  onPromptSelect={(text) => startBlendSequence(text)}
-                  onTextSubmit={(text) => startBlendSequence(text)}
+                  onPromptSelect={(text) => startBlendSequence({ type: 'user', text })}
+                  onTextSubmit={(text) => startBlendSequence({ type: 'user', text })}
                   onVoiceActivate={() => {
                     console.log("🎤 Voice activation triggered");
                     const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -474,7 +481,7 @@ export function AppShell_StateMachine() {
                       const transcript = event.results[0][0].transcript;
                       console.log("🗣️ Voice Transcript captured:", transcript);
                       setTranscribedText(transcript);
-                      startBlendSequence(transcript);
+                      startBlendSequence({ type: 'user', text: transcript });
                     };
                     recognition.start();
                   }}
@@ -568,26 +575,10 @@ export function AppShell_StateMachine() {
                         <span className="relative z-10">Make This Blend</span>
                       </button>
 
-                      {/* Why This Blend - Opt-in */}
-                      <button
-                        onClick={() => setShowExplanation(true)}
-                        className="px-6 py-3 text-sm text-white/60 hover:text-white/90 underline underline-offset-4
-                                   transition-all duration-200"
-                      >
-                        Why this blend?
-                      </button>
                     </div>
                   </div>
 
-                  {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
-                  <div className="mt-4 flex justify-center">
-                    <button
-                      onClick={() => startBlendSequence('Refresh blends')}
-                      className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
-                    >
-                      ↻ Refresh Blends
-                    </button>
-                  </div>
+
                 </div>
               )}
             </div>
