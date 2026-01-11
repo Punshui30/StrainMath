@@ -8,6 +8,8 @@ interface BlendExplanationPanelProps {
     explanation: string | null;
     userText: string;
     onClose: () => void;
+    onStartOver?: () => void;
+    onPrintLabel?: () => void;
 }
 
 export function BlendExplanationPanel({
@@ -15,18 +17,20 @@ export function BlendExplanationPanel({
     intent,
     explanation,
     userText,
-    onClose
+    onClose,
+    onStartOver,
+    onPrintLabel
 }: BlendExplanationPanelProps) {
 
     return (
-        <>
+        <div className="fixed inset-0 z-[1000]">
             {/* Backdrop */}
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={onClose}
-                className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300]"
+                className="fixed inset-0 bg-black/60 backdrop-blur-md"
             />
 
             {/* Panel */}
@@ -35,7 +39,7 @@ export function BlendExplanationPanel({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed inset-0 flex items-center justify-center z-[301] pointer-events-none"
+                className="fixed inset-0 flex items-center justify-center pointer-events-none"
             >
                 <div className="w-full max-w-2xl mx-8 p-12 rounded-3xl backdrop-blur-2xl bg-[#0a0a0a]/95 
                         shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_24px_80px_rgba(0,0,0,0.6)]
@@ -74,7 +78,29 @@ export function BlendExplanationPanel({
                     </div>
 
                     {/* Action - Single Close Button */}
-                    <div className="flex justify-center">
+                    <div className="flex gap-3 justify-center">
+                        {onStartOver && (
+                            <button
+                                onClick={onStartOver}
+                                className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10
+                                         border border-white/10 hover:border-white/20
+                                         text-white/60 hover:text-white/90 text-sm uppercase tracking-wider
+                                         transition-all duration-200"
+                            >
+                                Start Over
+                            </button>
+                        )}
+                        {onPrintLabel && (
+                            <button
+                                onClick={onPrintLabel}
+                                className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10
+                                         border border-white/10 hover:border-white/20
+                                         text-white/60 hover:text-white/90 text-sm uppercase tracking-wider
+                                         transition-all duration-200"
+                            >
+                                Print Label
+                            </button>
+                        )}
                         <button
                             onClick={onClose}
                             className="px-12 py-4 rounded-2xl
@@ -91,6 +117,6 @@ export function BlendExplanationPanel({
                     </div>
                 </div>
             </motion.div>
-        </>
+        </div>
     );
 }
