@@ -397,272 +397,276 @@ export function AppShell_StateMachine() {
       </div>
 
       {/* Main Application */}
-      <div className="flex-1 relative overflow-hidden">
-        {isMobile ? (
-          <div className="w-full h-full flex flex-col items-center justify-between p-6 pb-12 relative z-10">
-            <div className="flex flex-col items-center mt-4">
-              <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
-              <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 mt-3">Mobile Viewer</div>
-            </div>
-            <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
-              {visibleBlends.length > 0 ? (
-                <div className="w-full max-w-[320px] flex flex-col gap-6 animate-in fade-in zoom-in duration-500">
-                  <BlendResultCard
-                    blend={visibleBlends[0]}
-                    isSelected={true}
-                    index={0}
-                    onSelect={() => { }}
-                  />
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleReset}
-                      className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs uppercase"
-                    >
-                      Reset
-                    </button>
-                    <button
-                      className="flex-[2] py-4 rounded-xl bg-[#D4AF37] text-black font-bold tracking-wide uppercase text-sm shadow-[0_0_30px_rgba(212,175,55,0.4)]"
-                    >
-                      Share
-                    </button>
+      {mode === 'voice' && (
+        <div className="flex-1 relative overflow-hidden">
+          {isMobile ? (
+            <div className="w-full h-full flex flex-col items-center justify-between p-6 pb-12 relative z-10">
+              <div className="flex flex-col items-center mt-4">
+                <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
+                <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 mt-3">Mobile Viewer</div>
+              </div>
+              <div className="flex-1 w-full flex flex-col items-center justify-center gap-8">
+                {visibleBlends.length > 0 ? (
+                  <div className="w-full max-w-[320px] flex flex-col gap-6 animate-in fade-in zoom-in duration-500">
+                    <BlendResultCard
+                      blend={visibleBlends[0]}
+                      isSelected={true}
+                      index={0}
+                      onSelect={() => { }}
+                    />
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleReset}
+                        className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-xs uppercase"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        className="flex-[2] py-4 rounded-xl bg-[#D4AF37] text-black font-bold tracking-wide uppercase text-sm shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                      >
+                        Share
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-6">
-                  <button
-                    onClick={() => startBlendSequence("I want to feel relaxed and creative")}
-                    className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
-                  >
-                    <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
-                  </button>
-                  <p className="text-white/40 text-xs uppercase tracking-widest">Tap to Analyze</p>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : mode === 'voice' ? (
-          <div className="w-full h-full flex">
-            {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
-            <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
-              } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
-              }`}>
-              <PromptsSidebar
-                onPromptSelect={(text) => startBlendSequence(text)}
-                onTextSubmit={(text) => startBlendSequence(text)}
-                onVoiceActivate={() => {
-                  console.log("🎤 Voice activation triggered");
-                  const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                  if (!Recognition) {
-                    alert("Speech recognition not supported in this browser.");
-                    return;
-                  }
-                  const recognition = new Recognition();
-                  recognition.lang = 'en-US';
-                  recognition.onresult = (event: any) => {
-                    const transcript = event.results[0][0].transcript;
-                    console.log("🗣️ Voice Transcript captured:", transcript);
-                    setTranscribedText(transcript);
-                    startBlendSequence(transcript);
-                  };
-                  recognition.start();
-                }}
-              />
-            </div>
-
-            {/* Center Content */}
-            <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
-              {committedBlend ? (
-                /* Committed State - Blend Calculator */
-                <div className="flex-1 flex items-center justify-center">
-                  <BlendCalculator
-                    blend={committedBlend}
-                    alternateBlends={visibleBlends}
-                    onStartOver={handleReset}
-                    onSwitchBlend={handleSwitchBlendInCalculator}
-                  />
-                </div>
-              ) : (
-                <>
-                  {/* Logo / Processor */}
-                  isInterpreting={isInterpreting}
-                          />
-                  {(isInterpreting || transcribedText) && !committedBlend && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.4 }}
-                      className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
+                ) : (
+                  <div className="flex flex-col items-center gap-6">
+                    <button
+                      onClick={() => startBlendSequence("I want to feel relaxed and creative")}
+                      className="w-20 h-20 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center shadow-[0_0_40px_rgba(212,175,55,0.1)] active:scale-95 transition-all"
                     >
-                      "{transcribedText || lastUserText}"
-                    </motion.div>
-                  )}
-                </div>
-                      )}
+                      <div className="w-3 h-3 bg-[#D4AF37] rounded-full animate-pulse" />
+                    </button>
+                    <p className="text-white/40 text-xs uppercase tracking-widest">Tap to Analyze</p>
+                  </div>
+                )}
+              </div>
             </div>
+          ) : mode === 'voice' ? (
+            <div className="w-full h-full flex">
+              {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
+              <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
+                } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
+                }`}>
+                <PromptsSidebar
+                  onPromptSelect={(text) => startBlendSequence(text)}
+                  onTextSubmit={(text) => startBlendSequence(text)}
+                  onVoiceActivate={() => {
+                    console.log("🎤 Voice activation triggered");
+                    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                    if (!Recognition) {
+                      alert("Speech recognition not supported in this browser.");
+                      return;
+                    }
+                    const recognition = new Recognition();
+                    recognition.lang = 'en-US';
+                    recognition.onresult = (event: any) => {
+                      const transcript = event.results[0][0].transcript;
+                      console.log("🗣️ Voice Transcript captured:", transcript);
+                      setTranscribedText(transcript);
+                      startBlendSequence(transcript);
+                    };
+                    recognition.start();
+                  }}
+                />
+              </div>
 
-            {/* Blend Result Cards - Show only when animation completes */}
-            {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
-              <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
-                <div className="flex flex-col items-center w-full">
-                  <div className="flex gap-6 justify-center mb-12">
-                    {(visibleBlends || []).map((blend, index) => (
-                      <BlendResultCard
-                        key={blend.id}
-                        blend={blend}
-                        isSelected={blend.id === selectedBlendId}
-                        onSelect={() => handleSelectBlend(blend.id)}
-                        index={index}
-                        animationAnchor={logoRect}
+              {/* Center Content */}
+              <div className="flex-1 flex flex-col" style={{ paddingBottom: '20px' }}>
+                {committedBlend ? (
+                  /* Committed State - Blend Calculator */
+                  <div className="flex-1 flex items-center justify-center">
+                    <BlendCalculator
+                      blend={committedBlend}
+                      alternateBlends={visibleBlends}
+                      onStartOver={handleReset}
+                      onSwitchBlend={handleSwitchBlendInCalculator}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center relative">
+                    {/* Logo / Processor */}
+                    <div
+                      ref={goLogoRef}
+                      className={`transition-all duration-700 ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'scale-75 -translate-y-8' : 'scale-100'}`}
+                    >
+                      <ProcessorStateMachine
+                        state={animationState}
+                        cardsArrived={cardsArrived}
+                        totalCards={ingredientCards.length}
+                        isInterpreting={isInterpreting}
                       />
-                    ))}
-                  </div>
+                    </div>
 
-                  <div className="flex gap-4">
-                    {/* View QR Button */}
-                    <button
-                      onClick={() => setShowQR(true)}
-                      className="px-8 py-4 bg-white/5 hover:bg-white/10
+                    {(isInterpreting || transcribedText) && !committedBlend && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.4 }}
+                        className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
+                      >
+                        "{transcribedText || lastUserText}"
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Blend Result Cards - Show only when animation completes */}
+              {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
+                  <div className="flex flex-col items-center w-full">
+                    <div className="flex gap-6 justify-center mb-12">
+                      {(visibleBlends || []).map((blend, index) => (
+                        <BlendResultCard
+                          key={blend.id}
+                          blend={blend}
+                          isSelected={blend.id === selectedBlendId}
+                          onSelect={() => handleSelectBlend(blend.id)}
+                          index={index}
+                          animationAnchor={logoRect}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="flex gap-4">
+                      {/* View QR Button */}
+                      <button
+                        onClick={() => setShowQR(true)}
+                        className="px-8 py-4 bg-white/5 hover:bg-white/10
                                     backdrop-blur-xl rounded-2xl
                                     border border-white/10 hover:border-white/20
                                     text-white/60 hover:text-white_80 text-sm uppercase tracking-wider font-medium
                                     transition-all duration-200"
-                    >
-                      View QR
-                    </button>
+                      >
+                        View QR
+                      </button>
 
-                    {/* Make Blend Button - Always visible */}
-                    <button
-                      onClick={handleMakeBlend}
-                      className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
+                      {/* Make Blend Button - Always visible */}
+                      <button
+                        onClick={handleMakeBlend}
+                        className="group relative px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]
                                      backdrop-blur-2xl rounded-2xl overflow-hidden
                                      shadow-[inset_0_0_0_1px_rgba(212,175,55,0.3)]
                                      hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.6),0_8px_32px_rgba(212,175,55,0.25)]
                                      text-white/90 hover:text-white text-base uppercase tracking-wider font-medium
                                      transition-all duration-300 ease-out
                                      hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                        <span className="relative z-10">Make This Blend</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={() => startBlendSequence('Refresh blends')}
+                      className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
                     >
-                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                      <span className="relative z-10">Make This Blend</span>
+                      ↻ Refresh Blends
                     </button>
                   </div>
                 </div>
-
-                {/* [FLIGHT CHECK] Manual Trigger for Recommendations */}
-                <div className="mt-4 flex justify-center">
-                  <button
-                    onClick={() => startBlendSequence('Refresh blends')}
-                    className="text-xs uppercase tracking-widest text-white/20 hover:text-[#D4AF37] transition-colors"
-                  >
-                    ↻ Refresh Blends
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+              )}
+            </div>
     </div>
-  ) : mode === 'operator' ? (
-    <AdminOverlay
-      onShowBusinessOverview={() => setMode('business')}
-      inventory={inventory}
-      onUpdateInventory={setInventory}
-      isDemoRunning={isDemoRunning}
-      demoStep={demoStep}
-      onStartDemo={() => {
-        setDemoStep(0);
-        setIsDemoRunning(true);
-      }}
-      onStopDemo={() => setIsDemoRunning(false)}
-    />
-  ) : (
-    <BusinessOverview
-      onClose={() => setMode('operator')}
-    />
-  )
-}
-      </div >
+      )}
 
-  {/* Demo Mode Banner (Global) */ }
-  <AnimatePresence>
-{
-  isDemoRunning && (
-    <motion.div
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 100, opacity: 0 }}
-      className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center"
-    >
-      <div className="bg-[#D4AF37] text-black px-6 py-3 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center gap-4 border border-white/20">
-        <span className="font-bold text-xs tracking-wider">DEMO {demoStep + 1}/{DEMO_STEPS.length}</span>
-        <div className="w-px h-4 bg-black/10" />
-        <span className="font-medium text-sm">{DEMO_STEPS[demoStep].text.split('\n')[0]}</span>
-        <button
-          onClick={() => setIsDemoRunning(false)}
-          className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors text-xs font-bold"
-        >
-          ✕
-        </button>
-      </div>
-      <div className="mt-2 text-[10px] text-[#D4AF37]/80 uppercase tracking-widest font-medium bg-black/80 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
-        Visual Walkthrough Active
-      </div>
-    </motion.div>
-  )
-}
+      {/* Demo Mode Banner (Global) */}
+      <AnimatePresence>
+        {isDemoRunning && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center"
+          >
+            <div className="bg-[#D4AF37] text-black px-6 py-3 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center gap-4 border border-white/20">
+              <span className="font-bold text-xs tracking-wider">DEMO {demoStep + 1}/{DEMO_STEPS.length}</span>
+              <div className="w-px h-4 bg-black/10" />
+              <span className="font-medium text-sm">{DEMO_STEPS[demoStep].text.split('\n')[0]}</span>
+              <button
+                onClick={() => setIsDemoRunning(false)}
+                className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-2 text-[10px] text-[#D4AF37]/80 uppercase tracking-widest font-medium bg-black/80 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+              Visual Walkthrough Active
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* How It Works Modal */}
+      <AnimatePresence>
+        {
+          showHowItWorks && (
+            <HowItWorks onClose={() => setShowHowItWorks(false)} />
+          )
+        }
       </AnimatePresence >
 
-  {/* How It Works Modal */ }
-  <AnimatePresence>
-{
-  showHowItWorks && (
-    <HowItWorks onClose={() => setShowHowItWorks(false)} />
-  )
-}
-      </AnimatePresence >
-
-  {/* Safe Tile Animation (Visual Only) */ }
+      {/* Safe Tile Animation (Visual Only) */}
 
 
-{/* Floating Why Panel */ }
-{
-  animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
-    const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
-    return (
-      <WhyPanel
-        isVisible={true}
-        blend={selectedBlend}
-        intent={currentIntent}
+      {/* Floating Why Panel */}
+      {
+        animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (() => {
+          const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
+          return (
+            <WhyPanel
+              isVisible={true}
+              blend={selectedBlend}
+              intent={currentIntent}
+            />
+          );
+        })()
+      }
+
+      <QRCodeModal
+        isOpen={showQR}
+        onClose={() => setShowQR(false)}
+        blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
       />
-    );
-  })()
-}
 
-<QRCodeModal
-  isOpen={showQR}
-  onClose={() => setShowQR(false)}
-  blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
-/>
+      {/* Inventory Tray */}
+      {
+        mode === 'voice' && !committedBlend && (
+          <ScrollContainer
+            ref={inventoryRef}
+            highlightedStrains={highlightedStrains}
+          />
+        )
+      }
 
-{/* Inventory Tray */ }
-{
-  mode === 'voice' && !committedBlend && (
-    <ScrollContainer
-      ref={inventoryRef}
-      highlightedStrains={highlightedStrains}
-    />
-  )
-}
+      {
+        mode === 'operator' && (
+          <AdminOverlay
+            mode={mode}
+            onShowBusinessOverview={() => setMode('business')}
+            onPresetSelect={handlePresetSelect}
+            inventory={inventory}
+            onUpdateInventory={setInventory}
+            isDemoRunning={isDemoRunning}
+            demoStep={demoStep}
+            onStartDemo={() => {
+              setDemoStep(0);
+              setIsDemoRunning(true);
+            }}
+            onStopDemo={() => setIsDemoRunning(false)}
+          />
+        )
+      }
 
-{
-  mode === 'operator' && (
-    <AdminOverlay
-      mode={mode}
-      onPresetSelect={handlePresetSelect}
-      inventory={inventory}
-      onUpdateInventory={setInventory}
-    />
-  )
-}
+      {
+        mode === 'business' && (
+          <BusinessOverview
+            onClose={() => setMode('operator')}
+          />
+        )
+      }
     </div >
   );
 }
