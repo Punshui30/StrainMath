@@ -1,25 +1,30 @@
 import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import { StrainCard } from './StrainCard';
 
-interface InventoryItem {
-  id: number;
-  strain: string;
-  category: 'Hybrid' | 'Indica' | 'Sativa';
-  descriptor: string;
-}
 
-const inventoryItems: InventoryItem[] = [
-  { id: 1, strain: 'Blue Dream', category: 'Hybrid', descriptor: 'Balanced euphoria' },
-  { id: 2, strain: 'Northern Lights', category: 'Indica', descriptor: 'Deep relaxation' },
-  { id: 3, strain: 'Blueberry', category: 'Indica', descriptor: 'Sweet calm' },
-  { id: 4, strain: 'Sour Diesel', category: 'Sativa', descriptor: 'Energizing focus' },
-  { id: 5, strain: 'OG Kush', category: 'Hybrid', descriptor: 'Classic balance' },
-  { id: 6, strain: 'Girl Scout Cookies', category: 'Hybrid', descriptor: 'Happy uplift' },
-  { id: 7, strain: 'Granddaddy Purple', category: 'Indica', descriptor: 'Heavy body' },
-  { id: 8, strain: 'Jack Herer', category: 'Sativa', descriptor: 'Clear energy' },
-  { id: 9, strain: 'White Widow', category: 'Hybrid', descriptor: 'Bright focus' },
-  { id: 10, strain: 'Amnesia Haze', category: 'Sativa', descriptor: 'Uplifting buzz' },
-];
+
+import { MOCK_COAS } from '../../../data/mockCoas';
+
+const getCategory = (name: string): 'Hybrid' | 'Indica' | 'Sativa' => {
+  const sativas = ['Sour Diesel', 'Maui Wowie', 'Amnesia Haze', 'Jack Herer', 'Green Crack', 'Durban Poison', 'Super Lemon Haze', 'Lemon Haze', 'Tangie', 'Clementine', 'Sour Tangie'];
+  const indicas = ['Northern Lights', 'Blueberry', 'Granddaddy Purple', 'Bubba Kush', 'Purple Punch', 'Purple Haze', 'Skywalker OG', 'Master Kush', 'Death Star', 'LA Confidential', 'Slurricane', 'Ice Cream Cake', 'Animal Cookies', 'Critical Kush', 'Wedding Cake'];
+
+  if (sativas.some(s => name.includes(s))) return 'Sativa';
+  if (indicas.some(i => name.includes(i))) return 'Indica';
+  return 'Hybrid';
+};
+
+const inventoryItems = MOCK_COAS.map((item, index) => {
+  const name = item.strainName || (item as any)["strainNameContinue8:09 PM"] || "Unknown";
+  const dominantTerp = item.terpenes && item.terpenes.length > 0 ? item.terpenes[0] : null;
+
+  return {
+    id: index + 1,
+    strain: name,
+    category: getCategory(name),
+    descriptor: dominantTerp ? `${dominantTerp.name} ${dominantTerp.percentage}%` : 'Balanced profile'
+  };
+});
 
 interface ScrollContainerProps {
   selectedStrains?: string[];

@@ -1,4 +1,4 @@
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../assets/logo.png';
 
 interface BusinessOverviewProps {
   onClose: () => void;
@@ -11,9 +11,9 @@ export function BusinessOverview({ onClose }: BusinessOverviewProps) {
         {/* Header */}
         <div className="mb-16 flex items-start justify-between">
           <div className="flex items-start gap-4">
-            <img 
-              src={logoImage} 
-              alt="GO LINE" 
+            <img
+              src={logoImage}
+              alt="GO LINE"
               className="w-12 h-auto mt-1"
               style={{
                 filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
@@ -46,7 +46,7 @@ export function BusinessOverview({ onClose }: BusinessOverviewProps) {
               GO LINE is a voice-driven guidance system that translates customer intent into terpene-based product recommendations.
             </p>
             <p className="text-base text-white/60 font-light leading-relaxed">
-              Instead of asking customers "what strain do you want?", GO LINE asks "what outcome are you looking for?" 
+              Instead of asking customers "what strain do you want?", GO LINE asks "what outcome are you looking for?"
               — then uses your inventory's actual COA data to build precision blends that match their needs.
             </p>
           </div>
@@ -194,15 +194,15 @@ export function BusinessOverview({ onClose }: BusinessOverviewProps) {
           <div className="bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
             <div className="space-y-4 text-base text-white/70 font-light leading-relaxed">
               <p>
-                <strong className="text-white/90 font-normal">Not a chatbot.</strong> GO LINE doesn't simulate conversation — 
+                <strong className="text-white/90 font-normal">Not a chatbot.</strong> GO LINE doesn't simulate conversation —
                 it translates natural language into precision chemistry using your real inventory.
               </p>
               <p>
-                <strong className="text-white/90 font-normal">Not a strain database.</strong> It doesn't rely on generic strain profiles. 
+                <strong className="text-white/90 font-normal">Not a strain database.</strong> It doesn't rely on generic strain profiles.
                 Every recommendation uses your exact COA data, making it batch-specific and trustworthy.
               </p>
               <p>
-                <strong className="text-white/90 font-normal">Not dispensary software.</strong> GO LINE is a customer-facing guidance layer 
+                <strong className="text-white/90 font-normal">Not dispensary software.</strong> GO LINE is a customer-facing guidance layer
                 that sits alongside your existing POS, not a replacement.
               </p>
             </div>

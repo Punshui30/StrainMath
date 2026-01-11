@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../assets/logo.png';
 import { CircularVisualization } from './CircularVisualization';
 import { TapToSpeakArrows } from './TapToSpeakArrows';
 import type { BlendRecommendation } from '../data/blendRecommendations';
@@ -15,7 +15,7 @@ interface VoiceInterfaceProps {
   isProcessing?: boolean; // New prop for logo processing state
 }
 
-export function VoiceInterface({ state, onActivate, onReset, selectedBlend, isProcessing }: VoiceInterfaceProps) {
+export function VoiceInterface({ state, onActivate, selectedBlend }: VoiceInterfaceProps) {
   return (
     <div className="w-full h-full flex items-center justify-center px-12 py-16">
       <div className="flex flex-col items-center max-w-2xl w-full">
@@ -23,7 +23,7 @@ export function VoiceInterface({ state, onActivate, onReset, selectedBlend, isPr
         <div className="mb-10">
           {state === 'resolved' && selectedBlend ? (
             // Live Instrument - Updates with blend changes
-            <CircularVisualization 
+            <CircularVisualization
               blendName={selectedBlend.name}
               components={selectedBlend.components}
             />
@@ -45,8 +45,8 @@ export function VoiceInterface({ state, onActivate, onReset, selectedBlend, isPr
                   onClick={onActivate}
                   disabled={state !== 'idle'}
                   className={`relative w-64 h-64 flex items-center justify-center transition-all duration-300 ease-out group
-                    ${state === 'idle' 
-                      ? 'cursor-pointer' 
+                    ${state === 'idle'
+                      ? 'cursor-pointer'
                       : 'cursor-default'
                     }
                   `}
@@ -227,9 +227,8 @@ export function VoiceInterface({ state, onActivate, onReset, selectedBlend, isPr
           key={state}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`text-[11px] uppercase tracking-[0.3em] font-medium transition-colors duration-500 mb-4 ${
-            state === 'resolved' || state === 'analyzing' ? 'text-[#D4AF37]/80' : 'text-white/30'
-          }`}
+          className={`text-[11px] uppercase tracking-[0.3em] font-medium transition-colors duration-500 mb-4 ${state === 'resolved' || state === 'analyzing' ? 'text-[#D4AF37]/80' : 'text-white/30'
+            }`}
         >
           {state === 'listening' ? 'Listening' : state === 'analyzing' ? 'Analyzing' : state === 'resolved' ? 'Interpretations' : state === 'assembling' ? 'Assembling' : state === 'committed' ? 'Complete' : 'Ready'}
         </motion.div>

@@ -1,11 +1,11 @@
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../assets/logo.png';
 
 interface AdminOverlayProps {
   onClose?: () => void;
   onShowBusinessOverview?: () => void;
 }
 
-export function AdminOverlay({ onClose, onShowBusinessOverview }: AdminOverlayProps) {
+export function AdminOverlay({ onShowBusinessOverview }: AdminOverlayProps) {
   const inventory = [
     { strain: 'Green Crack', qty: 245, status: 'In Stock' },
     { strain: 'Durban Poison', qty: 180, status: 'In Stock' },
@@ -20,9 +20,9 @@ export function AdminOverlay({ onClose, onShowBusinessOverview }: AdminOverlayPr
         {/* Header with Business Overview link */}
         <div className="mb-6 pb-4 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img 
-              src={logoImage} 
-              alt="GO LINE" 
+            <img
+              src={logoImage}
+              alt="GO LINE"
               className="w-10 h-auto"
               style={{
                 filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
@@ -81,14 +81,14 @@ export function AdminOverlay({ onClose, onShowBusinessOverview }: AdminOverlayPr
               <div className="flex items-center gap-3">
                 <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sm text-white/80 hover:text-white transition-all">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60">
-                    <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-                    <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/>
+                    <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
                   </svg>
                   Scan COA
                 </button>
                 <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sm text-white/80 hover:text-white transition-all">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60">
-                    <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                   Upload COA
                 </button>
@@ -120,8 +120,8 @@ export function AdminOverlay({ onClose, onShowBusinessOverview }: AdminOverlayPr
                         item.status === 'In Stock'
                           ? 'text-white/60'
                           : item.status === 'Low Stock'
-                          ? 'text-[#D4A574]'
-                          : 'text-white/30'
+                            ? 'text-[#D4A574]'
+                            : 'text-white/30'
                       }
                     >
                       {item.status}

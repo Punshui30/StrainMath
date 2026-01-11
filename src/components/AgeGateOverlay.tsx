@@ -1,4 +1,4 @@
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../assets/logo.png';
 
 interface AgeGateOverlayProps {
   onVerify: () => void;
@@ -12,9 +12,9 @@ export function AgeGateOverlay({ onVerify }: AgeGateOverlayProps) {
         <div className="flex flex-col items-center mb-16">
           {/* Logo - Primary, Dominant */}
           <div className="mb-4 relative">
-            <img 
-              src={logoImage} 
-              alt="GO LINE Logo" 
+            <img
+              src={logoImage}
+              alt="GO LINE Logo"
               className="w-44 h-auto"
               style={{
                 filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.4))'

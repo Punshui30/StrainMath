@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { VoiceInterface } from './VoiceInterface';
+import { AnimatePresence } from 'motion/react';
 import { PromptsSidebar } from './PromptsSidebar';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { Processor } from './GoLogo/Processor';
@@ -12,7 +11,7 @@ import { BusinessOverview } from './BusinessOverview';
 import { HowItWorks } from './HowItWorks';
 import { AgeGateOverlay } from './AgeGateOverlay';
 import { AmbientBackground } from './AmbientBackground';
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../assets/logo.png';
 import { blendRecommendations, type BlendRecommendation } from '../data/blendRecommendations';
 import type { BlendAnimationState, BlendIngredient } from '../types/blendStates';
 
@@ -34,14 +33,14 @@ export function AppShell_StateFrames() {
   const [selectedBlendId, setSelectedBlendId] = useState(1);
   const [committedBlend, setCommittedBlend] = useState<BlendRecommendation | null>(null);
   const [currentIngredients, setCurrentIngredients] = useState<BlendIngredient[]>([]);
-  
+
   const inventoryRef = useRef<ScrollContainerHandle>(null);
 
   const handleVoiceActivation = async () => {
     if (blendState === 'idle') {
       // Voice listening phase
       setBlendState('idle'); // Keep as idle during listening
-      
+
       setTimeout(async () => {
         // Get selected blend ingredients
         const blend = blendRecommendations.find(b => b.id === selectedBlendId) || blendRecommendations[0];
@@ -58,22 +57,22 @@ export function AppShell_StateFrames() {
         // **FRAME A: inventory_resolved**
         // Scroll inventory to center selected strains
         await inventoryRef.current?.scrollToCenter(strainNames);
-        
+
         // Hold frame to show highlighted strains
         setBlendState('inventory_resolved');
-        
+
         await new Promise(resolve => setTimeout(resolve, 1200)); // Hold for visibility
 
         // **FRAME B: blending_in_progress**
         // Logo processes, ingredient tokens visible
         setBlendState('blending_in_progress');
-        
+
         await new Promise(resolve => setTimeout(resolve, 1800)); // Processing time
 
         // **FRAME C: blend_output**
         // Show blend recommendation cards
         setBlendState('blend_output');
-        
+
       }, 2000); // Initial listening delay
     }
   };
@@ -104,18 +103,16 @@ export function AppShell_StateFrames() {
     }
   };
 
-  const selectedBlend = blendRecommendations.find(b => b.id === selectedBlendId);
-
   // Determine which strains should be highlighted in inventory
-  const highlightedStrains = blendState === 'inventory_resolved' 
+  const highlightedStrains = blendState === 'inventory_resolved'
     ? currentIngredients.map(i => i.strain)
     : [];
 
   // Determine logo/processor state
-  const processorState = 
+  const processorState =
     blendState === 'inventory_resolved' ? 'analyzing' :
-    blendState === 'blending_in_progress' ? 'processing' :
-    'idle';
+      blendState === 'blending_in_progress' ? 'processing' :
+        'idle';
 
   if (!ageVerified) {
     return <AgeGateOverlay onVerify={() => setAgeVerified(true)} />;
@@ -124,20 +121,20 @@ export function AppShell_StateFrames() {
   return (
     <div className="w-full h-screen bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] text-white flex flex-col overflow-hidden relative">
       {/* Ambient Background */}
-      <AmbientBackground 
-        imageUrl={blendState === 'blend_output' 
-          ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
+      <AmbientBackground
+        imageUrl={blendState === 'blend_output'
+          ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
           : "https://images.unsplash.com/photo-1714065712817-af7d54710a0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
         }
         opacity={blendState === 'idle' ? 0.04 : 0.06}
       />
-      
+
       {/* Minimal Header */}
       <div className="h-16 flex items-center justify-between px-8 flex-shrink-0 relative z-10">
         <div className="flex items-center gap-3">
-          <img 
-            src={logoImage} 
-            alt="GO LINE" 
+          <img
+            src={logoImage}
+            alt="GO LINE"
             className="w-10 h-auto"
             style={{
               filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))'
@@ -145,7 +142,7 @@ export function AppShell_StateFrames() {
           />
           <h1 className="text-base tracking-[0.3em] uppercase font-light text-white/90">GO LINE</h1>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {mode === 'voice' && blendState === 'idle' && (
             <button
@@ -155,7 +152,7 @@ export function AppShell_StateFrames() {
               How It Works
             </button>
           )}
-          
+
           <button
             onClick={() => setMode(mode === 'operator' ? 'voice' : 'operator')}
             className="text-xs uppercase tracking-wider text-white/40 hover:text-white/80 transition-colors font-medium"
@@ -170,9 +167,8 @@ export function AppShell_StateFrames() {
         {mode === 'voice' ? (
           <div className="w-full h-full flex">
             {/* Left Sidebar - Hidden when not idle */}
-            <div className={`transition-all duration-700 ease-out ${
-              blendState === 'idle' ? 'w-80' : 'w-0'
-            } overflow-hidden`}>
+            <div className={`transition-all duration-700 ease-out ${blendState === 'idle' ? 'w-80' : 'w-0'
+              } overflow-hidden`}>
               <PromptsSidebar onPromptSelect={() => handleVoiceActivation()} />
             </div>
 
@@ -181,11 +177,11 @@ export function AppShell_StateFrames() {
               {committedBlend ? (
                 /* Committed State - Blend Calculator */
                 <div className="flex-1 flex items-center justify-center">
-                  <BlendCalculator 
-                    blend={committedBlend} 
+                  <BlendCalculator
+                    blend={committedBlend}
                     alternateBlends={blendRecommendations}
-                    onStartOver={handleReset} 
-                    onSwitchBlend={handleSwitchBlendInCalculator} 
+                    onStartOver={handleReset}
+                    onSwitchBlend={handleSwitchBlendInCalculator}
                   />
                 </div>
               ) : (
@@ -193,7 +189,7 @@ export function AppShell_StateFrames() {
                   {/* Voice Interface + Logo Processor */}
                   <div className="flex-1 flex items-center justify-center">
                     {(blendState === 'idle' || blendState === 'inventory_resolved' || blendState === 'blending_in_progress') && (
-                      <Processor 
+                      <Processor
                         state={processorState}
                         ingredients={blendState === 'blending_in_progress' ? currentIngredients : []}
                       />
@@ -236,11 +232,11 @@ export function AppShell_StateFrames() {
             </div>
           </div>
         ) : mode === 'operator' ? (
-          <AdminOverlay 
+          <AdminOverlay
             onShowBusinessOverview={() => setMode('business')}
           />
         ) : (
-          <BusinessOverview 
+          <BusinessOverview
             onClose={() => setMode('operator')}
           />
         )}
@@ -255,7 +251,7 @@ export function AppShell_StateFrames() {
 
       {/* Floating Why Panel */}
       {blendState === 'blend_output' && mode === 'voice' && (
-        <WhyPanel 
+        <WhyPanel
           confidence="98.4"
           explanation="This recommendation is driven primarily by myrcene, which provides deep physical relaxation. Caryophyllene acts as a stabilizer, helping to reduce physical tension and anxiety."
           isVisible={true}
@@ -264,7 +260,7 @@ export function AppShell_StateFrames() {
 
       {/* FRAME A + B: Inventory Tray (visible, with highlighted strains) */}
       {mode === 'voice' && !committedBlend && (
-        <ScrollContainer 
+        <ScrollContainer
           ref={inventoryRef}
           highlightedStrains={highlightedStrains}
         />

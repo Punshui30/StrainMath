@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../../assets/logo.png';
 import type { BlendIngredient } from '../../types/blendStates';
 
 interface ProcessorProps {
@@ -29,7 +29,7 @@ export function Processor({ state, ingredients = [] }: ProcessorProps) {
   return (
     <div className="relative flex flex-col items-center">
       {/* Ambient glow */}
-      <div 
+      <div
         className="absolute inset-0 blur-3xl transition-opacity duration-500"
         style={{
           background: `radial-gradient(circle, rgba(212,175,55,${glowIntensity}) 0%, transparent 70%)`,

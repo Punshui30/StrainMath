@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import logoImage from 'figma:asset/f7eabe4467f2f507507acb041076599c4b9fae68.png';
+import logoImage from '../../assets/logo.png';
 import type { AnimationState } from '../../types/animationStates';
 
 interface ProcessorStateMachineProps {
