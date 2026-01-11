@@ -34,6 +34,14 @@ type BlendTrigger =
 
 type AppMode = 'voice' | 'operator' | 'business';
 
+// Screen states for single render authority (mobile-first architecture)
+type ScreenState =
+  | 'INPUT'           // Text input, voice, presets
+  | 'PROCESSING'      // Animation states 0-2
+  | 'RESULTS'         // Blend cards visible
+  | 'EXPLANATION'     // Explanation modal (exclusive)
+  | 'CALCULATOR';     // Blend calculator (exclusive)
+
 /**
  * AppShell_StateMachine
  */
@@ -331,7 +339,48 @@ export function AppShell_StateMachine() {
   }
 
   // ==========================================
-  // NORMAL RENDER (Only executes when explanation is closed)
+  // SINGLE RENDER AUTHORITY
+  // ==========================================
+  // Derive current screen state from existing state variables
+  const deriveScreenState = (): ScreenState => {
+    if (showExplanation) return 'EXPLANATION';
+    if (committedBlend) return 'CALCULATOR';
+    if (animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && visibleBlends.length > 0) return 'RESULTS';
+    if (animationState !== 'STATE_0_IDLE') return 'PROCESSING';
+    return 'INPUT';
+  };
+
+  const currentScreen = deriveScreenState();
+
+  // Guard clauses for screen ownership
+  // EXPLANATION screen already handled above (lines 322-339)
+
+  // CALCULATOR screen - exclusive render
+  if (currentScreen === 'CALCULATOR') {
+    const blend = committedBlend!;
+    return (
+      <div className="w-full h-screen bg-black text-white flex flex-col overflow-hidden relative">
+        <AmbientBackground
+          imageUrl="https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+          opacity={0.06}
+        />
+        <BlendCalculator
+          blend={blend}
+          onStartOver={handleReset}
+          onSwitchBlend={handleSwitchBlendInCalculator}
+          alternateBlends={visibleBlends}
+        />
+        <QRCodeModal
+          isOpen={showQR}
+          onClose={() => setShowQR(false)}
+          blend={blend}
+        />
+      </div>
+    );
+  }
+
+  // ==========================================
+  // NORMAL RENDER (INPUT, PROCESSING, RESULTS)
   // ==========================================
 
   // Determine which strains are highlighted (STATE 1 & 2)
