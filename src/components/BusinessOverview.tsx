@@ -24,7 +24,7 @@ export function BusinessOverview({ onClose }: BusinessOverviewProps) {
                 GO LINE for Your Business
               </h1>
               <p className="text-lg text-white/50 font-light leading-relaxed max-w-2xl">
-                Transform how your customers discover cannabis products through terpene-driven outcome guidance
+                Turn Customer Intent into Higher Throughput, Bigger Carts, and Smarter Inventory Utilization
               </p>
             </div>
           </div>
@@ -36,71 +36,129 @@ export function BusinessOverview({ onClose }: BusinessOverviewProps) {
           </button>
         </div>
 
-        {/* What GO LINE Does */}
+        {/* Narrative Intro */}
         <section className="mb-16">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-6 font-medium">
-            What It Does
-          </h2>
           <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-            <p className="text-lg text-white/80 font-light leading-relaxed mb-6">
-              GO LINE is a voice-driven guidance system that translates customer intent into terpene-based product recommendations.
+            <p className="text-xl text-white/90 font-light leading-relaxed mb-8">
+              GO LINE is an outcome-driven guidance system designed to solve the real problems dispensary operators face every day:
             </p>
-            <p className="text-base text-white/60 font-light leading-relaxed">
-              Instead of asking customers "what strain do you want?", GO LINE asks "what outcome are you looking for?"
-              — then uses your inventory's actual COA data to build precision blends that match their needs.
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mb-8">
+              {[
+                "Customers take too long to decide",
+                "Staff get stuck explaining strain differences",
+                "Inventory turns unevenly",
+                "Discounts and aging SKUs sit unsold",
+                "Experiences vary by budtender, not by brand"
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 text-white/50 text-sm font-light">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-400/40" />
+                  {item}
+                </div>
+              ))}
+            </div>
+            <p className="text-lg text-white/80 font-light leading-relaxed border-t border-white/5 pt-8">
+              GO LINE fixes this by shifting the conversation from <span className="text-white">“what strain do you want?”</span> to <span className="text-white">“what outcome are you trying to achieve?”</span> — and then translating that intent into terpene-driven recommendations using your actual COA data.
+            </p>
+            <p className="text-base text-[#D4AF37]/80 font-medium mt-4">
+              The result: faster decisions, higher basket sizes, and consistent guidance at scale.
             </p>
           </div>
         </section>
 
-        {/* Why Terpene-Driven Outcomes Beat Strain Menus */}
+        {/* Why This Matters to Operators */}
         <section className="mb-16">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-6 font-medium">
-            Why Terpene-Driven Outcomes
+          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-8 font-medium">
+            Why This Matters to Operators
           </h2>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 backdrop-blur-xl">
-              <h3 className="text-base text-white/90 font-light mb-3">Traditional Strain Menus</h3>
-              <ul className="space-y-2 text-sm text-white/50 font-light">
-                <li className="flex gap-2">
-                  <span className="text-white/30">—</span>
-                  <span>Customers overwhelmed by choice</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-white/30">—</span>
-                  <span>Staff struggle to guide meaningfully</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-white/30">—</span>
-                  <span>Low basket size, high decision fatigue</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-white/30">—</span>
-                  <span>Inconsistent experiences reduce trust</span>
-                </li>
-              </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-white/95 text-lg font-medium mb-2">Faster Decisions = Higher Throughput</h3>
+                <p className="text-white/50 text-sm font-light leading-relaxed">
+                  Customers who know what they’re looking for move faster. GO LINE reduces decision paralysis by guiding customers toward outcomes instead of overwhelming menus — keeping lines moving and floors flowing.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-white/95 text-lg font-medium mb-2">Bigger Carts, Naturally</h3>
+                <p className="text-white/50 text-sm font-light leading-relaxed">
+                  Outcome-based guidance leads to multi-product blends instead of single-item purchases. Customers don’t feel upsold — they feel helped.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-white/95 text-lg font-medium mb-2">Always Have Something to Sell</h3>
+                <p className="text-white/50 text-sm font-light leading-relaxed">
+                  Because GO LINE works from terpene profiles, not strain names, it can assemble recommendations even when a specific cultivar is out of stock.
+                </p>
+                <div className="mt-3 space-y-1">
+                  <p className="text-white/30 text-xs flex gap-2"><span>•</span> Fewer dead ends</p>
+                  <p className="text-white/30 text-xs flex gap-2"><span>•</span> Better use of substitute inventory</p>
+                  <p className="text-white/30 text-xs flex gap-2"><span>•</span> More flexibility during shortages</p>
+                </div>
+              </div>
             </div>
-            <div className="bg-white/[0.05] border border-[#D4AF37]/20 rounded-2xl p-6 backdrop-blur-xl shadow-[0_0_40px_rgba(212,175,55,0.1)]">
-              <h3 className="text-base text-white/90 font-light mb-3">GO LINE Approach</h3>
-              <ul className="space-y-2 text-sm text-white/60 font-light">
-                <li className="flex gap-2">
-                  <span className="text-[#D4AF37]/70">+</span>
-                  <span>Voice-first removes decision paralysis</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-[#D4AF37]/70">+</span>
-                  <span>Staff become trusted outcome advisors</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-[#D4AF37]/70">+</span>
-                  <span>Multi-product blends increase basket size</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-[#D4AF37]/70">+</span>
-                  <span>COA-grounded precision builds loyalty</span>
-                </li>
-              </ul>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-white/95 text-lg font-medium mb-2">Move Aging and Markdown Inventory Intelligently</h3>
+                <p className="text-white/50 text-sm font-light leading-relaxed">
+                  Low-velocity SKUs don’t have to be discounted blindly. GO LINE can incorporate them into blends where their terpene profile still adds value — turning problem inventory into sellable outcomes.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-white/95 text-lg font-medium mb-2">Consistent Guidance, Regardless of Staff Experience</h3>
+                <p className="text-white/50 text-sm font-light leading-relaxed">
+                  Recommendations are grounded in chemistry, not personal opinion. New hires perform like seasoned staff. Your brand experience stays consistent across shifts and locations.
+                </p>
+              </div>
             </div>
           </div>
+        </section>
+
+        {/* How It Works (Operational) */}
+        <section className="mb-16">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-8 font-medium">
+            How GO LINE Works (Operational View)
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {[
+              "Customers speak or type what they want to feel",
+              "GO LINE interprets intent and maps to terpene targets",
+              "The system evaluates current inventory COAs in real time",
+              "One or more valid blend options are generated",
+              "Staff or customers select and proceed"
+            ].map((step, i) => (
+              <div key={i} className="bg-white/[0.02] border border-white/5 p-4 rounded-xl flex flex-col gap-3">
+                <div className="text-[10px] text-[#D4AF37]/50 font-bold">0{i + 1}</div>
+                <p className="text-xs text-white/60 font-medium leading-normal">{step}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex justify-center gap-12 text-[10px] uppercase tracking-widest text-white/20 font-medium">
+            <span>No medical claims</span>
+            <span>No strain mythology</span>
+            <span>Data-based guidance</span>
+          </div>
+        </section>
+
+        {/* What This Unlocks */}
+        <section className="mb-16">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-8 font-medium">
+            What This Unlocks
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              "Higher average basket size",
+              "Faster customer flow",
+              "Better inventory turns",
+              "More predictable outcomes"
+            ].map((benefit, i) => (
+              <div key={i} className="px-6 py-4 bg-white/[0.04] border border-[#D4AF37]/10 rounded-xl text-center">
+                <p className="text-sm text-white/80 font-light">{benefit}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-white/40 text-sm font-light mt-8">
+            Stronger customer trust and repeat visits
+          </p>
         </section>
 
         {/* Business Impact */}
@@ -133,78 +191,50 @@ export function BusinessOverview({ onClose }: BusinessOverviewProps) {
           </div>
         </section>
 
-        {/* Hardware + Workflow Compatibility */}
-        <section className="mb-16">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-6 font-medium">
-            Integration & Workflow
-          </h2>
-          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-base text-white/80 font-light mb-4">Compatible Hardware</h3>
-                <ul className="space-y-2 text-sm text-white/50 font-light">
-                  <li>• Any iPad or tablet (voice + touch)</li>
-                  <li>• Desktop POS integration ready</li>
-                  <li>• Mobile device support for field use</li>
-                  <li>• No specialized equipment required</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-base text-white/80 font-light mb-4">Workflow Integration</h3>
-                <ul className="space-y-2 text-sm text-white/50 font-light">
-                  <li>• Scan COA → Auto-populate inventory</li>
-                  <li>• Real-time stock updates</li>
-                  <li>• Export blend ratios to fulfillment</li>
-                  <li>• Staff presets for common outcomes</li>
-                </ul>
-              </div>
+        {/* Live Demo Transition Section */}
+        <section className="mt-24 pb-24 border-t border-white/5 pt-16">
+          <div className="text-center mb-12">
+            <div className="inline-block px-4 py-1 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[10px] text-[#D4AF37] font-bold uppercase tracking-[0.2em] mb-6">
+              Live Demonstration
             </div>
-          </div>
-        </section>
-
-        {/* Compliance + COA Grounding */}
-        <section className="mb-16">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-6 font-medium">
-            Compliance & Data Grounding
-          </h2>
-          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-            <p className="text-base text-white/60 font-light leading-relaxed mb-6">
-              Every recommendation is grounded in your actual Certificate of Analysis (COA) data, ensuring:
+            <h2 className="text-3xl font-light text-white mb-4">See GO LINE in Action</h2>
+            <p className="text-white/40 text-base font-light max-w-2xl mx-auto">
+              This walkthrough shows how real customer inputs translate into real inventory-based recommendations on the floor.
             </p>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <div className="text-sm text-white/80 font-light mb-2">• Regulatory compliance</div>
-                <div className="text-sm text-white/80 font-light mb-2">• Terpene accuracy to lab-tested levels</div>
-                <div className="text-sm text-white/80 font-light">• No medical claims, only guidance</div>
+          </div>
+
+          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-white/[0.02] border border-white/10 flex items-center justify-center group cursor-pointer">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+
+            {/* Play Indicator / Automated Demo Placeholder */}
+            <div className="relative z-20 flex flex-col items-center gap-6">
+              <div className="w-20 h-20 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center backdrop-blur-xl group-hover:scale-110 transition-transform duration-500">
+                <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-[#D4AF37] border-b-[10px] border-b-transparent ml-1" />
               </div>
-              <div>
-                <div className="text-sm text-white/80 font-light mb-2">• Batch-specific precision</div>
-                <div className="text-sm text-white/80 font-light mb-2">• Auto-flagging low stock</div>
-                <div className="text-sm text-white/80 font-light">• Audit trail for every blend</div>
+              <p className="text-sm font-medium text-[#D4AF37]/80 tracking-widest uppercase">Start Workflow Simulation</p>
+            </div>
+
+            {/* Simulated UI Backdrop */}
+            <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-700 blur-[2px]">
+              {/* Visual hint of the interface */}
+              <div className="w-full h-full flex flex-col p-12">
+                <div className="w-32 h-4 bg-white/20 rounded-full mb-8" />
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="w-48 h-48 rounded-full border-4 border-white/10 border-t-[#D4AF37]/40" />
+                </div>
+                <div className="flex gap-4 mt-auto">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="flex-1 h-20 bg-white/10 rounded-xl" />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Differentiation */}
-        <section className="mb-16">
-          <h2 className="text-xs uppercase tracking-[0.25em] text-[#D4AF37]/70 mb-6 font-medium">
-            What Makes GO LINE Different
-          </h2>
-          <div className="bg-gradient-to-br from-white/[0.05] to-white/[0.02] border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
-            <div className="space-y-4 text-base text-white/70 font-light leading-relaxed">
-              <p>
-                <strong className="text-white/90 font-normal">Not a chatbot.</strong> GO LINE doesn't simulate conversation —
-                it translates natural language into precision chemistry using your real inventory.
-              </p>
-              <p>
-                <strong className="text-white/90 font-normal">Not a strain database.</strong> It doesn't rely on generic strain profiles.
-                Every recommendation uses your exact COA data, making it batch-specific and trustworthy.
-              </p>
-              <p>
-                <strong className="text-white/90 font-normal">Not dispensary software.</strong> GO LINE is a customer-facing guidance layer
-                that sits alongside your existing POS, not a replacement.
-              </p>
+            {/* Overlay hint */}
+            <div className="absolute bottom-8 left-0 right-0 z-30 flex justify-center gap-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37]">Voice Synthesis</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37]">Real-time Matching</span>
+              <span className="text-[10px] uppercase tracking-widest text-[#D4AF37]">Inventory Sync</span>
             </div>
           </div>
         </section>
