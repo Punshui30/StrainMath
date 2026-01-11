@@ -223,26 +223,20 @@ export function AppShell_StateMachine() {
     const uniqueStrains = Array.from(new Set(strainNames));
 
     // ========================================
-    // STATE 1: INVENTORY ALIGNMENT & IMMEDIATE RESULT
+    // STATE 1: INVENTORY ALIGNMENT & FLY-IN ANIMATION
     // ========================================
     setAnimationState('STATE_1_INVENTORY_ALIGNED');
 
     // Scroll inventory to center selected strains (Visual feedback only)
     await inventoryRef.current?.scrollToCenter(uniqueStrains);
 
-    // Short processing delay for "Compute" feel
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    // STATE 2: Ingredient Lift / Assembly
-    setAnimationState('STATE_2_INGREDIENT_LIFT');
-
-    // Fire visual-only fly-in (overlay listens for this)
+    // Fire visual-only fly-in DURING STATE_1 (before results render)
     window.dispatchEvent(new Event('strain-math:trigger-fly-in'));
 
-    // Allow animation to play
-    await new Promise(resolve => setTimeout(resolve, 900));
+    // Allow animation to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // STATE 3: Results
+    // Transition to Results
     setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
 
   }, [animationState, selectedBlendId, inventory]);
@@ -662,8 +656,8 @@ export function AppShell_StateMachine() {
         blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
       />
 
-      {/* Visual Fly-In Overlay (isolated, non-blocking) */}
-      <VisualFlyInOverlay />
+      {/* Visual Fly-In Overlay (isolated, non-blocking) - ONLY during STATE_1 */}
+      {animationState === 'STATE_1_INVENTORY_ALIGNED' && <VisualFlyInOverlay />}
 
       {/* Inventory Tray */}
       {
