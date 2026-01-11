@@ -441,7 +441,7 @@ export function AppShell_StateMachine() {
                 )}
               </div>
             </div>
-          ) : mode === 'voice' ? (
+          ) : (
             <div className="w-full h-full flex">
               {/* Left Sidebar - Visible in IDLE and RESULTS, but disabled in RESULTS */}
               <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
@@ -569,7 +569,8 @@ export function AppShell_StateMachine() {
                 </div>
               )}
             </div>
-    </div>
+          )}
+        </div>
       )}
 
       {/* Demo Mode Banner (Global) */}
