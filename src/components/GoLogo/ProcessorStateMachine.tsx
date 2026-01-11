@@ -6,6 +6,7 @@ interface ProcessorStateMachineProps {
   state: AnimationState;
   cardsArrived?: number;
   totalCards?: number;
+  isInterpreting?: boolean;
 }
 
 /**
@@ -20,10 +21,12 @@ interface ProcessorStateMachineProps {
 export function ProcessorStateMachine({
   state,
   cardsArrived = 0,
-  totalCards = 0
+  totalCards = 0,
+  isInterpreting = false
 }: ProcessorStateMachineProps) {
 
   const getGlowIntensity = () => {
+    if (isInterpreting) return 0.8;
     switch (state) {
       case 'STATE_0_IDLE':
         return 0.2;
@@ -95,15 +98,16 @@ export function ProcessorStateMachine({
       )}
 
       {/* State label */}
-      {state !== 'STATE_0_IDLE' && (
+      {(state !== 'STATE_0_IDLE' || isInterpreting) && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 0.4, y: 0 }}
           className="mt-2 text-[9px] uppercase tracking-[0.15em] text-white/30 font-medium"
         >
-          {state === 'STATE_1_INVENTORY_ALIGNED' && 'Analyzing...'}
-          {state === 'STATE_2_INGREDIENT_LIFT' && 'Receiving...'}
-          {state === 'STATE_3_RECOMMENDATION_OUTPUT' && 'Complete'}
+          {isInterpreting && 'Thinking...'}
+          {!isInterpreting && state === 'STATE_1_INVENTORY_ALIGNED' && 'Analyzing...'}
+          {!isInterpreting && state === 'STATE_2_INGREDIENT_LIFT' && 'Receiving...'}
+          {!isInterpreting && state === 'STATE_3_RECOMMENDATION_OUTPUT' && 'Complete'}
         </motion.div>
       )}
     </div>

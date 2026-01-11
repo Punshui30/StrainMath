@@ -5,6 +5,8 @@ interface WhyPanelProps {
   confidence: string;
   explanation: string;
   isVisible: boolean;
+  intent?: any;
+  userText?: string;
 }
 
 export function WhyPanel({ confidence, explanation, isVisible }: WhyPanelProps) {

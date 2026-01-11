@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { ProcessorStateMachine } from './GoLogo/ProcessorStateMachine';
 import { IngredientCardLifting } from './IngredientCardLifting';
@@ -24,9 +24,6 @@ type AppMode = 'voice' | 'operator' | 'business';
 
 /**
  * AppShell_StateMachine
- * 
- * State-framed animation implementation (Bolt.new compatible).
- * Four explicit, non-overlapping states with spatial contracts.
  */
 export function AppShell_StateMachine() {
   const [ageVerified, setAgeVerified] = useState(false);
@@ -40,6 +37,12 @@ export function AppShell_StateMachine() {
   const [selectedBlendId, setSelectedBlendId] = useState(1);
   const [committedBlend, setCommittedBlend] = useState<any | null>(null);
 
+  // LLM States
+  const [isInterpreting, setIsInterpreting] = useState(false);
+  const [currentIntent, setCurrentIntent] = useState<any | null>(null);
+  const [lastUserText, setLastUserText] = useState("");
+  const [transcribedText, setTranscribedText] = useState("");
+
   // STATE 2 tracking
   const [ingredientCards, setIngredientCards] = useState<IngredientCard[]>([]);
   const [currentLiftingIndex, setCurrentLiftingIndex] = useState(-1);
@@ -50,13 +53,61 @@ export function AppShell_StateMachine() {
   const logoRef = useRef<HTMLDivElement>(null);
 
   /**
-   * STATE TRANSITION: 0 → 1 → 2 → 3
+   * interpretOutcome
+   * Calls the serverless LLM route
    */
-  const startBlendSequence = useCallback(async () => {
+  const interpretOutcome = async (text: string) => {
+    console.log("📍 API Request Receipt:", text);
+    setIsInterpreting(true);
+    setLastUserText(text);
+
+    try {
+      const response = await fetch('/api/interpret-outcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ outcomeText: text })
+      });
+      const structuredIntent = await response.json();
+      console.log("✨ API Response:", structuredIntent);
+      console.log("⚙️ Engine Input Vectors:", structuredIntent);
+      setCurrentIntent(structuredIntent);
+      return structuredIntent;
+    } catch (error) {
+      console.error("❌ Interpretation failed:", error);
+      return null;
+    } finally {
+      setIsInterpreting(false);
+    }
+  };
+
+  /**
+   * startBlendSequence
+   * Updated to handle real interpretation
+   */
+  const startBlendSequence = useCallback(async (userInput?: string) => {
     if (animationState !== 'STATE_0_IDLE') return;
 
-    // Get selected blend
-    const blend = blendRecommendations.find(b => b.id === selectedBlendId) || blendRecommendations[0];
+    let intent = null;
+    let selectedId = selectedBlendId;
+
+    if (userInput) {
+      intent = await interpretOutcome(userInput);
+
+      if (intent) {
+        // Simple heuristic to pick a blend
+        // 1: Focus, 2: Calm, 3: Jack Focus
+        if (intent.relaxation > 0.6 || intent.anti_anxiety > 0.6) {
+          selectedId = 2;
+        } else if (intent.energy > 0.6) {
+          selectedId = 3;
+        } else if (intent.focus > 0.6 || intent.creativity > 0.6) {
+          selectedId = 1;
+        }
+        setSelectedBlendId(selectedId);
+      }
+    }
+
+    const blend = blendRecommendations.find(b => b.id === selectedId) || blendRecommendations[0];
 
     // Prepare ingredient cards
     const cards: IngredientCard[] = blend.components.map(c => ({
@@ -246,9 +297,25 @@ export function AppShell_StateMachine() {
             <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
               } overflow-hidden`}>
               <PromptsSidebar
-                onPromptSelect={startBlendSequence}
-                onTextSubmit={startBlendSequence}
-                onVoiceActivate={() => console.log('Voice activation triggered')}
+                onPromptSelect={() => startBlendSequence()}
+                onTextSubmit={(text) => startBlendSequence(text)}
+                onVoiceActivate={() => {
+                  console.log("🎤 Voice activation triggered");
+                  const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                  if (!Recognition) {
+                    alert("Speech recognition not supported in this browser.");
+                    return;
+                  }
+                  const recognition = new Recognition();
+                  recognition.lang = 'en-US';
+                  recognition.onresult = (event: any) => {
+                    const transcript = event.results[0][0].transcript;
+                    console.log("🗣️ Voice Transcript captured:", transcript);
+                    setTranscribedText(transcript);
+                    startBlendSequence(transcript);
+                  };
+                  recognition.start();
+                }}
               />
             </div>
 
@@ -267,16 +334,26 @@ export function AppShell_StateMachine() {
               ) : (
                 <>
                   {/* Logo / Processor */}
-                  <div className="flex-1 flex items-center justify-center">
+                  <div className="flex-1 flex flex-col items-center justify-center gap-6">
                     {(animationState === 'STATE_0_IDLE' ||
                       animationState === 'STATE_1_INVENTORY_ALIGNED' ||
                       animationState === 'STATE_2_INGREDIENT_LIFT') && (
-                        <div ref={logoRef}>
+                        <div ref={logoRef} className="flex flex-col items-center">
                           <ProcessorStateMachine
                             state={animationState}
                             cardsArrived={cardsArrived}
                             totalCards={ingredientCards.length}
+                            isInterpreting={isInterpreting}
                           />
+                          {(isInterpreting || transcribedText) && !committedBlend && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 0.4 }}
+                              className="mt-4 text-sm font-light text-white/60 italic max-w-md text-center"
+                            >
+                              "{transcribedText || lastUserText}"
+                            </motion.div>
+                          )}
                         </div>
                       )}
                   </div>
@@ -352,8 +429,13 @@ export function AppShell_StateMachine() {
       {/* Floating Why Panel */}
       {animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && mode === 'voice' && !committedBlend && (
         <WhyPanel
-          confidence="98.4"
-          explanation="This recommendation is driven primarily by myrcene, which provides deep physical relaxation. Caryophyllene acts as a stabilizer, helping to reduce physical tension and anxiety."
+          confidence={currentIntent ? "98.4" : "92.1"}
+          explanation={currentIntent
+            ? `Based on your request "${lastUserText}", we optimized for ${Object.entries(currentIntent).filter(([_, v]: any) => v > 0.5).map(([k]) => k).join(', ')}. This selection prioritizes terpenes that align with your specific goals.`
+            : "This recommendation is driven primarily by myrcene, which provides deep physical relaxation. Caryophyllene acts as a stabilizer, helping to reduce physical tension and anxiety."
+          }
+          intent={currentIntent}
+          userText={lastUserText}
           isVisible={true}
         />
       )}
