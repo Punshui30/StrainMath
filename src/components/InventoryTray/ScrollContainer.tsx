@@ -40,7 +40,7 @@ export interface ScrollContainerHandle {
  * Horizontal scroll container for strain inventory.
  * Exposes methods to programmatically center strain cards.
  */
-export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainerProps>(({ 
+export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainerProps>(({
   selectedStrains = [],
   highlightedStrains = [],
   onStrainHover,
@@ -67,10 +67,10 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
       const leftmost = Math.min(...cardElements.map(el => el.offsetLeft));
       const rightmost = Math.max(...cardElements.map(el => el.offsetLeft + el.offsetWidth));
       const groupCenter = (leftmost + rightmost) / 2;
-      
+
       // Scroll to center the group
       const scrollLeft = groupCenter - (containerRect.width / 2);
-      
+
       container.scrollTo({
         left: scrollLeft,
         behavior: 'smooth'
@@ -102,9 +102,9 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-10"
-         style={{ height: '96px' }}>
+      style={{ height: '120px' }}>
       {/* Soft top gradient divider */}
-      <div 
+      <div
         className="absolute top-0 left-0 right-0 h-8 pointer-events-none"
         style={{
           background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)'
@@ -112,7 +112,7 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
       />
 
       {/* Tray Material */}
-      <div 
+      <div
         className="relative h-full backdrop-blur-[14px]"
         style={{
           background: 'rgba(18, 20, 22, 0.55)',
@@ -120,7 +120,7 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
         }}
       >
         {/* Subtle grain overlay */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.035] pointer-events-none"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' /%3E%3C/svg%3E")`,
@@ -131,7 +131,7 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
         {/* Inventory Rail Container */}
         <div className="relative h-full px-6 pt-4 pb-4 flex items-center">
           {/* Left fade mask */}
-          <div 
+          <div
             className="absolute left-0 top-0 bottom-0 w-8 pointer-events-none z-10"
             style={{
               background: 'linear-gradient(90deg, rgba(18, 20, 22, 0.8) 0%, transparent 100%)'
@@ -139,9 +139,9 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
           />
 
           {/* Horizontal scroll rail */}
-          <div 
+          <div
             ref={scrollRef}
-            className="flex gap-3 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth"
+            className="flex gap-1.5 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -170,7 +170,7 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
           </div>
 
           {/* Right fade mask */}
-          <div 
+          <div
             className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none z-10"
             style={{
               background: 'linear-gradient(270deg, rgba(18, 20, 22, 0.8) 0%, transparent 100%)'

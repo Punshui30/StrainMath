@@ -31,7 +31,9 @@ type AppMode = 'voice' | 'operator' | 'business';
 export function AppShell_StateMachine() {
   const [ageVerified, setAgeVerified] = useState(false);
   const [userTypeSelected, setUserTypeSelected] = useState(false);
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState(() => {
+    return localStorage.getItem('hasOnboarded') === 'true';
+  });
   const [animationState, setAnimationState] = useState<AnimationState>('STATE_0_IDLE');
   const [mode, setMode] = useState<AppMode>('voice');
   const [showHowItWorks, setShowHowItWorks] = useState(false);
@@ -182,7 +184,14 @@ export function AppShell_StateMachine() {
   }
 
   if (!onboardingComplete) {
-    return <OnboardingScreen onComplete={() => setOnboardingComplete(true)} />;
+    return (
+      <OnboardingScreen
+        onComplete={() => {
+          localStorage.setItem('hasOnboarded', 'true');
+          setOnboardingComplete(true);
+        }}
+      />
+    );
   }
 
   return (
@@ -240,7 +249,7 @@ export function AppShell_StateMachine() {
             </div>
 
             {/* Center Content */}
-            <div className="flex-1 flex flex-col" style={{ paddingBottom: '120px' }}>
+            <div className="flex-1 flex flex-col" style={{ paddingBottom: '40px' }}>
               {committedBlend ? (
                 /* Committed State - Blend Calculator */
                 <div className="flex-1 flex items-center justify-center">

@@ -36,7 +36,7 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
 }, ref) => {
   const accentColor = getStrainColor(strain);
   const accentGlow = getStrainGlow(strain, 0.6);
-  
+
   return (
     <motion.button
       ref={ref}
@@ -46,8 +46,8 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
       onClick={onClick}
       className="flex-shrink-0 relative"
       style={{
-        width: '150px',
-        height: '64px',
+        width: '190px',
+        height: '88px',
       }}
       animate={{
         y: isHovered ? -3 : 0,
@@ -59,31 +59,31 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
       }}
     >
       {/* Card background */}
-      <div 
-        className="absolute inset-0 rounded-[14px] transition-all duration-[180ms]"
+      <div
+        className="absolute inset-0 rounded-[18px] transition-all duration-[180ms]"
         style={{
           background: 'rgba(28, 32, 35, 0.6)',
-          boxShadow: isHovered 
-            ? '0 6px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
-            : '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)',
+          boxShadow: isHovered
+            ? '0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)'
+            : '0 6px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
         }}
       />
 
       {/* Strain-specific accent indicator - Top border when highlighted */}
       {isHighlighted && (
-        <div 
-          className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[14px]"
+        <div
+          className="absolute top-0 left-0 right-0 h-[4px] rounded-t-[18px]"
           style={{
             background: accentColor,
-            boxShadow: `0 0 12px ${accentGlow}`,
+            boxShadow: `0 0 16px ${accentGlow}`,
           }}
         />
       )}
 
       {/* Hover inner glow */}
       {isHovered && (
-        <div 
-          className="absolute inset-0 rounded-[14px] pointer-events-none"
+        <div
+          className="absolute inset-0 rounded-[18px] pointer-events-none"
           style={{
             background: 'rgba(212, 175, 55, 0.08)',
           }}
@@ -92,18 +92,18 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
 
       {/* Highlighted state - Full outline + glow (FRAME A) */}
       {isHighlighted && (
-        <div 
-          className="absolute inset-0 rounded-[14px] pointer-events-none"
+        <div
+          className="absolute inset-0 rounded-[18px] pointer-events-none"
           style={{
-            boxShadow: `inset 0 0 0 1px ${accentGlow}, 0 0 16px ${accentGlow}`,
+            boxShadow: `inset 0 0 0 1px ${accentGlow}, 0 0 20px ${accentGlow}`,
           }}
         />
       )}
 
       {/* Selection ring (deprecated - use isHighlighted instead) */}
       {isSelected && !isHighlighted && (
-        <div 
-          className="absolute inset-0 rounded-[14px] pointer-events-none"
+        <div
+          className="absolute inset-0 rounded-[18px] pointer-events-none"
           style={{
             boxShadow: 'inset 0 0 0 1.5px rgba(212, 175, 55, 0.5)',
           }}
@@ -111,38 +111,38 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
       )}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-center px-3.5">
+      <div className="relative h-full flex flex-col justify-center px-4.5">
         {/* Category */}
-        <div 
-          className="text-[8px] uppercase tracking-[0.12em] mb-1 font-medium"
+        <div
+          className="text-[10px] uppercase tracking-[0.14em] mb-1.5 font-medium"
           style={{
-            color: category === 'Sativa' 
-              ? 'rgba(251, 191, 36, 0.7)' 
-              : category === 'Indica' 
-              ? 'rgba(139, 92, 246, 0.7)' 
-              : 'rgba(212, 175, 55, 0.7)'
+            color: category === 'Sativa'
+              ? 'rgba(251, 191, 36, 0.8)'
+              : category === 'Indica'
+                ? 'rgba(139, 92, 246, 0.8)'
+                : 'rgba(212, 175, 55, 0.8)'
           }}
         >
           {category}
         </div>
 
         {/* Strain name */}
-        <div className="text-sm font-light text-white/90 mb-0.5 leading-tight">
+        <div className="text-lg font-light text-white/95 mb-1 leading-tight tracking-tight">
           {strain}
         </div>
 
         {/* Descriptor */}
-        <div className="text-[10px] font-light text-white/40 leading-snug">
+        <div className="text-[12px] font-light text-white/50 leading-snug">
           {descriptor}
         </div>
 
         {/* Accent indicator dot - Bottom right when highlighted */}
         {isHighlighted && (
-          <div 
-            className="absolute bottom-2 right-2 w-2 h-2 rounded-full"
+          <div
+            className="absolute bottom-3 right-3 w-2.5 h-2.5 rounded-full"
             style={{
               background: accentColor,
-              boxShadow: `0 0 8px ${accentGlow}`,
+              boxShadow: `0 0 10px ${accentGlow}`,
             }}
           />
         )}

@@ -17,12 +17,12 @@ interface ProcessorStateMachineProps {
  * - STATE 2: Pulses on each card arrival (incremental intensity)
  * - STATE 3: Emit glow (ready to output)
  */
-export function ProcessorStateMachine({ 
-  state, 
+export function ProcessorStateMachine({
+  state,
   cardsArrived = 0,
-  totalCards = 0 
+  totalCards = 0
 }: ProcessorStateMachineProps) {
-  
+
   const getGlowIntensity = () => {
     switch (state) {
       case 'STATE_0_IDLE':
@@ -45,7 +45,7 @@ export function ProcessorStateMachine({
   return (
     <div className="relative flex flex-col items-center">
       {/* Ambient glow */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 blur-3xl -z-10"
         animate={{
           opacity: glowIntensity,
@@ -53,7 +53,7 @@ export function ProcessorStateMachine({
         }}
         transition={{
           opacity: { duration: 0.3 },
-          scale: { 
+          scale: {
             duration: 0.4,
             repeat: isReceivingCards ? Infinity : 0,
             repeatDelay: 0.3,
@@ -68,10 +68,10 @@ export function ProcessorStateMachine({
       <motion.img
         src={logoImage}
         alt="GO LINE"
-        className="w-32 h-auto relative z-10"
+        className="w-64 h-auto relative z-10"
         animate={{
           scale: isReceivingCards ? [1, 1.08, 1] : 1,
-          filter: `drop-shadow(0 0 ${12 + glowIntensity * 20}px rgba(212,175,55,${glowIntensity}))`
+          filter: `drop-shadow(0 0 ${24 + glowIntensity * 40}px rgba(212,175,55,${glowIntensity}))`
         }}
         transition={{
           scale: {
