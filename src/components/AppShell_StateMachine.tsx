@@ -60,6 +60,7 @@ export function AppShell_StateMachine() {
   const [transcribedText, setTranscribedText] = useState("");
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
+  // [CRITICAL] Initial state MUST be empty to ensure only Logo is shown on load.
   const [visibleBlends, setVisibleBlends] = useState<BlendRecommendation[]>([]);
 
   // STATE 2 tracking
@@ -417,7 +418,7 @@ export function AppShell_StateMachine() {
 
                   {/* Blend Result Cards - Show only when animation completes */}
                   {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
-                    <div className="flex-shrink-0 pb-8 px-12 relative z-50">
+                    <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
                       <div className="flex flex-col items-center w-full">
                         <div className="flex gap-6 justify-center mb-12">
                           {visibleBlends.map((blend, index) => (

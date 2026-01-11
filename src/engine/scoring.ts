@@ -1,4 +1,4 @@
-import { MockCOA } from '../../data/mockCoas';
+import { MOCK_COAS, type MockCOA } from '../../data/mockCoas';
 
 export interface IntentVectors {
     relaxation: number;
@@ -71,10 +71,21 @@ export function scoreStrain(coa: MockCOA, intent: IntentVectors): ScoredStrain {
  * Assembles 3 distinct blends from a collection of scored strains.
  */
 export function assembleBlends(scoredStrains: ScoredStrain[]) {
-    // Sort by match score descending
-    const sorted = [...scoredStrains].sort((a, b) => b.matchScore - a.matchScore);
+    // [CRITICAL GUARANTEE] Fallback to Mock Data if input is empty
+    let sourceStrains = scoredStrains;
+    if (!sourceStrains || sourceStrains.length === 0) {
+        // Fallback: Use raw MOCK_COAS with default scores
+        sourceStrains = MOCK_COAS.map(c => ({
+            ...c,
+            matchScore: 0.5,
+            intentAlignment: { relaxation: 0.5, focus: 0.5, energy: 0.5, creativity: 0.5, pain_relief: 0.5, anti_anxiety: 0.5 }
+        }));
+    }
 
-    // Safety check: if we somehow have no strains, return empty or mock
+    // Sort by match score descending
+    const sorted = [...sourceStrains].sort((a, b) => b.matchScore - a.matchScore);
+
+    // Safety check: if fallback failed (MOCK_COAS empty?), return safe empty but this shouldn't happen.
     if (!sorted || sorted.length === 0) return [];
 
     const getSafeStrain = (idx: number) => sorted[idx] || sorted[0];
@@ -118,10 +129,13 @@ export function assembleBlends(scoredStrains: ScoredStrain[]) {
     // Safe indices logic - modulo if we run out of unique strains
     const safeIndices = (baseIndices: number[]) => baseIndices.map(i => i % sorted.length);
 
-    // Variety logic
-    return [
+    // [CRITICAL GUARANTEE] Always return 3 blends
+    // Even if we have to recycle the top strain 3 times, we never return < 3 options.
+    const blends = [
         buildBlend(1, safeIndices([0, 1, 2]), `Elite ${getSafeStrain(0).strainName || 'Custom'} Blend`),
         buildBlend(2, safeIndices([0, 3, 4]), `Focused ${getSafeStrain(0).strainName || 'Custom'} Mix`),
         buildBlend(3, safeIndices([1, 2, 5]), `${getSafeStrain(1).strainName || 'Custom'} Balanced Cut`)
     ];
+
+    return blends;
 }
