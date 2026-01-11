@@ -65,6 +65,7 @@ export function AppShell_StateMachine() {
   const [lastUserText, setLastUserText] = useState("");
   const [transcribedText, setTranscribedText] = useState("");
   const [showQR, setShowQR] = useState(false);
+  const [blendExplanationText, setBlendExplanationText] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
@@ -123,11 +124,12 @@ export function AppShell_StateMachine() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ outcomeText: text })
       });
-      const structuredIntent = await response.json();
-      console.log("✨ API Response:", structuredIntent);
-      console.log("⚙️ Engine Input Vectors:", structuredIntent);
-      setCurrentIntent(structuredIntent);
-      return structuredIntent;
+      const structured = await response.json();
+      console.log("✨ API Response:", structured);
+      console.log("⚙️ Engine Input Vectors:", structured.intent);
+      setCurrentIntent(structured.intent);
+      setBlendExplanationText(structured.explanation || null);
+      return structured.intent;
     } catch (error) {
       console.error("❌ Interpretation failed:", error);
       return null;
@@ -709,6 +711,7 @@ export function AppShell_StateMachine() {
             <BlendExplanationPanel
               blend={selectedBlend}
               intent={currentIntent}
+              explanation={blendExplanationText}
               userText={lastUserText}
               onProceed={handleCommitBlend}
               onCancel={() => setShowExplanation(false)}
