@@ -74,6 +74,7 @@ export function AppShell_StateMachine() {
   // Mobile Strain Chaser UI State
   const [mobileStrainName, setMobileStrainName] = useState('');
   const [mobileLovedEffects, setMobileLovedEffects] = useState('');
+  const [mobileMode, setMobileMode] = useState<'outcome' | 'strain-chase'>('outcome');
 
   // LLM States
   const [isInterpreting, setIsInterpreting] = useState(false);
@@ -508,131 +509,143 @@ export function AppShell_StateMachine() {
           {isMobile ? (
             <div className="w-full h-full flex flex-col relative z-10 overflow-hidden">
               {/* Fixed Header */}
-              <div className="flex flex-col items-center pt-8 pb-4 bg-black/40 backdrop-blur-md">
-                <img src={logoImage} alt="GO CA" className="w-8 h-auto opacity-90" />
-                <div className="text-[9px] uppercase tracking-[0.3em] text-white/40 mt-2">Mobile Viewer</div>
+              <div className="flex flex-col items-center pt-10 pb-6">
+                <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
+                <div className="text-[8px] uppercase tracking-[0.6em] text-white/10 mt-3 font-bold">Atmospheric Interface</div>
               </div>
 
               {/* Scrollable Content Area */}
-              <div className="flex-1 w-full overflow-y-auto px-6 pt-4 pb-40 scroll-smooth">
+              <div className="flex-1 w-full overflow-y-auto px-8 pt-10 pb-40 scroll-smooth">
                 {animationState === 'STATE_0_IDLE' ? (
-                  <div className="space-y-12">
-                    <div className="w-full max-w-[380px] mx-auto flex flex-col gap-6 py-8">
-                      <h2 className="text-center text-sm font-medium text-white/60 leading-relaxed">
-                        Describe the outcome you're looking for
-                      </h2>
-
-                      <div className="space-y-4">
-                        <input
-                          type="text"
-                          placeholder="Type your desired outcome..."
-                          className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-base text-white/80 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none transition-all duration-300 shadow-inner"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const value = (e.target as HTMLInputElement).value;
-                              if (value.trim()) startBlendSequence({ type: 'user', text: value });
-                            }
-                          }}
-                        />
-
-                        <button
-                          onClick={() => {
-                            const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                            if (!Recognition) return;
-                            const recognition = new Recognition();
-                            recognition.lang = 'en-US';
-                            recognition.onresult = (event: any) => {
-                              const transcript = event.results[0][0].transcript;
-                              setTranscribedText(transcript);
-                              startBlendSequence({ type: 'user', text: transcript });
-                            };
-                            recognition.start();
-                          }}
-                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/30 rounded-xl transition-all duration-300 shadow-lg active:scale-95"
-                        >
-                          <span className="text-xl">🎤</span>
-                          <span className="text-xs uppercase tracking-widest text-[#D4AF37] font-bold">Voice Input</span>
-                        </button>
-                      </div>
-
-                      <div className="space-y-4 mt-4">
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-medium text-center">Or try a preset</p>
-                        <div className="grid grid-cols-1 gap-3">
-                          {['Relaxed & Alert', 'Pain Relief', 'Focus & Creative', 'Sleep Aid'].map((preset) => (
-                            <button
-                              key={preset}
-                              onClick={() => startBlendSequence({ type: 'user', text: preset })}
-                              className="w-full px-4 py-4 text-xs text-white/70 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-2xl rounded-xl transition-all duration-200 border border-white/5 hover:border-white/20 text-center uppercase tracking-widest"
-                            >
-                              {preset}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                  <div className="space-y-24 max-w-[400px] mx-auto">
+                    {/* Mobile Mode Selector */}
+                    <div className="flex justify-center gap-10">
+                      <button
+                        onClick={() => setMobileMode('outcome')}
+                        className={`text-[9px] uppercase tracking-[0.4em] font-bold transition-all ${mobileMode === 'outcome' ? 'text-[#D4AF37]' : 'text-white/10'
+                          }`}
+                      >
+                        Intent
+                      </button>
+                      <button
+                        onClick={() => setMobileMode('strain-chase')}
+                        className={`text-[9px] uppercase tracking-[0.4em] font-bold transition-all ${mobileMode === 'strain-chase' ? 'text-[#D4AF37]' : 'text-white/10'
+                          }`}
+                      >
+                        Memory
+                      </button>
                     </div>
 
-                    {/* Mobile Strain Chaser - Visually Separate */}
-                    <div className="mt-8 pt-6 border-t border-white/[0.08] w-full max-w-[380px] mx-auto">
-                      <div className="mb-5 px-1 text-center">
-                        <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest mb-1.5">Chasing a Strain You Loved?</h3>
-                        <p className="text-[10px] text-white/40 leading-relaxed">Approximate a past experience using chemistry + effects</p>
-                      </div>
-
-                      <div className="space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[9px] uppercase tracking-[0.2em] text-white/30 ml-1 font-medium">Remembered Strain</label>
-                          <div className="relative group">
+                    {mobileMode === 'outcome' ? (
+                      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="space-y-16">
+                          <div className="relative">
                             <input
                               type="text"
-                              value={mobileStrainName}
-                              onChange={(e) => setMobileStrainName(e.target.value)}
-                              placeholder='e.g. "White Gummy by Don Murpho"'
-                              className="w-full px-4 py-4 pr-12 rounded-xl bg-white/[0.03] border border-white/10 
-                                         text-sm text-white/80 placeholder:text-white/20
-                                         focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none 
-                                         transition-all duration-300"
+                              placeholder="What’s your outcome?"
+                              className="w-full bg-transparent border-b border-white/5 py-4 text-2xl font-light text-white 
+                                         placeholder:text-white/10 focus:outline-none focus:border-[#D4AF37]/20 transition-all text-center"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const value = (e.target as HTMLInputElement).value;
+                                  if (value.trim()) startBlendSequence({ type: 'user', text: value });
+                                }
+                              }}
                             />
+                            <div className="mt-8 flex justify-center">
+                              <button
+                                onClick={() => {
+                                  const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                                  if (!Recognition) return;
+                                  const recognition = new Recognition();
+                                  recognition.lang = 'en-US';
+                                  recognition.onresult = (event: any) => {
+                                    const transcript = event.results[0][0].transcript;
+                                    setTranscribedText(transcript);
+                                    startBlendSequence({ type: 'user', text: transcript });
+                                  };
+                                  recognition.start();
+                                }}
+                                className="p-5 rounded-full bg-white/[0.02] border border-white/5 text-[#D4AF37]/40 active:scale-90 transition-all"
+                              >
+                                <Mic className="w-6 h-6" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-6">
+                            <h3 className="text-[9px] uppercase tracking-[0.4em] text-white/10 font-bold text-center">Reference Profiles</h3>
+                            <div className="grid grid-cols-1 gap-2">
+                              {['Relaxed & Alert', 'Pain Relief', 'Focused', 'Sleep Support'].map((preset) => (
+                                <button
+                                  key={preset}
+                                  onClick={() => startBlendSequence({ type: 'user', text: preset })}
+                                  className="w-full py-5 text-[10px] text-white/30 tracking-[0.2em] uppercase font-bold border border-white/5 rounded-xl hover:bg-white/[0.02] transition-colors"
+                                >
+                                  {preset}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="space-y-16">
+                          <div className="space-y-12">
+                            <div className="space-y-4 border-b border-white/5 focus-within:border-[#D4AF37]/20 transition-all pb-2">
+                              <label className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-bold text-center block">Reference Strain</label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={mobileStrainName}
+                                  onChange={(e) => setMobileStrainName(e.target.value)}
+                                  placeholder='Strain Name...'
+                                  className="w-full bg-transparent py-4 text-xl font-light text-white placeholder:text-white/10 focus:outline-none text-center"
+                                />
+                                <button
+                                  onClick={() => {
+                                    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                                    if (!Recognition) return;
+                                    const recognition = new Recognition();
+                                    recognition.lang = 'en-US';
+                                    recognition.onresult = (event: any) => {
+                                      const transcript = event.results[0][0].transcript;
+                                      setMobileStrainName(transcript);
+                                    };
+                                    recognition.start();
+                                  }}
+                                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-white/10"
+                                >
+                                  <Mic className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-4 border-b border-white/5 focus-within:border-[#D4AF37]/20 transition-all pb-2">
+                              <label className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-bold text-center block">Favor Effects</label>
+                              <input
+                                type="text"
+                                value={mobileLovedEffects}
+                                onChange={(e) => setMobileLovedEffects(e.target.value)}
+                                placeholder='e.g. Calm, Social'
+                                className="w-full bg-transparent py-4 text-xl font-light text-white placeholder:text-white/10 focus:outline-none text-center"
+                              />
+                            </div>
+
                             <button
                               onClick={() => {
-                                const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                                if (!Recognition) return;
-                                const recognition = new Recognition();
-                                recognition.lang = 'en-US';
-                                recognition.onresult = (event: any) => {
-                                  const transcript = event.results[0][0].transcript;
-                                  setMobileStrainName(transcript);
-                                };
-                                recognition.start();
+                                startBlendSequence({ type: 'strain-chase', strainName: mobileStrainName, lovedEffects: mobileLovedEffects });
                               }}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-[#D4AF37]/10 rounded-full transition-colors"
+                              disabled={!mobileStrainName.trim()}
+                              className="w-full py-6 bg-[#D4AF37] text-black font-bold uppercase tracking-[0.2em] text-xs rounded-2xl shadow-xl shadow-[#D4AF37]/10 disabled:opacity-10 active:scale-95 transition-all"
                             >
-                              <span className="text-lg opacity-60">🎤</span>
+                              Match Profile
                             </button>
                           </div>
                         </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[9px] uppercase tracking-[0.2em] text-white/30 ml-1 font-medium">What did you love? (Optional)</label>
-                          <input
-                            type="text"
-                            value={mobileLovedEffects}
-                            onChange={(e) => setMobileLovedEffects(e.target.value)}
-                            placeholder='e.g. "calm, euphoric"'
-                            className="w-full px-4 py-4 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white/80 placeholder:text-white/20 focus:bg-white/[0.05] focus:border-[#D4AF37]/30 focus:outline-none transition-all duration-300"
-                          />
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            startBlendSequence({ type: 'strain-chase', strainName: mobileStrainName, lovedEffects: mobileLovedEffects });
-                          }}
-                          disabled={!mobileStrainName.trim()}
-                          className="w-full py-4 bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 border border-[#D4AF37]/20 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-xs uppercase tracking-[0.2em] text-[#D4AF37] font-bold transition-all duration-300 active:scale-95 shadow-lg shadow-[#D4AF37]/5"
-                        >
-                          Find Closest Match
-                        </button>
                       </div>
-                    </div>
+                    )}
                   </div>
                 ) : (
                   <div className="w-full max-w-[420px] mx-auto py-4">
