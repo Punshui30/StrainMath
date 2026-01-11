@@ -74,6 +74,14 @@ export function AppShell_StateMachine() {
   const inventoryRef = useRef<ScrollContainerHandle>(null);
   const logoRef = useRef<HTMLDivElement>(null);
 
+  // [CORRECTIVE FIX] Shared Inventory State (Single Source of Truth)
+  const [inventory, setInventory] = useState(() => MOCK_COAS.map(coa => ({
+    ...coa,
+    strain: coa.name, // Compatibility
+    qty: Math.floor(Math.random() * 400) + 50,
+    status: 'In Stock' as const
+  })));
+
   /**
    * interpretOutcome
    * Calls the serverless LLM route
@@ -134,7 +142,8 @@ export function AppShell_StateMachine() {
         anti_anxiety: intent.anti_anxiety ?? 0.5
       };
 
-      const scored = MOCK_COAS.map(coa => scoreStrain(coa, safeIntent));
+      // [CORRECTIVE FIX] Score against Shared Inventory State
+      const scored = inventory.map(coa => scoreStrain(coa, safeIntent));
 
       // Assemble 3 unique blends from top scores
       const newBlends = assembleBlends(scored);
@@ -203,7 +212,7 @@ export function AppShell_StateMachine() {
 
     // Cards will lift sequentially via handleCardArrival
 
-  }, [animationState, selectedBlendId]);
+  }, [animationState, selectedBlendId, inventory]);
 
   /**
    * STATE 2: Handle individual card arrival
@@ -550,11 +559,9 @@ export function AppShell_StateMachine() {
           const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0];
           return (
             <WhyPanel
-              confidence={currentIntent ? "98.4" : "92.1"}
-              explanation={generateExplanation(lastUserText, currentIntent, selectedBlend)}
-              intent={currentIntent}
-              userText={lastUserText}
               isVisible={true}
+              blend={selectedBlend}
+              intent={currentIntent}
             />
           );
         })()
@@ -576,7 +583,14 @@ export function AppShell_StateMachine() {
         )
       }
 
-      {mode === 'operator' && <AdminOverlay mode={mode} onPresetSelect={handlePresetSelect} />}
+      {mode === 'operator' && (
+        <AdminOverlay
+          mode={mode}
+          onPresetSelect={handlePresetSelect}
+          inventory={inventory}
+          onUpdateInventory={setInventory}
+        />
+      )}
     </div>
   );
 }

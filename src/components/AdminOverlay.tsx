@@ -2,19 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { CameraScanner } from './CameraScanner';
 import logoImage from '../assets/logo.png';
-import type { IntentVectors } from '../engine/scoring'; // Import type if needed
 
 interface AdminOverlayProps {
-  mode?: string; // Added to match usage in AppShell
+  mode?: string;
   onClose?: () => void;
   onShowBusinessOverview?: () => void;
-  onPresetSelect?: (intent: any) => void; // Loose type for now to avoid import hell if type not exported
-}
-
-interface InventoryItem {
-  strain: string;
-  qty: number;
-  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  onPresetSelect?: (intent: any) => void;
+  inventory: any[];
+  onUpdateInventory: (inv: any[]) => void;
 }
 
 const DEMO_STEPS = [
@@ -26,17 +21,8 @@ const DEMO_STEPS = [
   { target: 'presets', text: 'Production Presets\nOne-click targeting for popular effect profiles.' },
 ];
 
-export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: AdminOverlayProps) {
+export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect, inventory, onUpdateInventory }: AdminOverlayProps) {
   const [isScanning, setIsScanning] = useState(false);
-
-  // Interactive Inventory State
-  const [inventory, setInventory] = useState<InventoryItem[]>([
-    { strain: 'Green Crack', qty: 245, status: 'In Stock' },
-    { strain: 'Durban Poison', qty: 180, status: 'In Stock' },
-    { strain: 'Jack Herer', qty: 95, status: 'Low Stock' },
-    { strain: 'OG Kush', qty: 310, status: 'In Stock' },
-    { strain: 'Blue Dream', qty: 0, status: 'Out of Stock' },
-  ]);
 
   // Demo State
   const [isDemoRunning, setIsDemoRunning] = useState(false);
@@ -53,7 +39,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
       } else {
         setIsDemoRunning(false); // End demo
       }
-    }, 3000); // 3 seconds per step
+    }, 4000); // 4 seconds per step for better reading
 
     return () => clearTimeout(timer);
   }, [isDemoRunning, demoStep]);
@@ -79,19 +65,33 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
     if (!strain) return;
     const qtyStr = prompt("Enter Quantity (g):");
     const qty = parseInt(qtyStr || '0');
-    setInventory(prev => [{ strain, qty, status: updateStatus(qty) }, ...prev]);
+    // We assume MOCK format or simple format.
+    // If inventory items are full COAs, we might be pushin a partial object.
+    // But since display is just Strain/Qty/Status, we can push a partial.
+    // For scoring, "scoreStrain" needs "terpenes".
+    // If we push a manual entry without terpenes, the engine might choke.
+    // [SAFETY] For manual entry in this demo, let's clone an existing terpene profile randomly so it works in engine.
+    const template = inventory[0] || {};
+
+    onUpdateInventory([{
+      ...template, // Clone mock data structure
+      name: strain, // Override name
+      strain: strain,
+      qty: qty,
+      status: updateStatus(qty)
+    }, ...inventory]);
   };
 
   const handleEditQty = (index: number) => {
     const item = inventory[index];
-    const newQtyStr = prompt(`Update quantity for ${item.strain}:`, item.qty.toString());
+    const newQtyStr = prompt(`Update quantity for ${item.strain || item.name}:`, item.qty.toString());
     if (newQtyStr === null) return;
     const newQty = parseInt(newQtyStr);
     if (isNaN(newQty)) return;
 
     const newInv = [...inventory];
     newInv[index] = { ...item, qty: newQty, status: updateStatus(newQty) };
-    setInventory(newInv);
+    onUpdateInventory(newInv);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +99,9 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
     if (file) {
       // Mock Parse
       const strainName = file.name.split('.')[0] || "Unknown Import";
-      setInventory(prev => [{ strain: strainName, qty: 500, status: 'In Stock' }, ...prev]);
+      // Clone template for engine safety
+      const template = inventory[0] || {};
+      onUpdateInventory([{ ...template, name: strainName, strain: strainName, qty: 500, status: 'In Stock' }, ...inventory]);
     }
   };
 
@@ -126,44 +128,36 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="w-full h-full bg-[#0A0A0B] overflow-y-auto relative"
     >
-      {/* Demo Overlay */}
+      {/* Visual-Only Demo Banner (Non-Blocking) */}
       <AnimatePresence>
         {isDemoRunning && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[999] bg-black/60 backdrop-blur-sm pointer-events-auto flex flex-col items-center justify-center text-center p-8"
-            onClick={skipDemo} // Click anywhere to skip
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center"
           >
-            <motion.div
-              key={demoStep}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="max-w-xl"
-            >
-              <div className="text-[#D4AF37] text-xs uppercase tracking-[0.2em] mb-4">
-                Step {demoStep + 1} / {DEMO_STEPS.length}
-              </div>
-              <h2 className="text-3xl font-light text-white mb-4 whitespace-pre-line">
-                {DEMO_STEPS[demoStep].text.split('\n')[0]}
-              </h2>
-              <p className="text-white/60 text-lg font-light leading-relaxed">
-                {DEMO_STEPS[demoStep].text.split('\n')[1]}
-              </p>
-            </motion.div>
-
-            <button onClick={skipDemo} className="absolute bottom-12 text-white/30 hover:text-white transition-colors text-xs uppercase tracking-widest border border-white/10 px-4 py-2 rounded-full">
-              Skip Demo
-            </button>
+            <div className="bg-[#D4AF37] text-black px-6 py-3 rounded-full shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center gap-4 border border-white/20">
+              <span className="font-bold text-xs tracking-wider">DEMO {demoStep + 1}/{DEMO_STEPS.length}</span>
+              <div className="w-px h-4 bg-black/10" />
+              <span className="font-medium text-sm">{DEMO_STEPS[demoStep].text.split('\n')[0]}</span>
+              <button
+                onClick={skipDemo}
+                className="ml-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 transition-colors text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-2 text-[10px] text-[#D4AF37]/80 uppercase tracking-widest font-medium bg-black/80 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+              Visual Walkthrough Active
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <div className="max-w-7xl mx-auto p-8">
         {/* Header with Business Overview link */}
-        <div className="mb-6 pb-4 border-b border-white/10 flex items-center justify-between">
+        <div className={`mb-6 pb-4 border-b border-white/10 flex items-center justify-between transition-all duration-300 ${isDemoRunning && demoStep === 0 ? 'scale-[1.02] origin-left bg-white/[0.03] p-4 rounded-xl ring-1 ring-[#D4AF37]/50' : ''}`}>
           <div className="flex items-center gap-4">
             <img
               src={logoImage}
@@ -187,9 +181,9 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
           </button>
         </div>
 
-        <div className={`grid grid-cols-2 gap-6 transition-opacity duration-300 ${isDemoRunning ? 'opacity-20' : 'opacity-100'}`}>
+        <div className={`grid grid-cols-2 gap-6 transition-all duration-500 ${isDemoRunning ? 'opacity-40 grayscale-[0.5]' : 'opacity-100'}`}>
           {/* System Mode */}
-          <div className={`border border-white/20 bg-black/40 p-6 ${isDemoRunning && demoStep === 1 ? 'ring-2 ring-[#D4AF37] opacity-100 !bg-white/5' : ''}`}>
+          <div className={`border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && demoStep === 1 ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.02] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
             <div className="text-xs uppercase tracking-widest text-white/40 mb-4">System Mode</div>
             <div className="grid grid-cols-3 gap-2">
               <button className="py-2 px-3 bg-white/10 border border-white/20 text-sm hover:bg-white/15 transition-colors text-white">
@@ -205,7 +199,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
           </div>
 
           {/* System Stats */}
-          <div className={`border border-white/20 bg-black/40 p-6 ${isDemoRunning && demoStep === 2 ? 'ring-2 ring-[#D4AF37] opacity-100 !bg-white/5' : ''}`}>
+          <div className={`border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && demoStep === 2 ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.02] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
             <div className="text-xs uppercase tracking-widest text-white/40 mb-4">Statistics</div>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               <div className="flex justify-between">
@@ -220,11 +214,11 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
           </div>
 
           {/* Inventory - Full Width */}
-          <div className={`col-span-2 border border-white/20 bg-black/40 p-6 ${isDemoRunning && (demoStep === 3 || demoStep === 4) ? 'ring-2 ring-[#D4AF37] opacity-100 !bg-white/5' : ''}`}>
+          <div className={`col-span-2 border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && (demoStep === 3 || demoStep === 4) ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.01] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
             {/* Header with COA Ingestion Actions */}
             <div className="flex items-center justify-between mb-6">
               <div className="text-xs uppercase tracking-widest text-white/40">Inventory</div>
-              <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-3 transition-opacity duration-300 ${isDemoRunning && demoStep === 4 ? 'animate-pulse' : ''}`}>
                 <button
                   onClick={() => setIsScanning(true)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-sm text-white/80 hover:text-white transition-all"
@@ -274,10 +268,10 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
               <div className="max-h-64 overflow-y-auto pr-2">
                 {inventory.map((item, idx) => (
                   <div
-                    key={`${item.strain}-${idx}`}
+                    key={`${item.strain || item.name}-${idx}`}
                     className="grid grid-cols-4 gap-4 py-2 border-b border-white/5 hover:bg-white/5 transition-colors text-sm items-center"
                   >
-                    <div className="text-white/90">{item.strain}</div>
+                    <div className="text-white/90">{item.strain || item.name}</div>
                     <div className="text-white/60">{item.qty}g</div>
                     <div>
                       <span
@@ -307,7 +301,7 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
           </div>
 
           {/* Presets */}
-          <div className={`col-span-2 border border-white/20 bg-black/40 p-6 ${isDemoRunning && demoStep === 5 ? 'ring-2 ring-[#D4AF37] opacity-100 !bg-white/5' : ''}`}>
+          <div className={`col-span-2 border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && demoStep === 5 ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.01] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="text-xs uppercase tracking-widest text-white/40">Presets</div>
               <button className="text-xs text-white/40 hover:text-white transition-colors">+ New</button>
@@ -335,7 +329,9 @@ export function AdminOverlay({ mode, onShowBusinessOverview, onPresetSelect }: A
             onCapture={(data) => {
               console.log("Captured COA Image data length:", data.length);
               // Mock scan result
-              setInventory(prev => [{ strain: "Scanned Sample #092", qty: 250, status: 'In Stock' }, ...prev]);
+              // Clone template for safety
+              const template = inventory[0] || {};
+              onUpdateInventory([{ ...template, strain: "Scanned Sample #092", name: "Scanned Sample #092", qty: 250, status: 'In Stock' }, ...inventory]);
               setIsScanning(false);
             }}
           />
