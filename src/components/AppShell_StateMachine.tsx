@@ -272,9 +272,14 @@ export function AppShell_StateMachine() {
   };
 
   const handleMakeBlend = () => {
+    console.log("🛠️ Make Blend Clicked. Selected ID:", selectedBlendId);
+    console.log("🛠️ Visible Blends:", visibleBlends);
     const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
     if (selectedBlend) {
+      console.log("✅ Setting committed blend:", selectedBlend.name);
       setCommittedBlend(selectedBlend);
+    } else {
+      console.error("❌ No blend found for ID:", selectedBlendId);
     }
   };
 
