@@ -7,6 +7,7 @@ import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
 import { WhyPanel } from './WhyPanel';
 import { BlendExplanationPanel } from './BlendExplanationPanel';
+import { VisualFlyInOverlay } from './VisualFlyInOverlay';
 import { PromptsSidebar } from './PromptsSidebar';
 import { BusinessOverview } from './BusinessOverview';
 import { AdminOverlay } from './AdminOverlay';
