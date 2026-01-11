@@ -219,40 +219,17 @@ export function AppShell_StateMachine() {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     // ========================================
-    // STATE 2: INGREDIENT LIFT (SEQUENTIAL)
+    // STATE 2: INGREDIENT LIFT (VISUAL ONLY)
     // ========================================
     setAnimationState('STATE_2_INGREDIENT_LIFT');
-    setCardsArrived(0);
-    setCurrentLiftingIndex(0);
 
-    // Cards will lift sequentially via handleCardArrival
+    // [CRITICAL FAILSAFE] Force Advance to Presentation Layer
+    // Does not rely on animation callbacks. Guaranteed to render results.
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
 
   }, [animationState, selectedBlendId, inventory]);
-
-  /**
-   * STATE 2: Handle individual card arrival
-   * Triggers next card to lift
-   */
-  const handleCardArrival = useCallback(() => {
-    setCardsArrived(prev => {
-      const newCount = prev + 1;
-
-      if (newCount < ingredientCards.length) {
-        // Lift next card after delay
-        setTimeout(() => {
-          setCurrentLiftingIndex(newCount);
-        }, ANIMATION_TIMINGS.CARD_LIFT_DELAY);
-      } else {
-        // All cards arrived - transition to STATE 3
-        setTimeout(() => {
-          setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
-          setCurrentLiftingIndex(-1);
-        }, ANIMATION_TIMINGS.CARD_LIFT_DELAY);
-      }
-
-      return newCount;
-    });
-  }, [ingredientCards.length]);
 
   const handleReset = () => {
     setAnimationState('STATE_0_IDLE');
