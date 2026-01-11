@@ -366,8 +366,8 @@ export function AppShell_StateMachine() {
                       )}
                   </div>
 
-                  {/* STATE 3: Blend Result Cards */}
-                  {animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
+                  {/* Blend Result Cards - Always show when blends exist */}
+                  {visibleBlends.length > 0 && (
                     <div className="flex-shrink-0 pb-8 px-12">
                       <div className="flex flex-col items-center w-full">
                         <div className="flex gap-6 justify-center mb-12">
@@ -382,7 +382,7 @@ export function AppShell_StateMachine() {
                           ))}
                         </div>
 
-                        {/* Make Blend Button */}
+                        {/* Make Blend Button - Always visible */}
                         <button
                           onClick={handleMakeBlend}
                           className="px-12 py-4 bg-white/[0.08] hover:bg-white/[0.12]

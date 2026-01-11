@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, forwardRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { getStrainColor, getStrainGlow } from '../../utils/strainColors';
 import type { MockCOA } from '../../../data/mockCoas';
@@ -157,8 +158,8 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
       </div>
 
       {/* Expanded Detail Overlay */}
-      <AnimatePresence>
-        {isExpanded && coa && (
+      {isExpanded && coa && createPortal(
+        <AnimatePresence>
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md" onClick={(e) => {
             if (e.target === e.currentTarget) {
               setIsExpanded(false);
@@ -169,7 +170,7 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-lg bg-[#1C2023]/90 border border-white/10 rounded-3xl overflow-y-auto shadow-2xl"
+              className="relative w-full max-w-lg bg-[#1C2023]/95 border border-white/10 rounded-3xl overflow-y-auto shadow-2xl"
               style={{
                 boxShadow: `0 0 40px ${accentGlow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
                 maxHeight: '90vh',
@@ -237,8 +238,9 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
               <div className="absolute bottom-0 left-0 w-full h-1" style={{ background: accentColor }} />
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </motion.button>
   );
 });
