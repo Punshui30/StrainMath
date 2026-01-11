@@ -228,9 +228,18 @@ export function AppShell_StateMachine() {
     await inventoryRef.current?.scrollToCenter(uniqueStrains);
 
     // Short processing delay for "Compute" feel
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise(resolve => setTimeout(resolve, 400));
 
-    // Direct transition to Results - NO Assembly Animation
+    // STATE 2: Ingredient Lift / Assembly
+    setAnimationState('STATE_2_INGREDIENT_LIFT');
+
+    // Fire visual-only fly-in (overlay listens for this)
+    window.dispatchEvent(new Event('strain-math:trigger-fly-in'));
+
+    // Allow animation to play
+    await new Promise(resolve => setTimeout(resolve, 900));
+
+    // STATE 3: Results
     setAnimationState('STATE_3_RECOMMENDATION_OUTPUT');
 
   }, [animationState, selectedBlendId, inventory]);
@@ -530,7 +539,7 @@ export function AppShell_StateMachine() {
 
               {/* Blend Result Cards - Show only when animation completes */}
               {visibleBlends.length > 0 && animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && (
-                <div className="flex-shrink-0 pb-32 px-12 relative z-[100]">
+                <div className="absolute inset-0 flex items-center justify-center pb-32 z-[100] pointer-events-auto">
                   <div className="flex flex-col items-center w-full">
                     <div className="flex gap-6 justify-center mb-12">
                       {(visibleBlends || []).map((blend, index) => (
@@ -649,6 +658,9 @@ export function AppShell_StateMachine() {
         onClose={() => setShowQR(false)}
         blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]!}
       />
+
+      {/* Visual Fly-In Overlay (isolated, non-blocking) */}
+      <VisualFlyInOverlay />
 
       {/* Inventory Tray */}
       {

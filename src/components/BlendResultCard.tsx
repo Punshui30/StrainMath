@@ -26,7 +26,6 @@ export function BlendResultCard({ blend, isSelected, onSelect, index, animationA
     <motion.button
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scrollBehavior: 'smooth', y: yKeyframes, scale: 1 }}
-      whileHover={{ y: -6 }}
       transition={{
         duration: 0.8,
         delay: index * 0.12,
