@@ -277,7 +277,22 @@ export function AppShell_StateMachine() {
   };
 
   if (!ageVerified) {
-    return <AgeGateOverlay onVerify={() => setAgeVerified(true)} />;
+    return (
+      <AgeGateOverlay
+        onEnterConsumer={() => {
+          setAgeVerified(true);
+          setUserTypeSelected(true);
+          setOnboardingComplete(true);
+          setMode('voice');
+        }}
+        onEnterOperator={() => {
+          setAgeVerified(true);
+          setUserTypeSelected(true);
+          setOnboardingComplete(true);
+          setMode('operator');
+        }}
+      />
+    );
   }
 
   if (!userTypeSelected) {
@@ -555,7 +570,7 @@ export function AppShell_StateMachine() {
         )
       }
 
-      <AdminOverlay mode={mode} onPresetSelect={handlePresetSelect} />
+      {mode === 'operator' && <AdminOverlay mode={mode} onPresetSelect={handlePresetSelect} />}
     </div>
   );
 }
