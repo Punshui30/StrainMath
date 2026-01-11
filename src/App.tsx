@@ -1,36 +1,6 @@
-import React from 'react';
-import { AppProvider } from './state/AppContext';
-import { Router, useRouter } from './router/Router';
-import { AgeGate } from './pages/AgeGate';
-import { FirstTimeOnboarding } from './pages/FirstTimeOnboarding';
-import { Calculator } from './pages/Calculator';
-import { BlendCommit } from './pages/BlendCommit';
+import { useState } from 'react';
+import { AppShell_StateMachine } from './components/AppShell_StateMachine';
 
-function AppRoutes() {
-  const { currentRoute } = useRouter();
-
-  switch (currentRoute) {
-    case 'age-gate':
-      return <AgeGate />;
-    case 'first-time-onboarding':
-      return <FirstTimeOnboarding />;
-    case 'calculator':
-      return <Calculator />;
-    case 'blend-commit':
-      return <BlendCommit />;
-    default:
-      return <AgeGate />;
-  }
+export default function App() {
+  return <AppShell_StateMachine />;
 }
-
-function App() {
-  return (
-    <AppProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AppProvider>
-  );
-}
-
-export default App;
