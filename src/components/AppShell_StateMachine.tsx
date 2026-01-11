@@ -245,7 +245,11 @@ export function AppShell_StateMachine() {
             {/* Left Sidebar - Hidden when not idle */}
             <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'
               } overflow-hidden`}>
-              <PromptsSidebar onPromptSelect={startBlendSequence} />
+              <PromptsSidebar
+                onPromptSelect={startBlendSequence}
+                onTextSubmit={startBlendSequence}
+                onVoiceActivate={() => console.log('Voice activation triggered')}
+              />
             </div>
 
             {/* Center Content */}

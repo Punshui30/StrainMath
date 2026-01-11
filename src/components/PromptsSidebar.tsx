@@ -6,7 +6,11 @@ interface PromptsSidebarProps {
   onVoiceActivate?: () => void;
 }
 
-export function PromptsSidebar({ onPromptSelect }: PromptsSidebarProps) {
+export function PromptsSidebar({
+  onPromptSelect,
+  onTextSubmit,
+  onVoiceActivate
+}: PromptsSidebarProps) {
   const prompts = [
     '"Relaxed but alert, no anxiety"',
     '"Pain relief and anti-nausea, but no jitters"',
