@@ -2,16 +2,14 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { ProcessorStateMachine } from './GoLogo/ProcessorStateMachine';
-import { IngredientCardLifting } from './IngredientCardLifting';
 import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
 import { BlendExplanationPanel } from './BlendExplanationPanel';
 import { VisualFlyInOverlay } from './VisualFlyInOverlay';
 import { PromptsSidebar } from './PromptsSidebar';
-import { BusinessOverview } from './BusinessOverview';
 import { AdminOverlay } from './AdminOverlay';
 import { HowItWorks } from './HowItWorks';
-import { BusinessImpactScreen } from './BusinessImpactScreen';
+import { BusinessWalkthrough } from './BusinessWalkthrough';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { AgeGateOverlay } from './AgeGateOverlay';
 import { OnboardingScreen } from './OnboardingScreen';
@@ -91,8 +89,7 @@ export function AppShell_StateMachine() {
     explanation: string;
   } | null>(null);
 
-  const [showBusinessImpact, setShowBusinessImpact] = useState(false);
-  const [showBusinessOverview, setShowBusinessOverview] = useState(false);
+  const [showBusinessWalkthrough, setShowBusinessWalkthrough] = useState(false);
 
   // Initialize with top 3 strains based on a neutral intent
   // Initialize empty - waiting for user intent
@@ -301,7 +298,7 @@ export function AppShell_StateMachine() {
 
   }, [animationState, selectedBlendId, inventory]);
 
-  // Demo Lifecycle Loop
+  // Demo Lifecycle Loop (Legacy - Disabled for new Walkthrough Flow)
   useEffect(() => {
     if (!isDemoRunning) return;
 
@@ -314,17 +311,9 @@ export function AppShell_StateMachine() {
       }, 500);
     }
 
-    const timer = setTimeout(() => {
-      if (demoStep < DEMO_STEPS.length - 1) {
-        setDemoStep(prev => prev + 1);
-      } else {
-        setIsDemoRunning(false); // End demo
-        setShowBusinessImpact(true); // Show impact screen after walkthrough
-      }
-    }, 6000); // Step Duration
-
-    return () => clearTimeout(timer);
-  }, [isDemoRunning, demoStep, mode, startBlendSequence]);
+    // Auto-advance is now disabled for the business narrative.
+    // Logic remains for potential consumer-side automation in future.
+  }, [isDemoRunning, demoStep]);
 
   const handleReset = () => {
     setAnimationState('STATE_0_IDLE');
@@ -799,34 +788,25 @@ export function AppShell_StateMachine() {
       {/* Modals & Overlays */}
       {showHowItWorks && <HowItWorks isOpen={showHowItWorks} onClose={() => setShowHowItWorks(false)} />}
 
-      {mode === 'operator' && (
+      {mode === 'operator' && !showBusinessWalkthrough && (
         <AdminOverlay
           isDemoRunning={isDemoRunning}
           demoStep={demoStep}
-          onStartDemo={() => setIsDemoRunning(true)}
+          onStartDemo={() => setShowBusinessWalkthrough(true)}
           onStopDemo={() => setIsDemoRunning(false)}
           inventory={inventory}
           onUpdateInventory={setInventory}
           onPresetSelect={handlePresetSelect}
-          onShowBusinessOverview={() => setShowBusinessOverview(true)}
+          onShowBusinessOverview={() => setShowBusinessWalkthrough(true)}
         />
       )}
 
-      {showBusinessOverview && (
-        <div className="fixed inset-0 z-[100]">
-          <BusinessOverview onClose={() => setShowBusinessOverview(false)} />
-        </div>
-      )}
-
-      {showBusinessImpact && (
-        <BusinessImpactScreen
-          onRestart={() => {
-            setShowBusinessImpact(false);
-            setDemoStep(0);
-            setIsDemoRunning(true);
-          }}
-          onSchedule={() => {
-            window.open('https://calendly.com/golinesystems', '_blank');
+      {showBusinessWalkthrough && (
+        <BusinessWalkthrough
+          onClose={() => setShowBusinessWalkthrough(false)}
+          onEnterConsole={() => {
+            setShowBusinessWalkthrough(false);
+            setMode('operator');
           }}
         />
       )}
