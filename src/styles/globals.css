@@ -1,13 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
 
-@custom-variant dark (&:is(.dark *));
+
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
   body {
     @apply bg-[#0A0A0A] text-white antialiased;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
@@ -18,7 +14,7 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
