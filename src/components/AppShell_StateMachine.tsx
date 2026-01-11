@@ -7,7 +7,7 @@ import { BlendResultCard } from './BlendResultCard';
 import { BlendCalculator } from './BlendCalculator';
 import { WhyPanel } from './WhyPanel';
 import { PromptsSidebar } from './PromptsSidebar';
-import { SystemEvaluationAnimation } from './SystemEvaluationAnimation';
+import { SafeTileAnimation } from './SafeTileAnimation';
 import { BusinessOverview } from './BusinessOverview';
 import { HowItWorks } from './HowItWorks';
 import { AgeGateOverlay } from './AgeGateOverlay';
@@ -552,9 +552,9 @@ export function AppShell_StateMachine() {
         )}
       </AnimatePresence>
 
-      {/* Abstract System Scan Animation */}
+      {/* Safe Tile Animation (Visual Only) */}
       {animationState === 'STATE_2_INGREDIENT_LIFT' && (
-        <SystemEvaluationAnimation />
+        <SafeTileAnimation cards={ingredientCards} />
       )}
 
       {/* Floating Why Panel */}
