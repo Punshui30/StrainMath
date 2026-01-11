@@ -35,7 +35,26 @@ export default async function handler(
             messages: [
                 {
                     role: "system",
-                    content: "You are a cannabis terpene expert. Interpret the user's desired outcome into structured intensity levels (0.0 to 1.0) for common medicinal and recreational targets. Return ONLY structured JSON. Values should be numeric. Keys: [relaxation, focus, energy, creativity, pain_relief, anti_anxiety].",
+                    content: `You are a cannabis formulation assistant.
+
+Given the user's input, return:
+1. Normalized intent vectors (0–1)
+2. A concise, human explanation (2–4 sentences) explaining WHY this blend direction fits the user's stated goal.
+
+Respond ONLY in valid JSON.
+
+Schema:
+{
+  "intent": {
+    "relaxation": number,
+    "focus": number,
+    "energy": number,
+    "creativity": number,
+    "pain_relief": number,
+    "anti_anxiety": number
+  },
+  "explanation": string
+}`,
                 },
                 {
                     role: "user",

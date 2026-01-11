@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
 import type { BlendRecommendation } from '../types/blend';
 import type { IntentVectors } from '../engine/scoring';
-import { generateExplanation } from '../utils/explanationGenerator';
 
 interface BlendExplanationPanelProps {
     blend: BlendRecommendation;
     intent: IntentVectors | null;
+    explanation: string | null;
     userText: string;
     onProceed: () => void;
     onCancel: () => void;
@@ -14,11 +14,11 @@ interface BlendExplanationPanelProps {
 export function BlendExplanationPanel({
     blend,
     intent,
+    explanation,
     userText,
     onProceed,
     onCancel
 }: BlendExplanationPanelProps) {
-    const explanation = generateExplanation(userText, intent, blend);
 
     return (
         <>
@@ -55,9 +55,15 @@ export function BlendExplanationPanel({
 
                     {/* Explanation */}
                     <div className="mb-10 p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-                        <p className="text-lg leading-relaxed text-white/80 font-light">
-                            {explanation}
-                        </p>
+                        {explanation ? (
+                            <p className="text-lg leading-relaxed text-white/80 font-light whitespace-pre-line">
+                                {explanation}
+                            </p>
+                        ) : (
+                            <p className="text-lg leading-relaxed text-white/60 font-light italic">
+                                This blend was selected based on available inventory and general wellness principles.
+                            </p>
+                        )}
                     </div>
 
                     {/* Confidence Badge */}
