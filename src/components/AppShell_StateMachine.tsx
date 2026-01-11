@@ -732,7 +732,9 @@ export function AppShell_StateMachine() {
             </div>
           ) : (
             <div className="w-full h-full flex">
-              <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' ? 'w-80' : 'w-0'} overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''}`}>
+              <div className={`transition-all duration-700 ease-out ${animationState === 'STATE_0_IDLE' || animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'w-80' : 'w-0'
+                } overflow-hidden ${animationState === 'STATE_3_RECOMMENDATION_OUTPUT' ? 'pointer-events-none opacity-40 grayscale' : ''
+                }`}>
                 <PromptsSidebar
                   onPromptSelect={(text) => startBlendSequence({ type: 'user', text })}
                   onTextSubmit={(text) => startBlendSequence({ type: 'user', text })}
