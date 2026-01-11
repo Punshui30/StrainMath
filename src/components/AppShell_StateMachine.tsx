@@ -108,6 +108,7 @@ export function AppShell_StateMachine() {
 
     let intent: any = null;
     let selectedId = selectedBlendId;
+    let activeBlends = visibleBlends;
 
     if (userInput) {
       intent = await interpretOutcome(userInput);
@@ -139,6 +140,7 @@ export function AppShell_StateMachine() {
         }
 
         setVisibleBlends(newBlends);
+        activeBlends = newBlends;
         selectedId = newBlends[0].id;
         setSelectedBlendId(selectedId);
       }
