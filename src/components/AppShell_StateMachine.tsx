@@ -112,12 +112,31 @@ export function AppShell_StateMachine() {
     if (userInput) {
       intent = await interpretOutcome(userInput);
 
-      if (intent) {
+      if (intent && typeof intent === 'object') {
+        // [CRITICAL FIX] Normalize & Guard Data Shape
+        console.log("🛡️ Validating Intent Shape:", intent);
+
         // Score across all 60+ strains in MOCK_COAS
-        const scored = MOCK_COAS.map(coa => scoreStrain(coa, intent));
+        // Ensure intent has minimal required keys or fallback
+        const safeIntent: IntentVectors = {
+          relaxation: intent.relaxation ?? 0.5,
+          focus: intent.focus ?? 0.5,
+          energy: intent.energy ?? 0.5,
+          creativity: intent.creativity ?? 0.5,
+          pain_relief: intent.pain_relief ?? 0.5,
+          anti_anxiety: intent.anti_anxiety ?? 0.5
+        };
+
+        const scored = MOCK_COAS.map(coa => scoreStrain(coa, safeIntent));
 
         // Assemble 3 unique blends from top scores
         const newBlends = assembleBlends(scored);
+
+        // [CRITICAL FIX] Validate Output Shape
+        if (!newBlends || newBlends.length === 0 || !newBlends[0].components) {
+          console.error("❌ CRTICAL ERROR: Engine produced malformed blends", newBlends);
+          return; // Abort - Do not crash UI
+        }
 
         setVisibleBlends(newBlends);
         selectedId = newBlends[0].id;
@@ -125,7 +144,14 @@ export function AppShell_StateMachine() {
       }
     }
 
-    const blend = visibleBlends.find(b => b.id === selectedId) || visibleBlends[0];
+    // [CRITICAL FIX] Safe Access
+    const blend = visibleBlends.find(b => b.id === selectedId) || visibleBlends[0] || (userInput ? null : visibleBlends[0]);
+
+    // If we're processing new input but failed to get a blend, abort sequence
+    if (!blend || !blend.components) {
+      console.error("❌ No valid blend found to animate");
+      return;
+    }
 
     // Prepare ingredient cards
     const cards: IngredientCard[] = blend.components.map(c => ({

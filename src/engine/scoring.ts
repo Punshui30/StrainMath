@@ -74,43 +74,54 @@ export function assembleBlends(scoredStrains: ScoredStrain[]) {
     // Sort by match score descending
     const sorted = [...scoredStrains].sort((a, b) => b.matchScore - a.matchScore);
 
+    // Safety check: if we somehow have no strains, return empty or mock
+    if (!sorted || sorted.length === 0) return [];
+
+    const getSafeStrain = (idx: number) => sorted[idx] || sorted[0];
+
     // Ensure we have enough variety. 
     // We'll build 3 blends using different permutations of the top 6-9 strains.
-
     const buildBlend = (id: number, indices: number[], name: string) => {
+        const primaryStrain = getSafeStrain(indices[0]);
+        // Fallback for name generation
+        const safeName = primaryStrain?.strainName || "Custom";
+
         const components = indices.map((idx, i) => {
-            const s = sorted[idx];
+            const s = getSafeStrain(idx);
             const role = i === 0 ? 'Driver' : i === 1 ? 'Modulator' : 'Anchor';
             const percentage = i === 0 ? 50 : i === 1 ? 30 : 20;
 
             return {
                 id: idx,
                 name: s.strainName || "Unknown Strain",
-                type: s.strainName?.toLowerCase().includes('haze') || s.strainName?.toLowerCase().includes('diesel') ? 'Sativa' : 'Hybrid', // Simplified
+                type: s.strainName?.toLowerCase().includes('haze') || s.strainName?.toLowerCase().includes('diesel') ? 'Sativa' : 'Hybrid',
                 role,
                 profile: "Dynamic",
                 percentage,
                 arcColor: i === 0 ? 'from-[#14B8A6] to-[#5EEAD4]' : i === 1 ? 'from-[#10B981] to-[#6EE7B7]' : 'from-[#0891B2] to-[#67E8F9]',
-                terpenes: s.terpenes.slice(0, 3).map(t => t.name),
-                description: `Selected as ${role} for its ${s.terpenes[0].name} dominance.`
+                terpenes: (s.terpenes || []).slice(0, 3).map(t => t.name),
+                description: `Selected as ${role} for its ${(s.terpenes?.[0]?.name) || 'terpene'} dominance.`
             };
         });
 
         return {
             id,
             name,
-            vibeEmphasis: `Custom ${sorted[indices[0]].strainName} dominant blend`,
+            vibeEmphasis: `Custom ${safeName} dominant blend`,
             confidenceRange: '92–98%',
             isPrimary: id === 1,
             components,
-            targets: sorted[indices[0]].intentAlignment // Use top strain as target proxy for UI
+            targets: primaryStrain.intentAlignment
         };
     };
 
+    // Safe indices logic - modulo if we run out of unique strains
+    const safeIndices = (baseIndices: number[]) => baseIndices.map(i => i % sorted.length);
+
     // Variety logic
     return [
-        buildBlend(1, [0, 1, 2], `Elite ${sorted[0].strainName} Blend`),
-        buildBlend(2, [0, 3, 4], `Focused ${sorted[0].strainName} Mix`),
-        buildBlend(3, [1, 2, 5], `${sorted[1].strainName} Balanced Cut`)
+        buildBlend(1, safeIndices([0, 1, 2]), `Elite ${getSafeStrain(0).strainName || 'Custom'} Blend`),
+        buildBlend(2, safeIndices([0, 3, 4]), `Focused ${getSafeStrain(0).strainName || 'Custom'} Mix`),
+        buildBlend(3, safeIndices([1, 2, 5]), `${getSafeStrain(1).strainName || 'Custom'} Balanced Cut`)
     ];
 }
