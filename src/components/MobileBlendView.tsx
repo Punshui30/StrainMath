@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Share, RefreshCw } from 'lucide-react';
 import { BlendResultCard } from '../components/BlendResultCard';
 import { decodeBlend } from '../utils/blendSerializer';

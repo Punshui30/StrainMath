@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import type { IngredientCard } from '../types/animationStates';
 import { ANIMATION_TIMINGS } from '../types/animationStates';

@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 type CardPhase = 'flying-to-logo' | 'docked-in-logo' | 'flying-to-blend' | 'completed';

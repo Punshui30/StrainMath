@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import type { BlendRecommendation } from '../types/blend';
 import type { IntentVectors } from '../engine/scoring';

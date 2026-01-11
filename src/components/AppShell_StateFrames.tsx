@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'framer-motion';
 import { PromptsSidebar } from './PromptsSidebar';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { Processor } from './GoLogo/Processor';

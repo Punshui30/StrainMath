@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import type { BlendRecommendation } from '../types/blend';
 import { getStrainColor } from '../utils/strainColors';

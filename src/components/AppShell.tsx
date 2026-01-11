@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { VoiceInterface } from './VoiceInterface';
 import { PromptsSidebar } from './PromptsSidebar';
 import { InventoryTray, type InventoryTrayHandle } from './InventoryTray';

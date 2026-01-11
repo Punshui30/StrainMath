@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import type { BlendRecommendation } from '../types/blend';
 import { getRoleColor } from '../utils/roleColors';
 

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import logoImage from '../../assets/logo.png';
 import type { BlendIngredient } from '../../types/blendStates';
 
