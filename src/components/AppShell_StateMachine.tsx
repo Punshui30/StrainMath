@@ -440,13 +440,12 @@ export function AppShell_StateMachine() {
     );
   }
 
-  if (!onboardingComplete) {
+  if (!onboardingComplete && userTypeSelected) {
     return (
       <OnboardingScreen
         onComplete={() => {
-          localStorage.setItem('hasOnboarded', 'true');
           setOnboardingComplete(true);
-          setUserTypeSelected(true);
+          localStorage.setItem('hasOnboarded', 'true');
         }}
       />
     );
