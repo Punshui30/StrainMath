@@ -25,13 +25,13 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 100, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       whileHover={{ y: -6 }}
       transition={{
-        duration: 0.5,
-        delay: index * 0.08,
-        ease: [0.22, 1, 0.36, 1],
+        duration: 0.8,
+        delay: index * 0.15, // Staggered arrival
+        ease: [0.2, 0.8, 0.2, 1], // Custom easeOut
       }}
       onClick={onSelect}
       className={`relative group w-full max-w-[320px] p-8 rounded-3xl backdrop-blur-xl border border-white/5
