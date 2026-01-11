@@ -11,7 +11,7 @@ export function AgeGateOverlay({ onEnterNewUser, onEnterReturningUser, onEnterOp
   const [hasVerifiedAge, setHasVerifiedAge] = useState(false);
 
   return (
-    <div className="fixed inset-0 bg-[#050505] flex items-center justify-center z-[200]">
+    <div className="fixed inset-0 min-h-[100dvh] bg-[#0A0A0B] flex items-center justify-center z-[200]">
       <div className="flex flex-col items-center max-w-md px-8 w-full">
         {/* Static Logo - No Animation */}
         <img
@@ -21,14 +21,14 @@ export function AgeGateOverlay({ onEnterNewUser, onEnterReturningUser, onEnterOp
           style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }}
         />
 
-        <h1 className="text-sm tracking-[0.2em] uppercase font-light text-[#D4AF37] text-center mb-16">
+        <h1 className="text-sm tracking-[0.2em] uppercase font-medium text-[#D4AF37] text-center mb-16">
           Guided Outcome Calculator
         </h1>
 
         {!hasVerifiedAge ? (
           /* Step 1: Age Verification */
           <div className="w-full flex flex-col items-center animate-in fade-in duration-300">
-            <p className="text-sm text-white/40 text-center mb-12 font-light">
+            <p className="text-sm text-white/40 text-center mb-12 font-medium">
               Age verification required. 21+
             </p>
 

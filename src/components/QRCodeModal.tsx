@@ -3,7 +3,7 @@ import QRCode from 'react-qr-code';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BlendRecommendation } from '../types/blend';
 import { encodeBlend } from '../utils/blendSerializer';
-import logoImage from '../assets/logo.png'; // Assuming logo exists here based on other files
+import logoImage from '../assets/logo.png';
 
 interface QRCodeModalProps {
     isOpen: boolean;

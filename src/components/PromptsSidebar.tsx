@@ -31,14 +31,14 @@ export function PromptsSidebar({
       <div className="flex gap-8 mb-16 px-1">
         <button
           onClick={() => setMode('outcome')}
-          className={`text-[10px] uppercase tracking-[0.3em] font-bold transition-all ${mode === 'outcome' ? 'text-[#D4AF37]' : 'text-white/20 hover:text-white/40'
+          className={`text-[10px] uppercase tracking-[0.3em] font-medium transition-all ${mode === 'outcome' ? 'text-[#D4AF37]' : 'text-white/20 hover:text-white/40'
             }`}
         >
           Outcome Search
         </button>
         <button
           onClick={() => setMode('strain-chase')}
-          className={`text-[10px] uppercase tracking-[0.3em] font-bold transition-all ${mode === 'strain-chase' ? 'text-[#D4AF37]' : 'text-white/20 hover:text-white/40'
+          className={`text-[10px] uppercase tracking-[0.3em] font-medium transition-all ${mode === 'strain-chase' ? 'text-[#D4AF37]' : 'text-white/20 hover:text-white/40'
             }`}
         >
           Strain Chaser
@@ -74,13 +74,13 @@ export function PromptsSidebar({
 
           {/* Presets - Premium Layout */}
           <div className="space-y-8">
-            <h3 className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-bold mb-6">Popular Outcomes</h3>
+            <h3 className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-medium mb-6">Popular Outcomes</h3>
             <div className="grid grid-cols-1 gap-4">
               {prompts.map((prompt) => (
                 <button
                   key={prompt}
                   onClick={() => onPromptSelect(prompt)}
-                  className="group flex items-center justify-between py-4 text-lg font-light text-white/40 hover:text-white transition-all border-b border-transparent hover:border-white/5"
+                  className="group flex items-center justify-between py-4 text-lg font-medium text-white/40 hover:text-white transition-all border-b border-transparent hover:border-white/5"
                 >
                   <span>{prompt}</span>
                   <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 text-[#D4AF37]/40 transition-all" />
@@ -93,12 +93,12 @@ export function PromptsSidebar({
         <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="mb-12">
             <h1 className="text-4xl font-light text-white mb-4">Recreate a memory.</h1>
-            <p className="text-white/40 font-light text-lg">Enter the strain you loved and any specific effects you want to favor.</p>
+            <p className="text-white/40 font-medium text-lg">Enter the strain you loved and any specific effects you want to favor.</p>
           </div>
 
           <div className="space-y-12">
             <div className="space-y-2 border-b border-white/10 focus-within:border-[#D4AF37]/40 transition-all pb-2">
-              <label className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-bold">The Reference Strain</label>
+              <label className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-medium">The Reference Strain</label>
               <div className="relative">
                 <input
                   type="text"
@@ -127,7 +127,7 @@ export function PromptsSidebar({
             </div>
 
             <div className="space-y-2 border-b border-white/10 focus-within:border-[#D4AF37]/40 transition-all pb-2">
-              <label className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-bold">Favor Specific Effects (Optional)</label>
+              <label className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-medium">Favor Specific Effects (Optional)</label>
               <input
                 type="text"
                 value={lovedEffects}
@@ -151,7 +151,7 @@ export function PromptsSidebar({
 
       {/* Footer / Branding */}
       <div className="mt-auto pt-12 border-t border-white/5 opacity-20 hover:opacity-40 transition-opacity">
-        <p className="text-[9px] uppercase tracking-[0.5em] text-white">Advanced Outcome Guidance System</p>
+        <p className="text-[9px] uppercase tracking-[0.5em] text-white font-medium">Advanced Outcome Guidance System</p>
       </div>
     </div>
   );

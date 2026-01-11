@@ -59,7 +59,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                         <p className="text-lg md:text-xl text-[#D4AF37] font-medium mb-8 tracking-wide">
                             Turn inventory into outcomes — automatically.
                         </p>
-                        <p className="text-base md:text-lg text-white/40 font-light leading-relaxed mb-12 max-w-2xl mx-auto">
+                        <p className="text-base md:text-lg text-white/40 font-medium leading-relaxed mb-12 max-w-2xl mx-auto">
                             This walkthrough shows how GO Line helps dispensaries increase cart size, improve sell-through, and build customer loyalty using outcome-based blends.
                         </p>
                         <button
@@ -105,7 +105,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                         <h2 className="text-2xl md:text-4xl font-light text-white mb-8 md:mb-12 tracking-tight max-w-2xl mx-auto leading-tight">
                             Customers describe what they want to feel.
                         </h2>
-                        <p className="text-base md:text-xl text-white/40 font-light leading-relaxed mb-12 max-w-2xl mx-auto">
+                        <p className="text-base md:text-xl text-white/40 font-medium leading-relaxed mb-12 max-w-2xl mx-auto">
                             GO Line translates that intent into optimized blends using your existing inventory.
                         </p>
                         <button
@@ -127,7 +127,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                     >
                         <div className="text-center mb-12">
                             <h2 className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.4em] mb-4">CUSTOMER EXPERIENCE</h2>
-                            <p className="text-base text-white/40 font-light">How shoppers interact with GO Line</p>
+                            <p className="text-base text-white/40 font-medium">How shoppers interact with GO Line</p>
                         </div>
                         <div className="mb-12 transform scale-90 md:scale-110">
                             <BlendResultCard
@@ -189,7 +189,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                             </div>
                         </div>
 
-                        <p className="text-lg text-white/40 font-light leading-relaxed mb-12 max-w-2xl mx-auto text-center">
+                        <p className="text-lg text-white/40 font-medium leading-relaxed mb-12 max-w-2xl mx-auto text-center">
                             The Operator Console provides a curated view of inventory, system states, and live usage—ensuring your staff stay in control.
                         </p>
 
@@ -223,7 +223,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                             ].map((impact, i) => (
                                 <div key={i} className="p-6 md:p-8 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-[#D4AF37]/20 transition-colors">
                                     <h3 className="text-lg md:text-xl font-medium text-white mb-2">{impact.t}</h3>
-                                    <p className="text-white/40 text-sm md:text-base font-light leading-relaxed">{impact.d}</p>
+                                    <p className="text-white/40 text-sm md:text-base font-medium leading-relaxed">{impact.d}</p>
                                 </div>
                             ))}
                         </div>
@@ -247,7 +247,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                         className="max-w-3xl w-full text-center px-4"
                     >
                         <h1 className="text-5xl md:text-6xl font-light text-white mb-8 tracking-tight">That’s GO Line.</h1>
-                        <p className="text-xl text-white font-light leading-relaxed mb-12 max-w-2xl mx-auto">
+                        <p className="text-xl text-white font-medium leading-relaxed mb-12 max-w-2xl mx-auto">
                             GO Line turns everyday inventory into consistent, outcome-driven experiences — for customers and operators alike.
                         </p>
 
@@ -260,7 +260,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                                     "Increased cart size and sell-through",
                                     "White-label flexibility"
                                 ].map((item, i) => (
-                                    <li key={i} className="flex gap-4 items-center text-white/70 font-light">
+                                    <li key={i} className="flex gap-4 items-center text-white/70 font-medium">
                                         <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
                                         {item}
                                     </li>
@@ -288,7 +288,7 @@ export function BusinessWalkthrough({ onClose, onEnterConsole }: BusinessWalkthr
                             <span className="text-3xl md:text-4xl">🚀</span>
                         </div>
                         <h1 className="text-4xl md:text-5xl font-light text-white mb-6 tracking-tight">Ready to get started?</h1>
-                        <p className="text-lg md:text-xl text-white/40 font-light leading-relaxed mb-12 max-w-2xl mx-auto">
+                        <p className="text-lg md:text-xl text-white/40 font-medium leading-relaxed mb-12 max-w-2xl mx-auto">
                             The walkthrough is complete. Choose your next step below.
                         </p>
                         <div className="flex flex-col items-center gap-6">

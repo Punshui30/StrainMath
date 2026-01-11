@@ -1,4 +1,6 @@
 import { MOCK_COAS, type MockCOA } from '../../data/mockCoas';
+import { auditBlendConfidence } from './confidenceVerification';
+import type { BlendRecommendation } from '../types/blend';
 
 export interface IntentVectors {
     relaxation: number;
@@ -69,8 +71,10 @@ export function scoreStrain(coa: MockCOA, intent: IntentVectors): ScoredStrain {
 
 /**
  * Assembles 3 distinct blends from a collection of scored strains.
+ * @param scoredStrains - Strains scored against user intent
+ * @param intent - Optional intent vectors for confidence verification
  */
-export function assembleBlends(scoredStrains: ScoredStrain[]) {
+export function assembleBlends(scoredStrains: ScoredStrain[], intent?: IntentVectors) {
     // [CRITICAL GUARANTEE] Fallback to Mock Data if input is empty
     let sourceStrains = scoredStrains;
     if (!sourceStrains || sourceStrains.length === 0) {
@@ -92,7 +96,7 @@ export function assembleBlends(scoredStrains: ScoredStrain[]) {
 
     // Ensure we have enough variety. 
     // We'll build 3 blends using different permutations of the top 6-9 strains.
-    const buildBlend = (id: number, indices: number[], name: string) => {
+    const buildBlend = (id: number, indices: number[], name: string): BlendRecommendation => {
         const primaryStrain = getSafeStrain(indices[0]);
         // Fallback for name generation
         const safeName = primaryStrain?.strainName || "Custom";
@@ -137,5 +141,23 @@ export function assembleBlends(scoredStrains: ScoredStrain[]) {
         buildBlend(3, safeIndices([1, 2, 5]), `${getSafeStrain(1).strainName || 'Custom'} Balanced Cut`)
     ];
 
+    // NEW: Attach confidence audits if intent is provided
+    if (intent) {
+        blends.forEach(blend => {
+            blend.confidenceAudit = auditBlendConfidence(blend, intent);
+
+            // DEV MODE LOGGING
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`[CONFIDENCE AUDIT] ${blend.name}:`, {
+                    alignment: `${blend.confidenceAudit.alignmentScore.toFixed(1)}%`,
+                    stability: `${blend.confidenceAudit.stabilityScore.toFixed(1)}%`,
+                    conflicts: blend.confidenceAudit.hasConflicts ? blend.confidenceAudit.conflictFlags : 'None',
+                    contributions: blend.confidenceAudit.componentContributions
+                });
+            }
+        });
+    }
+
     return blends;
 }
+

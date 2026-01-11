@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 import type { BlendRecommendation } from '../types/blend';
 import { getStrainColor } from '../utils/strainColors';
@@ -9,12 +8,21 @@ interface BlendCalculatorProps {
   alternateBlends: BlendRecommendation[];
   onSwitchBlend: (id: number) => void;
   onStartOver: () => void;
+  onBack: () => void;
+  onToggleQR: () => void;
 }
 
 type PreRollSize = 0.35 | 0.5 | 1.0 | number;
 type WasteFactor = 0 | 0.03 | 0.05;
 
-export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStartOver }: BlendCalculatorProps) {
+export function BlendCalculator({
+  blend,
+  alternateBlends,
+  onSwitchBlend,
+  onStartOver,
+  onBack,
+  onToggleQR
+}: BlendCalculatorProps) {
   const [preRollSize, setPreRollSize] = useState<PreRollSize>(0.5);
   const [count, setCount] = useState(10);
   const [wasteFactor, setWasteFactor] = useState<WasteFactor>(0);
@@ -45,8 +53,16 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
     <div className="w-full max-w-6xl mx-auto px-4 md:px-12 py-6 md:py-8 overflow-y-auto h-full">
       {/* Alternate Interpretations Row */}
       <div className="mb-6">
-        <div className="text-[9px] uppercase tracking-[0.2em] text-white/30 mb-3 font-medium px-2">
-          Other Interpretations
+        <div className="flex items-center justify-between px-2 mb-3">
+          <div className="text-[9px] uppercase tracking-[0.2em] text-white/30 font-medium">
+            Other Interpretations
+          </div>
+          <button
+            onClick={onBack}
+            className="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37]/60 hover:text-[#D4AF37] transition-colors font-medium"
+          >
+            ← Back to Results
+          </button>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide px-2">
           {alternateBlends.map((alt) => {
@@ -246,10 +262,18 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
       <div className="flex gap-4 justify-center mt-8">
         <button
           type="button"
-          onClick={onStartOver}
-          className="px-8 py-3 rounded-xl backdrop-blur-xl bg-white/[0.06] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] text-sm uppercase tracking-wider text-white/60 hover:text-white/90 hover:bg-white/[0.1] transition-all duration-300 font-medium"
+          onClick={onBack}
+          className="px-8 py-3 rounded-xl backdrop-blur-xl bg-white/[0.06] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] text-sm uppercase tracking-wider text-white/40 hover:text-white/70 hover:bg-white/[0.1] transition-all duration-300 font-medium"
         >
-          Start Over
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggleQR}
+          className="px-8 py-3 rounded-xl backdrop-blur-xl bg-white/[0.04] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] text-sm uppercase tracking-wider text-white/60 hover:text-white/90 hover:bg-white/[0.08] transition-all duration-300 font-medium"
+        >
+          View QR
         </button>
 
         <button

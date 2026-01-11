@@ -116,8 +116,8 @@ export function AdminOverlay({
               }}
             />
             <div>
-              <h1 className="text-xl font-light text-white/90 mb-1">Operator Console</h1>
-              <p className="text-sm text-white/40">Inventory, system modes, and operations</p>
+              <h1 className="text-xl font-medium text-white/90 mb-1">Operator Console</h1>
+              <p className="text-sm text-white/40 font-medium">Inventory, system modes, and operations</p>
             </div>
           </div>
           <button
@@ -132,7 +132,7 @@ export function AdminOverlay({
         <div className={`grid grid-cols-2 gap-6 transition-all duration-500 ${isDemoRunning ? 'opacity-40 grayscale-[0.5]' : 'opacity-100'}`}>
           {/* System Mode */}
           <div className={`border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && demoStep === 1 ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.02] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
-            <div className="text-xs uppercase tracking-widest text-white/40 mb-4">System Mode</div>
+            <div className="text-xs uppercase tracking-widest text-white/40 mb-4 font-medium">System Mode</div>
             <div className="grid grid-cols-3 gap-2">
               <button className="py-2 px-3 bg-white/10 border border-white/20 text-sm hover:bg-white/15 transition-colors text-white">
                 Standard
@@ -148,15 +148,15 @@ export function AdminOverlay({
 
           {/* System Stats */}
           <div className={`border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && demoStep === 2 ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.02] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
-            <div className="text-xs uppercase tracking-widest text-white/40 mb-4">Statistics</div>
+            <div className="text-xs uppercase tracking-widest text-white/40 mb-4 font-medium">Statistics</div>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-white/40">Sessions Today</span>
-                <span className="text-white/90">47</span>
+                <span className="text-white/40 font-medium">Sessions Today</span>
+                <span className="text-white/90 font-semibold tabular-nums">47</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white/40">Avg Confidence</span>
-                <span className="text-white/90">92.3%</span>
+                <span className="text-white/40 font-medium">Avg Confidence</span>
+                <span className="text-white/90 font-semibold tabular-nums">92.3%</span>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@ export function AdminOverlay({
           <div className={`col-span-2 border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && (demoStep === 3 || demoStep === 4) ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.01] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
             {/* Header with COA Ingestion Actions */}
             <div className="flex items-center justify-between mb-6">
-              <div className="text-xs uppercase tracking-widest text-white/40">Inventory</div>
+              <div className="text-xs uppercase tracking-widest text-white/40 font-medium">Inventory</div>
               <div className={`flex items-center gap-3 transition-opacity duration-300 ${isDemoRunning && demoStep === 4 ? 'animate-pulse' : ''}`}>
                 <button
                   onClick={() => setIsScanning(true)}
@@ -206,7 +206,7 @@ export function AdminOverlay({
 
             <div className="space-y-1">
               {/* Header */}
-              <div className="grid grid-cols-4 gap-4 pb-2 border-b border-white/10 text-xs text-white/40">
+              <div className="grid grid-cols-4 gap-4 pb-2 border-b border-white/10 text-xs text-white/40 font-medium">
                 <div>Strain</div>
                 <div>Quantity</div>
                 <div>Status</div>
@@ -219,17 +219,16 @@ export function AdminOverlay({
                     key={`${item.strain || item.name}-${idx}`}
                     className="grid grid-cols-4 gap-4 py-2 border-b border-white/5 hover:bg-white/5 transition-colors text-sm items-center"
                   >
-                    <div className="text-white/90">{item.strain || item.name}</div>
-                    <div className="text-white/60">{item.qty}g</div>
+                    <div className="text-white/90 font-semibold tracking-tight">{item.strain || item.name}</div>
+                    <div className="text-white/60 font-semibold tabular-nums">{item.qty}g</div>
                     <div>
                       <span
-                        className={
-                          item.status === 'In Stock'
-                            ? 'text-[#4ADE80]/80'
-                            : item.status === 'Low Stock'
-                              ? 'text-[#D4A574]'
-                              : 'text-red-400/80'
-                        }
+                        className={`font-semibold ${item.status === 'In Stock'
+                          ? 'text-[#4ADE80]/80'
+                          : item.status === 'Low Stock'
+                            ? 'text-[#D4A574]'
+                            : 'text-red-400/80'
+                          }`}
                       >
                         {item.status}
                       </span>
@@ -251,7 +250,7 @@ export function AdminOverlay({
           {/* Presets */}
           <div className={`col-span-2 border border-white/20 bg-black/40 p-6 transition-all duration-300 ${isDemoRunning && demoStep === 5 ? '!opacity-100 !grayscale-0 ring-2 ring-[#D4AF37] scale-[1.01] bg-white/[0.08] relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]' : ''}`}>
             <div className="flex items-center justify-between mb-4">
-              <div className="text-xs uppercase tracking-widest text-white/40">Presets</div>
+              <div className="text-xs uppercase tracking-widest text-white/40 font-medium">Presets</div>
               <button className="text-xs text-white/40 hover:text-white transition-colors">+ New</button>
             </div>
             <div className="grid grid-cols-4 gap-3">
@@ -261,8 +260,8 @@ export function AdminOverlay({
                   onClick={() => handlePreset(preset)}
                   className="border border-white/20 p-4 hover:bg-white/5 transition-colors text-left group"
                 >
-                  <div className="text-sm text-white/80 group-hover:text-white mb-1">{preset}</div>
-                  <div className="text-[10px] text-white/40 group-hover:text-[#D4AF37]">Active profile</div>
+                  <div className="text-sm text-white/80 group-hover:text-white mb-1 font-medium">{preset}</div>
+                  <div className="text-[10px] text-white/40 group-hover:text-[#D4AF37] font-medium">Active profile</div>
                 </button>
               ))}
             </div>

@@ -10,6 +10,20 @@ export interface BlendComponent {
     description: string;
 }
 
+/**
+ * Internal confidence verification metrics.
+ * Used to validate blend quality without changing user-facing confidence display.
+ */
+export interface ConfidenceAudit {
+    alignmentScore: number;        // 0-100: How well final blend matches intent
+    stabilityScore: number;         // 0-100: Structural necessity of components
+    hasConflicts: boolean;          // Any antagonistic patterns detected
+    conflictFlags: string[];        // Specific conflict descriptions
+    componentContributions: {       // Per-strain counterfactual deltas
+        [strainName: string]: number;
+    };
+}
+
 export interface BlendRecommendation {
     id: number;
     name: string;
@@ -30,4 +44,5 @@ export interface BlendRecommendation {
         pain_relief: number;
         anti_anxiety: number;
     };
+    confidenceAudit?: ConfidenceAudit;  // Internal only, not displayed
 }

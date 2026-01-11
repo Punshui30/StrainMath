@@ -242,7 +242,7 @@ export function AppShell_StateMachine() {
       const scored = inventory.map(coa => scoreStrain(coa, safeIntent));
 
       // Assemble 3 unique blends from top scores
-      const newBlends = assembleBlends(scored);
+      const newBlends = assembleBlends(scored, safeIntent);
 
       // [CRITICAL FIX] Validate Output Shape
       if (!newBlends || newBlends.length === 0 || !newBlends[0].components) {
@@ -331,7 +331,12 @@ export function AppShell_StateMachine() {
     const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
     if (selectedBlend) {
       setCommittedBlend(selectedBlend);
+      // [FIX] QR must not trigger automatically
     }
+  };
+
+  const handleCancelCommit = () => {
+    setCommittedBlend(null);
   };
 
   const handleSelectBlend = (id: number) => {
@@ -384,8 +389,10 @@ export function AppShell_StateMachine() {
         <BlendCalculator
           blend={blend}
           onStartOver={handleReset}
+          onBack={handleCancelCommit}
           onSwitchBlend={handleSwitchBlendInCalculator}
           alternateBlends={visibleBlends}
+          onToggleQR={() => setShowQR(!showQR)}
         />
         <QRCodeModal
           isOpen={showQR}
@@ -446,7 +453,7 @@ export function AppShell_StateMachine() {
   }
 
   return (
-    <div className="w-full h-screen bg-black text-white flex flex-col overflow-hidden relative">
+    <div className="w-full min-h-[100dvh] bg-[#0A0A0B] text-white flex flex-col overflow-hidden relative">
       <AmbientBackground
         imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'
           ? "https://images.unsplash.com/photo-1582095127899-1dfb05e4e32d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
@@ -507,7 +514,7 @@ export function AppShell_StateMachine() {
       {mode === 'voice' && (
         <div className="flex-1 relative overflow-hidden">
           {isMobile ? (
-            <div className="w-full h-full flex flex-col relative z-10 overflow-hidden">
+            <div className="w-full h-full flex-1 flex flex-col relative z-10 min-h-0 overflow-hidden bg-[#0A0A0B]">
               {/* Fixed Header */}
               <div className="flex flex-col items-center pt-10 pb-6">
                 <img src={logoImage} alt="GO CA" className="w-10 h-auto opacity-90" />
@@ -522,14 +529,14 @@ export function AppShell_StateMachine() {
                     <div className="flex justify-center gap-10">
                       <button
                         onClick={() => setMobileMode('outcome')}
-                        className={`text-[9px] uppercase tracking-[0.4em] font-bold transition-all ${mobileMode === 'outcome' ? 'text-[#D4AF37]' : 'text-white/10'
+                        className={`text-[9px] uppercase tracking-[0.4em] font-medium transition-all ${mobileMode === 'outcome' ? 'text-[#D4AF37]' : 'text-white/10'
                           }`}
                       >
                         Intent
                       </button>
                       <button
                         onClick={() => setMobileMode('strain-chase')}
-                        className={`text-[9px] uppercase tracking-[0.4em] font-bold transition-all ${mobileMode === 'strain-chase' ? 'text-[#D4AF37]' : 'text-white/10'
+                        className={`text-[9px] uppercase tracking-[0.4em] font-medium transition-all ${mobileMode === 'strain-chase' ? 'text-[#D4AF37]' : 'text-white/10'
                           }`}
                       >
                         Memory
@@ -580,7 +587,7 @@ export function AppShell_StateMachine() {
                                 <button
                                   key={preset}
                                   onClick={() => startBlendSequence({ type: 'user', text: preset })}
-                                  className="w-full py-5 text-[10px] text-white/30 tracking-[0.2em] uppercase font-bold border border-white/5 rounded-xl hover:bg-white/[0.02] transition-colors"
+                                  className="w-full py-5 text-[10px] text-white/30 tracking-[0.2em] uppercase font-medium border border-white/5 rounded-xl hover:bg-white/[0.02] transition-colors"
                                 >
                                   {preset}
                                 </button>
@@ -594,7 +601,7 @@ export function AppShell_StateMachine() {
                         <div className="space-y-16">
                           <div className="space-y-12">
                             <div className="space-y-4 border-b border-white/5 focus-within:border-[#D4AF37]/20 transition-all pb-2">
-                              <label className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-bold text-center block">Reference Strain</label>
+                              <label className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-medium text-center block">Reference Strain</label>
                               <div className="relative">
                                 <input
                                   type="text"
@@ -623,7 +630,7 @@ export function AppShell_StateMachine() {
                             </div>
 
                             <div className="space-y-4 border-b border-white/5 focus-within:border-[#D4AF37]/20 transition-all pb-2">
-                              <label className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-bold text-center block">Favor Effects</label>
+                              <label className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-medium text-center block">Favor Effects</label>
                               <input
                                 type="text"
                                 value={mobileLovedEffects}
@@ -687,12 +694,20 @@ export function AppShell_StateMachine() {
                           >
                             Make This Blend
                           </button>
-                          <button
-                            onClick={() => setShowExplanation(true)}
-                            className="w-full py-4 rounded-xl border border-white/10 text-white/60 hover:text-white/90 text-[11px] uppercase tracking-widest font-bold transition-all"
-                          >
-                            Why this blend?
-                          </button>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => setShowQR(true)}
+                              className="flex-1 py-4 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white/90 text-[11px] uppercase tracking-widest font-bold transition-all"
+                            >
+                              View QR
+                            </button>
+                            <button
+                              onClick={() => setShowExplanation(true)}
+                              className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:text-white/90 text-[11px] uppercase tracking-widest font-bold transition-all"
+                            >
+                              Why?
+                            </button>
+                          </div>
                           <button
                             onClick={handleReset}
                             className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white/40 text-[11px] uppercase tracking-widest transition-all"
@@ -707,8 +722,8 @@ export function AppShell_StateMachine() {
                           <div className="w-4 h-4 bg-[#D4AF37] rounded-full animate-pulse" />
                         </div>
                         <div className="text-center space-y-2">
-                          <p className="text-[#D4AF37] text-sm uppercase tracking-[0.3em] font-bold animate-pulse">Analyzing</p>
-                          <p className="text-white/20 text-[10px] uppercase tracking-widest">Applying Strain Math...</p>
+                          <p className="text-[#D4AF37] text-sm uppercase tracking-[0.3em] font-medium animate-pulse">Analyzing</p>
+                          <p className="text-white/20 text-[10px] uppercase tracking-widest font-medium">Applying Strain Math...</p>
                         </div>
                       </div>
                     )}
@@ -821,6 +836,15 @@ export function AppShell_StateMachine() {
             setShowBusinessWalkthrough(false);
             setMode('operator');
           }}
+        />
+      )}
+
+      {/* Global QR Modal */}
+      {showQR && (
+        <QRCodeModal
+          isOpen={showQR}
+          onClose={() => setShowQR(false)}
+          blend={committedBlend || visibleBlends.find(b => b.id === selectedBlendId) || visibleBlends[0]}
         />
       )}
     </div>
