@@ -7,8 +7,7 @@ interface BlendExplanationPanelProps {
     intent: IntentVectors | null;
     explanation: string | null;
     userText: string;
-    onProceed: () => void;
-    onCancel: () => void;
+    onClose: () => void;
 }
 
 export function BlendExplanationPanel({
@@ -16,8 +15,7 @@ export function BlendExplanationPanel({
     intent,
     explanation,
     userText,
-    onProceed,
-    onCancel
+    onClose
 }: BlendExplanationPanelProps) {
 
     return (
@@ -27,7 +25,7 @@ export function BlendExplanationPanel({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={onCancel}
+                onClick={onClose}
                 className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300]"
             />
 
@@ -75,29 +73,20 @@ export function BlendExplanationPanel({
                         </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-4">
+                    {/* Action - Single Close Button */}
+                    <div className="flex justify-center">
                         <button
-                            onClick={onCancel}
-                            className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10
-                         border border-white/10 hover:border-white/20
-                         text-white/60 hover:text-white/90 text-sm uppercase tracking-wider
-                         transition-all duration-200"
+                            onClick={onClose}
+                            className="px-12 py-4 rounded-2xl
+                                     bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/10
+                                     hover:from-[#D4AF37]/30 hover:to-[#D4AF37]/20
+                                     border border-[#D4AF37]/40 hover:border-[#D4AF37]/60
+                                     text-white hover:text-white text-base uppercase tracking-wider font-medium
+                                     shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:shadow-[0_0_40px_rgba(212,175,55,0.25)]
+                                     transition-all duration-300
+                                     hover:scale-[1.02] active:scale-[0.98]"
                         >
-                            Go Back
-                        </button>
-                        <button
-                            onClick={onProceed}
-                            className="flex-[2] py-4 rounded-2xl
-                         bg-gradient-to-r from-[#D4AF37]/20 to-[#D4AF37]/10
-                         hover:from-[#D4AF37]/30 hover:to-[#D4AF37]/20
-                         border border-[#D4AF37]/40 hover:border-[#D4AF37]/60
-                         text-white hover:text-white text-base uppercase tracking-wider font-medium
-                         shadow-[0_0_30px_rgba(212,175,55,0.15)] hover:shadow-[0_0_40px_rgba(212,175,55,0.25)]
-                         transition-all duration-300
-                         hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                            Proceed to Calculator
+                            Got It
                         </button>
                     </div>
                 </div>

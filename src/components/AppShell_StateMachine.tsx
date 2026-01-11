@@ -241,6 +241,14 @@ export function AppShell_StateMachine() {
 
   }, [animationState, selectedBlendId, inventory]);
 
+  // Auto-open explanation when results first appear
+  useEffect(() => {
+    if (animationState === 'STATE_3_RECOMMENDATION_OUTPUT' && visibleBlends.length > 0 && !showExplanation && !committedBlend) {
+      // Auto-open explanation on first results render
+      setShowExplanation(true);
+    }
+  }, [animationState, visibleBlends.length, showExplanation, committedBlend]);
+
   // Demo Lifecycle Loop
   useEffect(() => {
     if (!isDemoRunning) return;
@@ -280,21 +288,10 @@ export function AppShell_StateMachine() {
   };
 
   const handleMakeBlend = () => {
-    console.log("🛠️ Make Blend Clicked. Selected ID:", selectedBlendId);
     const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
     if (selectedBlend) {
-      console.log("✅ Showing explanation for:", selectedBlend.name);
-      setShowExplanation(true);
-    } else {
-      console.error("❌ No blend found for ID:", selectedBlendId);
-    }
-  };
-
-  const handleCommitBlend = () => {
-    const selectedBlend = visibleBlends.find(b => b.id === selectedBlendId);
-    if (selectedBlend) {
+      console.log("✅ Committing blend:", selectedBlend.name);
       setCommittedBlend(selectedBlend);
-      setShowExplanation(false);
     }
   };
 
@@ -707,8 +704,7 @@ export function AppShell_StateMachine() {
               intent={currentIntent}
               explanation={blendExplanationText}
               userText={lastUserText}
-              onProceed={handleCommitBlend}
-              onCancel={() => setShowExplanation(false)}
+              onClose={() => setShowExplanation(false)}
             />
           );
         })()}
