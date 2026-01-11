@@ -336,7 +336,7 @@ if (!onboardingComplete) {
 }
 
 return (
-  <div className="w-full h-screen bg-gradient-to-b from-[#0A0A0A] via-[#0F0F0F] to-[#0A0A0A] text-white flex flex-col overflow-hidden relative">
+  <div className="w-full h-screen bg-black text-white flex flex-col overflow-hidden relative">
     {/* Ambient Background */}
     <AmbientBackground
       imageUrl={animationState === 'STATE_3_RECOMMENDATION_OUTPUT'

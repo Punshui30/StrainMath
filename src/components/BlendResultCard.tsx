@@ -34,11 +34,11 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
         ease: [0.22, 1, 0.36, 1],
       }}
       onClick={onSelect}
-      className={`relative group w-80 p-8 rounded-3xl backdrop-blur-2xl
-                 transition-all duration-200 ease-out
+      className={`relative group w-full max-w-[320px] p-8 rounded-3xl backdrop-blur-xl border border-white/5
+                 transition-all duration-300 ease-out
                  ${isSelected
-          ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4),0_16px_48px_rgba(0,0,0,0.5)]'
-          : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
+          ? 'bg-[#080808]/90 shadow-[0_20px_60px_rgba(0,0,0,0.6),0_0_0_1px_rgba(212,175,55,0.5)] scale-[1.02]'
+          : 'bg-[#080808]/60 hover:bg-[#080808]/80 shadow-[0_10px_30px_rgba(0,0,0,0.4)]'
         }`}
     >
       {/* Name & Descriptor */}
@@ -46,7 +46,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
         <h3 className="text-2xl font-light text-white/95 mb-3 tracking-tight">
           {blend.name}
         </h3>
-        <p className="text-sm text-white/50 leading-relaxed font-light">
+        <p className="text-sm text-white/70 leading-relaxed font-light">
           {blend.vibeEmphasis}
         </p>
       </div>
@@ -56,8 +56,8 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
         <div
           className="px-3 py-1 rounded-full text-xs font-light"
           style={{
-            background: 'rgba(212, 175, 55, 0.12)',
-            color: 'rgba(212, 175, 55, 0.9)',
+            background: 'rgba(212, 175, 55, 0.2)',
+            color: '#D4AF37',
           }}
         >
           {blend.confidenceRange} confidence
@@ -80,12 +80,12 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
                     boxShadow: `0 0 6px ${roleColor}80`,
                   }}
                 />
-                <span className="text-white/70 font-light">{component.name}</span>
+                <span className="text-white/90 font-light">{component.name}</span>
                 <span className="text-white/40 text-[10px] uppercase tracking-wider">
                   {component.role}
                 </span>
               </div>
-              <span className="text-white/50 font-light tabular-nums">{component.percentage}%</span>
+              <span className="text-white/70 font-light tabular-nums">{component.percentage}%</span>
             </div>
           );
         })}
