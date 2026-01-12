@@ -2,16 +2,18 @@
 
 :root {
     /* Subtle color adjustments - richer without hue change */
-    --bg-base: #0D0D0D;           /* Slightly brighter than #0A0A0A */
-    --text-primary: #FAFAFA;       /* Increased brightness from #F5F5F5 */
-    --text-secondary: #D5D5D5;    /* Darker for better contrast with primary */
-    --card-bg-min: rgba(255, 255, 255, 0.08);  /* Increased from 0.03 */
-    --card-bg-max: rgba(255, 255, 255, 0.12);  /* Increased from 0.06 */
+    --bg-base: #0B0B0B;                    /* Darker: #0D0D0D → #0B0B0B */
+    --text-primary: #FAFAFA;               /* Increased brightness from #F5F5F5 */
+    --text-secondary: #D5D5D5;            /* Darker for better contrast with primary */
+    --card-bg-min: rgba(255, 255, 255, 0.14);  /* Lighter: 0.08 → 0.14 */
+    --card-bg-max: rgba(255, 255, 255, 0.18);  /* Lighter: 0.12 → 0.18 */
+    --card-border-min: rgba(255, 255, 255, 0.15);  /* New: for border contrast */
+    --card-border-max: rgba(255, 255, 255, 0.20);  /* New: for border contrast */
     
     /* Richer accent colors (increased saturation without filters) */
-    --accent-driver: #E5C047;      /* Richer gold (from #D4AF37) */
-    --accent-modulator: #1AC8B8;   /* Richer teal (from #14B8A6) */
-    --accent-anchor: #9B8BB8;      /* Richer purple (from #8B7BA8) */
+    --accent-driver: #F0D050;              /* Richer gold (from #E5C047) */
+    --accent-modulator: #20D4C0;           /* Richer teal (from #1AC8B8) */
+    --accent-anchor: #A89BC0;              /* Richer purple (from #9B8BB8) */
 }
 
 @tailwind base;

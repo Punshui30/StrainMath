@@ -6,7 +6,7 @@
 @layer base {
   body {
     @apply antialiased;
-    background-color: var(--bg-base, #0D0D0D);
+    background-color: var(--bg-base, #0B0B0B);
     color: var(--text-primary, #FAFAFA);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
     
@@ -15,6 +15,7 @@
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "kern" 1;
     font-kerning: normal;
+    font-weight: 500;  /* +1 step from default 400 */
     /* No text-shadow for maximum sharpness */
   }
   
@@ -30,6 +31,17 @@
   
   .text-sm.font-light {
     font-weight: 400;
+  }
+  
+  /* Card titles and strain names: +4 steps from font-light (300) to 700 */
+  .text-2xl.font-light,
+  .text-lg.font-light {
+    font-weight: 700;  /* 300 → 700 (+4 steps) */
+  }
+  
+  /* Increase card border contrast globally */
+  [class*="backdrop-blur"], [class*="bg-white/"] {
+    border-color: var(--card-border-min, rgba(255, 255, 255, 0.15));
   }
   
   /* Override pure white text throughout */
