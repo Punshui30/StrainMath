@@ -3,10 +3,15 @@
 :root {
     /* Subtle color adjustments - richer without hue change */
     --bg-base: #0D0D0D;           /* Slightly brighter than #0A0A0A */
-    --text-primary: #F5F5F5;       /* Off-white instead of pure white */
-    --text-secondary: #E0E0E0;    /* Softer secondary text */
+    --text-primary: #FAFAFA;       /* Increased brightness from #F5F5F5 */
+    --text-secondary: #D5D5D5;    /* Darker for better contrast with primary */
     --card-bg-min: rgba(255, 255, 255, 0.08);  /* Increased from 0.03 */
     --card-bg-max: rgba(255, 255, 255, 0.12);  /* Increased from 0.06 */
+    
+    /* Richer accent colors (increased saturation without filters) */
+    --accent-driver: #E5C047;      /* Richer gold (from #D4AF37) */
+    --accent-modulator: #1AC8B8;   /* Richer teal (from #14B8A6) */
+    --accent-anchor: #9B8BB8;      /* Richer purple (from #8B7BA8) */
 }
 
 @tailwind base;

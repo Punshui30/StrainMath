@@ -7,18 +7,29 @@
   body {
     @apply antialiased;
     background-color: var(--bg-base, #0D0D0D);
-    color: var(--text-primary, #F5F5F5);
+    color: var(--text-primary, #FAFAFA);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
     
-    /* Enhanced text rendering */
+    /* Subpixel antialiasing (no optimizeLegibility for sharpness) */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
     font-feature-settings: "kern" 1;
     font-kerning: normal;
-    
-    /* Subtle text depth - very soft shadow */
-    text-shadow: 0 0.5px 0.75px rgba(0, 0, 0, 0.25);
+    /* No text-shadow for maximum sharpness */
+  }
+  
+  /* Increase font-weight for small text for better readability */
+  .text-xs, .text-\[10px\], .text-\[11px\], .text-\[12px\] {
+    font-weight: 450;
+  }
+  
+  .text-xs.font-light, .text-\[10px\].font-light, 
+  .text-\[11px\].font-light, .text-\[12px\].font-light {
+    font-weight: 450;
+  }
+  
+  .text-sm.font-light {
+    font-weight: 400;
   }
   
   /* Override pure white text throughout */
