@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import type { BlendRecommendation } from '../types/blend';
-import { getRoleColor } from '../utils/roleColors';
+import { getStrainColor } from '../utils/strainColors';
 
 interface BlendResultCardProps {
   blend: BlendRecommendation;
@@ -37,8 +37,8 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
       className={`relative group w-80 p-8 rounded-3xl backdrop-blur-2xl
                  transition-all duration-200 ease-out
                  ${isSelected
-          ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(212,175,55,0.4),0_16px_48px_rgba(0,0,0,0.5)]'
-          : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
+          ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15),0_16px_48px_rgba(0,0,0,0.5)]'
+          : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_12px_32px_rgba(0,0,0,0.4)]'
         }`}
     >
       {/* Name & Descriptor */}
@@ -53,21 +53,30 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
 
       {/* Confidence Range Pill */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <div
-          className="px-3 py-1 rounded-full text-xs font-light"
-          style={{
-            background: 'rgba(212, 175, 55, 0.12)',
-            color: 'rgba(212, 175, 55, 0.9)',
-          }}
-        >
-          {blend.confidenceRange} confidence
-        </div>
+        {(() => {
+          const driverStrain = blend.components.find(c => c.role.toLowerCase() === 'driver');
+          const driverColor = driverStrain ? getStrainColor(driverStrain.name) : '#FFD700';
+          const r = parseInt(driverColor.slice(1, 3), 16);
+          const g = parseInt(driverColor.slice(3, 5), 16);
+          const b = parseInt(driverColor.slice(5, 7), 16);
+          return (
+            <div
+              className="px-3 py-1 rounded-full text-xs font-light"
+              style={{
+                background: `rgba(${r}, ${g}, ${b}, 0.12)`,
+                color: `rgba(${r}, ${g}, ${b}, 0.9)`,
+              }}
+            >
+              {blend.confidenceRange} confidence
+            </div>
+          );
+        })()}
       </div>
 
       {/* Component breakdown */}
       <div className="space-y-2 pt-6 border-t border-white/[0.08] mb-6">
         {blend.components.map((component) => {
-          const roleColor = getRoleColor(component.role);
+          const strainColor = getStrainColor(component.name);
 
           return (
             <div key={component.name} className="flex justify-between items-center text-xs">
@@ -76,8 +85,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
                 <div
                   className="w-2 h-2 rounded-full"
                   style={{
-                    background: roleColor,
-                    boxShadow: `0 0 6px ${roleColor}80`,
+                    background: strainColor,
                   }}
                 />
                 <span className="text-white/70 font-light">{component.name}</span>
@@ -108,7 +116,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
           {(() => {
             let currentAngle = 0;
             return blend.components.map((component) => {
-              const roleColor = getRoleColor(component.role);
+              const strainColor = getStrainColor(component.name);
               const percentage = component.percentage;
               const segmentAngle = (percentage / 100) * 360;
               const radius = 52;
@@ -125,7 +133,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
                   cy="60"
                   r={radius}
                   fill="none"
-                  stroke={roleColor}
+                  stroke={strainColor}
                   strokeWidth="8"
                   strokeDasharray={`${segmentLength} ${circumference}`}
                   strokeDashoffset={-offset}
@@ -138,16 +146,22 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
       </div>
 
       {/* Selection indicator */}
-      {isSelected && (
-        <motion.div
-          layoutId="selection-indicator"
-          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full"
-          style={{
-            background: 'linear-gradient(90deg, rgba(212,175,55,0.6) 0%, rgba(212,175,55,0.9) 50%, rgba(212,175,55,0.6) 100%)',
-            boxShadow: '0 0 16px rgba(212,175,55,0.5)',
-          }}
-        />
-      )}
+      {isSelected && (() => {
+        const driverStrain = blend.components.find(c => c.role.toLowerCase() === 'driver');
+        const driverColor = driverStrain ? getStrainColor(driverStrain.name) : '#FFD700';
+        const r = parseInt(driverColor.slice(1, 3), 16);
+        const g = parseInt(driverColor.slice(3, 5), 16);
+        const b = parseInt(driverColor.slice(5, 7), 16);
+        return (
+          <motion.div
+            layoutId="selection-indicator"
+            className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full"
+            style={{
+              background: `linear-gradient(90deg, rgba(${r},${g},${b},0.6) 0%, rgba(${r},${g},${b},0.9) 50%, rgba(${r},${g},${b},0.6) 100%)`,
+            }}
+          />
+        );
+      })()}
     </motion.button>
   );
 }

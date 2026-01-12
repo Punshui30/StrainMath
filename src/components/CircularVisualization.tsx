@@ -31,8 +31,6 @@ export function CircularVisualization({ blendName, components }: CircularVisuali
           {/* Create gradient for each component using strain color */}
           {components.map((component, index) => {
             const baseColor = getStrainColor(component.name);
-            const isAnchor = component.role.toLowerCase() === 'anchor';
-            const anchorColor = '#C77DFF'; // Electric purple for anchor
 
             return (
               <linearGradient
@@ -40,8 +38,8 @@ export function CircularVisualization({ blendName, components }: CircularVisuali
                 id={`gradient-${component.id}-${index}`}
                 gradientUnits="userSpaceOnUse"
               >
-                <stop offset="0%" stopColor={isAnchor ? anchorColor : baseColor} />
-                <stop offset="100%" stopColor={isAnchor ? anchorColor : baseColor} />
+                <stop offset="0%" stopColor={baseColor} />
+                <stop offset="100%" stopColor={baseColor} />
               </linearGradient>
             );
           })}
@@ -61,8 +59,6 @@ export function CircularVisualization({ blendName, components }: CircularVisuali
           const dashArray = `${(adjustedPercentage / 100) * circumference} ${circumference}`;
           const dashOffset = -((cumulativeOffset / 100) * circumference);
 
-          // Determine stroke color and glow based on strain
-          const isAnchor = component.role.toLowerCase() === 'anchor';
           const baseColor = getStrainColor(component.name);
           const strokeColor = `url(#gradient-${component.id}-${index})`;
 
