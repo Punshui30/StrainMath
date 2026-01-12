@@ -71,10 +71,10 @@ export const StrainCard = forwardRef<HTMLButtonElement, StrainCardProps>(({
       <div
         className="absolute inset-0 rounded-[18px] transition-all duration-[180ms]"
         style={{
-          background: 'rgba(28, 32, 35, 0.6)',
-          boxShadow: isHovered
-            ? '0 8px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)'
-            : '0 6px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
+          background: 'rgba(255, 255, 255, 0.06)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 6px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       />
 
