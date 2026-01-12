@@ -9,17 +9,17 @@
  */
 
 export const strainColorMap: Record<string, string> = {
-  // Primary strains
-  'Blue Dream': '#14B8A6',        // Teal
-  'Northern Lights': '#10B981',   // Emerald
-  'Blueberry': '#0891B2',         // Cyan
-  'Sour Diesel': '#F59E0B',       // Amber
-  'OG Kush': '#D97706',           // Orange
-  'Girl Scout Cookies': '#DC2626', // Red
-  'Granddaddy Purple': '#9333EA', // Purple
-  'Jack Herer': '#EAB308',        // Yellow
-  'White Widow': '#06B6D4',       // Sky
-  'Amnesia Haze': '#84CC16',      // Lime
+  // Primary strains - Electric/Neon colors
+  'Blue Dream': '#00FFE5',        // Electric cyan (from #14B8A6)
+  'Northern Lights': '#00FF88',   // Electric green (from #10B981)
+  'Blueberry': '#00D4FF',         // Electric blue (from #0891B2)
+  'Sour Diesel': '#FFB800',       // Electric amber (from #F59E0B)
+  'OG Kush': '#FF6B00',           // Electric orange (from #D97706)
+  'Girl Scout Cookies': '#FF0040', // Electric red (from #DC2626)
+  'Granddaddy Purple': '#B400FF', // Electric purple (from #9333EA)
+  'Jack Herer': '#FFE500',        // Electric yellow (from #EAB308)
+  'White Widow': '#00B8FF',       // Electric sky (from #06B6D4)
+  'Amnesia Haze': '#88FF00',      // Electric lime (from #84CC16)
 };
 
 /**

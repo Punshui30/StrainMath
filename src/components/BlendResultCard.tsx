@@ -130,9 +130,6 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
                   strokeDasharray={`${segmentLength} ${circumference}`}
                   strokeDashoffset={-offset}
                   strokeLinecap="round"
-                  style={{
-                    filter: `drop-shadow(0 0 4px ${roleColor}60)`,
-                  }}
                 />
               );
             });

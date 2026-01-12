@@ -4,9 +4,9 @@
  */
 
 export const ROLE_COLORS = {
-    DRIVER: '#D4AF37',      // Primary gold (existing brand color)
-    MODULATOR: '#14B8A6',   // Teal/cyan
-    ANCHOR: '#8B7BA8',      // Muted purple
+    DRIVER: '#FFD700',      // Electric gold (from #D4AF37)
+    MODULATOR: '#00FFE5',   // Electric cyan (from #14B8A6)
+    ANCHOR: '#C77DFF',      // Electric purple (from #8B7BA8)
 } as const;
 
 export type BlendRole = 'Driver' | 'Modulator' | 'Anchor';

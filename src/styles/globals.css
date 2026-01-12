@@ -9,7 +9,7 @@
 @layer base {
   body {
     @apply antialiased;
-    background-color: var(--bg-base, #0B0B0B);
+    background-color: var(--bg-base, #000000);
     color: var(--text-primary, #FAFAFA);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-size: 18px;  /* Increased from 16px base */

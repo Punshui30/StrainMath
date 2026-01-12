@@ -202,7 +202,6 @@ export function BlendCalculator({ blend, alternateBlends, onSwitchBlend, onStart
                       className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{
                         backgroundColor: strainColor,
-                        boxShadow: `0 0 8px ${strainColor}80`
                       }}
                     />
 

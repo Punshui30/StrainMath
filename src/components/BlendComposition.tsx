@@ -191,14 +191,22 @@ export function BlendComposition() {
 
               {/* Role & Percentage */}
               <div className="flex items-baseline justify-between pt-6 border-t border-white/10">
-                <div className={`text-[10px] uppercase tracking-[0.2em] font-medium transition-colors duration-200 ${
-                  hoveredId === component.id ? 'text-teal-400' : 'text-teal-400/60'
-                }`}>
+                <div 
+                  className="text-[10px] uppercase tracking-[0.2em] font-medium transition-opacity duration-200"
+                  style={{ 
+                    color: hoveredId === component.id ? '#00FFE5' : '#00FFE5',
+                    opacity: hoveredId === component.id ? 1.0 : 0.8
+                  }}
+                >
                   {component.role}
                 </div>
-                <div className={`text-4xl font-light tracking-tight transition-colors duration-200 ${
-                  hoveredId === component.id ? 'text-teal-400' : 'text-teal-400/80'
-                }`}>
+                <div 
+                  className="text-4xl font-light tracking-tight transition-opacity duration-200"
+                  style={{ 
+                    color: hoveredId === component.id ? '#00FFE5' : '#00FFE5',
+                    opacity: hoveredId === component.id ? 1.0 : 0.9
+                  }}
+                >
                   {component.percentage}<span className="text-2xl">%</span>
                 </div>
               </div>

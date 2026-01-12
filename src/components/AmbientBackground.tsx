@@ -26,11 +26,11 @@ export function AmbientBackground({ imageUrl, opacity = 0.06 }: AmbientBackgroun
         }}
       />
 
-      {/* Heavy vignette overlay */}
+      {/* Reduced vignette overlay for near-true black background */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(10,10,10,0.4) 50%, rgba(10,10,10,0.9) 100%)',
+          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.6) 100%)',
         }}
       />
 

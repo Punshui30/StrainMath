@@ -2,7 +2,7 @@
 
 :root {
     /* Subtle color adjustments - richer without hue change */
-    --bg-base: #0B0B0B;                    /* Darker: #0D0D0D → #0B0B0B */
+    --bg-base: #000000;                    /* Near-true black: #0B0B0B → #000000 */
     --text-primary: #FAFAFA;               /* Increased brightness from #F5F5F5 */
     --text-secondary: #D5D5D5;            /* Darker for better contrast with primary */
     --card-bg-min: rgba(255, 255, 255, 0.14);  /* Lighter: 0.08 → 0.14 */
