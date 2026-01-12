@@ -35,7 +35,7 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
           // All cards have reached logo, enter docked phase
           setPhase('docked-in-logo');
         }
-      }, 175); // faster: ~2x speed (per-card)
+      }, 15); // aggressive: ~4-5x speed (per-card)
       return () => clearTimeout(timer);
     }
 
@@ -44,7 +44,7 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
       const timer = setTimeout(() => {
         setPhase('flying-to-blend');
         setActiveCardIndex(0);
-      }, 200); // faster: ~2x speed (processing pause)
+      }, 30); // short processing pause
       return () => clearTimeout(timer);
     }
 
@@ -60,7 +60,7 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
             onPhaseComplete();
           }, 400); // Wait for last card to settle
         }
-      }, 150); // faster: ~2x speed (per-card to blend)
+      }, 15); // aggressive: ~4-5x speed (per-card to blend)
       return () => clearTimeout(timer);
     }
   }, [activeCardIndex, phase, cards.length, onPhaseComplete]);
@@ -110,6 +110,8 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
         const targetScale = phase === 'docked-in-logo' ? 0.3 : 1;
         const targetOpacity = phase === 'completed' ? 0 : 1;
 
+        const travelScale = 0.6; // reduce travel distance ~40%
+
         return (
           <motion.div
             key={`animated-card-${card.strain}-${index}`}
@@ -122,14 +124,14 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
               zIndex: 1000 + index,
             }}
             animate={{
-              x: targetX - 120,
-              y: targetY - 80,
+              x: (card.startPosition.x - 120) + ((targetX - 120) - (card.startPosition.x - 120)) * travelScale,
+              y: (card.startPosition.y - 80) + ((targetY - 80) - (card.startPosition.y - 80)) * travelScale,
               scale: targetScale,
               opacity: targetOpacity,
             }}
             transition={{
-              duration: phase === 'flying-to-logo' ? 0.18 : 0.15, // ~2x faster
-              ease: [0.2, 0.8, 0.2, 1], // sharper ease-out
+              duration: 0.1, // snap-fast
+              ease: [0.15, 0.85, 0.2, 1], // hard ease-out, no spring/bounce
             }}
             className="pointer-events-none"
             style={{
