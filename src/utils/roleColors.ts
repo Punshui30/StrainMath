@@ -4,9 +4,9 @@
  */
 
 export const ROLE_COLORS = {
-    DRIVER: '#FFD700',      // Electric gold (from #D4AF37)
-    MODULATOR: '#00FFE5',   // Electric cyan (from #14B8A6)
-    ANCHOR: '#C77DFF',      // Electric purple (from #8B7BA8)
+    DRIVER: '#E9C13D',      // from original #D4AF37 (hue preserved, +intensity)
+    MODULATOR: '#16CAB7',   // from original #14B8A6 (same as Blue Dream)
+    ANCHOR: '#9987B9',      // from original #8B7BA8
 } as const;
 
 export type BlendRole = 'Driver' | 'Modulator' | 'Anchor';

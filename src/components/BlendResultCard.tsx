@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import type { BlendRecommendation } from '../types/blend';
 import { getStrainColor } from '../utils/strainColors';
+import { getRoleColor } from '../utils/roleColors';
 
 interface BlendResultCardProps {
   blend: BlendRecommendation;
@@ -37,8 +38,8 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
       className={`relative group w-80 p-8 rounded-3xl backdrop-blur-2xl
                  transition-all duration-200 ease-out
                  ${isSelected
-          ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15),0_16px_48px_rgba(0,0,0,0.5)]'
-          : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1),0_12px_32px_rgba(0,0,0,0.4)]'
+          ? 'bg-gradient-to-br from-white/[0.14] to-white/[0.08] shadow-[inset_0_0_0_1px_rgba(233,193,61,0.35),0_16px_48px_rgba(0,0,0,0.5)]'
+          : 'bg-gradient-to-br from-white/[0.06] to-white/[0.03] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] hover:shadow-[inset_0_0_0_1px_rgba(233,193,61,0.2),0_12px_32px_rgba(0,0,0,0.4)]'
         }`}
     >
       {/* Name & Descriptor */}
@@ -54,8 +55,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
       {/* Confidence Range Pill */}
       <div className="flex flex-wrap gap-2 mb-6">
         {(() => {
-          const driverStrain = blend.components.find(c => c.role.toLowerCase() === 'driver');
-          const driverColor = driverStrain ? getStrainColor(driverStrain.name) : '#FFD700';
+          const driverColor = getRoleColor('driver');
           const r = parseInt(driverColor.slice(1, 3), 16);
           const g = parseInt(driverColor.slice(3, 5), 16);
           const b = parseInt(driverColor.slice(5, 7), 16);
@@ -147,8 +147,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
 
       {/* Selection indicator */}
       {isSelected && (() => {
-        const driverStrain = blend.components.find(c => c.role.toLowerCase() === 'driver');
-        const driverColor = driverStrain ? getStrainColor(driverStrain.name) : '#FFD700';
+        const driverColor = getRoleColor('driver');
         const r = parseInt(driverColor.slice(1, 3), 16);
         const g = parseInt(driverColor.slice(3, 5), 16);
         const b = parseInt(driverColor.slice(5, 7), 16);

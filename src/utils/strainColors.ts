@@ -9,69 +9,17 @@
  */
 
 export const strainColorMap: Record<string, string> = {
-  // Primary strains - Electric/Neon colors
-  'Blue Dream': '#00FFE5',        // Electric cyan
-  'Northern Lights': '#00FF88',   // Electric green
-  'Blueberry': '#00D4FF',         // Electric blue
-  'Sour Diesel': '#FFB800',       // Electric amber
-  'OG Kush': '#FF6B00',           // Electric orange
-  'Girl Scout Cookies': '#FF0040', // Electric red
-  'Granddaddy Purple': '#B400FF', // Electric purple
-  'Jack Herer': '#FFE500',        // Electric yellow
-  'White Widow': '#00B8FF',       // Electric sky
-  'Amnesia Haze': '#88FF00',      // Electric lime
-  
-  // Additional strains - Electric/Neon colors
-  'Green Crack': '#00FFAA',       // Electric green-cyan
-  'Bubba Kush': '#FF00CC',        // Electric magenta
-  'Durban Poison': '#FFAA00',    // Electric orange-yellow
-  'Wedding Cake': '#FF00FF',      // Electric fuchsia
-  'Gorilla Glue #4': '#FF6600',  // Electric deep orange
-  'Pineapple Express': '#FFD400', // Electric yellow-gold
-  'Strawberry Cough': '#FF0066',  // Electric pink-red
-  'Purple Punch': '#CC00FF',      // Electric violet
-  'AK-47': '#FF3300',            // Electric red-orange
-  'Super Lemon Haze': '#FFFF00',  // Electric pure yellow
-  'Gelato': '#FF00AA',           // Electric hot pink
-  'Skywalker OG': '#AA00FF',     // Electric purple-blue
-  'Trainwreck': '#FF8800',       // Electric bright orange
-  'Cherry Pie': '#FF0066',       // Electric pink
-  'Zkittlez': '#FF00DD',         // Electric magenta-pink
-  'Maui Wowie': '#00FFDD',       // Electric cyan-green
-  'Chemdawg': '#FF4400',         // Electric red-orange
-  'LA Confidential': '#FF00BB',  // Electric hot pink
-  'Tangie': '#FFAA00',           // Electric orange-yellow
-  'Do-Si-Dos': '#FF00EE',        // Electric magenta
-  'Harlequin': '#00FFBB',        // Electric cyan-green
-  'Sunset Sherbet': '#FF0099',   // Electric pink-magenta
-  'Bruce Banner': '#FF2200',     // Electric red
-  'Purple Haze': '#DD00FF',      // Electric purple-pink
-  'Runtz': '#FF00CC',            // Electric magenta
-  'Critical Kush': '#FF00AA',    // Electric hot pink
-  'Mango Kush': '#FF9900',       // Electric orange
-  'Death Star': '#FF00DD',       // Electric magenta
-  'Candyland': '#FFAA00',        // Electric orange-yellow
-  'Headband': '#FF00BB',         // Electric hot pink
-  'Mimosa': '#FFFF00',           // Electric pure yellow
-  'Animal Cookies': '#FF0066',   // Electric pink-red
-  'Tahoe OG': '#FF00AA',         // Electric hot pink
-  'Acapulco Gold': '#FFD400',    // Electric yellow-gold
-  'Lemon Haze': '#FFFF00',       // Electric pure yellow
-  'Cookies and Cream': '#FF00EE', // Electric magenta
-  'Master Kush': '#FF00CC',      // Electric magenta
-  'Chem Dawg #4': '#FF4400',     // Electric red-orange
-  'Biscotti': '#FF00DD',         // Electric magenta
-  'Forbidden Fruit': '#FF00AA',   // Electric hot pink
-  'Clementine': '#FFAA00',       // Electric orange-yellow
-  'Slurricane': '#FF00BB',       // Electric hot pink
-  'Sour Tangie': '#FFFF00',      // Electric pure yellow
-  'MAC': '#FF00CC',              // Electric magenta
-  'Ice Cream Cake': '#FF00EE',   // Electric magenta
-  'Strawberry Banana': '#FF0066', // Electric pink-red
-  'Platinum OG': '#FF00DD',      // Electric magenta
-  'Lemon Kush': '#FFFF00',       // Electric pure yellow
-  'Pink Kush': '#FF00AA',        // Electric hot pink
-  'Chiesel': '#FF00BB',          // Electric hot pink
+  // Original palette with increased intensity (hue preserved)
+  'Blue Dream': '#16CAB7',        // from #14B8A6 (hue preserved, +intensity)
+  'Northern Lights': '#12CC8E',   // from #10B981
+  'Blueberry': '#09A0C4',         // from #0891B2
+  'Sour Diesel': '#FFAE0C',       // from #F59E0B (capped at 255)
+  'OG Kush': '#EF8307',           // from #D97706
+  'Girl Scout Cookies': '#F22A2A', // from #DC2626
+  'Granddaddy Purple': '#A238FF', // from #9333EA
+  'Jack Herer': '#FFC509',        // from #EAB308 (capped at 255)
+  'White Widow': '#07C8E9',       // from #06B6D4
+  'Amnesia Haze': '#91E018',      // from #84CC16
 };
 
 /**
@@ -82,7 +30,7 @@ export function getStrainColor(strainName: string): string {
   const color = strainColorMap[strainName];
   if (!color) {
     console.error(`[strainColors] Missing color for strain: "${strainName}"`);
-    return '#FFD700'; // Fallback only for missing mappings (should not happen)
+    return '#E9C13D'; // Fallback to driver gold (original hue, intensity up)
   }
   return color;
 }
