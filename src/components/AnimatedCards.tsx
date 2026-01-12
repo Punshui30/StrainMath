@@ -35,7 +35,7 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
           // All cards have reached logo, enter docked phase
           setPhase('docked-in-logo');
         }
-      }, 350); // 350ms per card
+      }, 175); // faster: ~2x speed (per-card)
       return () => clearTimeout(timer);
     }
 
@@ -44,7 +44,7 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
       const timer = setTimeout(() => {
         setPhase('flying-to-blend');
         setActiveCardIndex(0);
-      }, 400); // 400ms processing pause
+      }, 200); // faster: ~2x speed (processing pause)
       return () => clearTimeout(timer);
     }
 
@@ -60,7 +60,7 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
             onPhaseComplete();
           }, 400); // Wait for last card to settle
         }
-      }, 300); // 300ms per card
+      }, 150); // faster: ~2x speed (per-card to blend)
       return () => clearTimeout(timer);
     }
   }, [activeCardIndex, phase, cards.length, onPhaseComplete]);
@@ -128,8 +128,8 @@ export function AnimatedCards({ cards, logoPosition, blendCardPositions, onPhase
               opacity: targetOpacity,
             }}
             transition={{
-              duration: phase === 'flying-to-logo' ? 0.35 : 0.3,
-              ease: [0.22, 1, 0.36, 1],
+              duration: phase === 'flying-to-logo' ? 0.18 : 0.15, // ~2x faster
+              ease: [0.2, 0.8, 0.2, 1], // sharper ease-out
             }}
             className="pointer-events-none"
             style={{
