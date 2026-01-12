@@ -1,5 +1,8 @@
+/* Font A - UI/Workhorse */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+
+/* Font B - Display/Brand */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
 
 
 
@@ -8,7 +11,8 @@
     @apply antialiased;
     background-color: var(--bg-base, #0B0B0B);
     color: var(--text-primary, #FAFAFA);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 18px;  /* Increased from 16px base */
     
     /* Subpixel antialiasing (no optimizeLegibility for sharpness) */
     -webkit-font-smoothing: antialiased;
@@ -42,6 +46,20 @@
   /* Increase card border contrast globally */
   [class*="backdrop-blur"], [class*="bg-white/"] {
     border-color: var(--card-border-min, rgba(255, 255, 255, 0.15));
+  }
+  
+  /* Font B - Display font for ALL CAPS headers/navigation */
+  [class*="uppercase"][class*="tracking-"],
+  h1[class*="uppercase"],
+  .display-font {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 600;  /* Heavier weight */
+    letter-spacing: 0.05em;  /* Tighter tracking (can be overridden by tracking-* classes) */
+  }
+  
+  /* Ensure uppercase is enforced for display font */
+  [class*="uppercase"][class*="tracking-"] {
+    text-transform: uppercase;
   }
   
   /* Override pure white text throughout */
