@@ -76,7 +76,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
       {/* Component breakdown */}
       <div className="space-y-2 pt-6 border-t border-white/[0.08] mb-6">
         {blend.components.map((component) => {
-          const strainColor = getStrainColor(component.name);
+          const roleColor = getRoleColor(component.role);
 
           return (
             <div key={component.name} className="flex justify-between items-center text-xs">
@@ -85,7 +85,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
                 <div
                   className="w-2 h-2 rounded-full"
                   style={{
-                    background: strainColor,
+                    background: roleColor,
                   }}
                 />
                 <span className="text-white/70 font-light">{component.name}</span>
@@ -116,7 +116,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
           {(() => {
             let currentAngle = 0;
             return blend.components.map((component) => {
-              const strainColor = getStrainColor(component.name);
+              const roleColor = getRoleColor(component.role);
               const percentage = component.percentage;
               const segmentAngle = (percentage / 100) * 360;
               const radius = 52;
@@ -133,7 +133,7 @@ export function BlendResultCard({ blend, isSelected, onSelect, index }: BlendRes
                   cy="60"
                   r={radius}
                   fill="none"
-                  stroke={strainColor}
+                  stroke={roleColor}
                   strokeWidth="8"
                   strokeDasharray={`${segmentLength} ${circumference}`}
                   strokeDashoffset={-offset}

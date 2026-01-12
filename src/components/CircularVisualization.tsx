@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import type { BlendComponent } from '../types/blend';
-import { getStrainColor } from '../utils/strainColors';
+import { getRoleColor } from '../utils/roleColors';
 
 interface CircularVisualizationProps {
   blendName: string;
@@ -27,24 +27,6 @@ export function CircularVisualization({ blendName, components }: CircularVisuali
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="transform -rotate-90 relative z-10">
-        <defs>
-          {/* Create gradient for each component using strain color */}
-          {components.map((component, index) => {
-            const baseColor = getStrainColor(component.name);
-
-            return (
-              <linearGradient
-                key={`gradient-${component.id}-${index}`}
-                id={`gradient-${component.id}-${index}`}
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0%" stopColor={baseColor} />
-                <stop offset="100%" stopColor={baseColor} />
-              </linearGradient>
-            );
-          })}
-        </defs>
-
         {components.map((component, index) => {
           // Calculate the adjusted percentage accounting for gaps
           const adjustedPercentage = (component.percentage / 100) * usablePercentage;
@@ -59,8 +41,8 @@ export function CircularVisualization({ blendName, components }: CircularVisuali
           const dashArray = `${(adjustedPercentage / 100) * circumference} ${circumference}`;
           const dashOffset = -((cumulativeOffset / 100) * circumference);
 
-          const baseColor = getStrainColor(component.name);
-          const strokeColor = `url(#gradient-${component.id}-${index})`;
+          // Use role-based color for consistency across ring and dots
+          const strokeColor = getRoleColor(component.role);
 
           return (
             <motion.circle
