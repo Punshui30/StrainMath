@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Mic } from 'lucide-react';
 import { ScrollContainer, type ScrollContainerHandle } from './InventoryTray/ScrollContainer';
 import { ProcessorStateMachine } from './GoLogo/ProcessorStateMachine';
 import { BlendResultCard } from './BlendResultCard';
