@@ -37,6 +37,7 @@ interface ScrollContainerProps {
 export interface ScrollContainerHandle {
   scrollToCenter: (strainNames: string[]) => Promise<void>;
   getStrainPosition: (strainName: string) => DOMRect | null;
+  scrollScan: () => Promise<void>;
 }
 
 /**
@@ -92,6 +93,21 @@ export const ScrollContainer = forwardRef<ScrollContainerHandle, ScrollContainer
         return cardElement.getBoundingClientRect();
       }
       return null;
+    },
+    scrollScan: async () => {
+      const container = scrollRef.current;
+      if (!container) return;
+
+      const start = container.scrollLeft;
+      const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth);
+      const delta = Math.min(200, maxScroll > 0 ? maxScroll : 0);
+      const target = Math.min(maxScroll, start + delta);
+
+      // Move out, then back, within 300–500ms total
+      container.scrollTo({ left: target, behavior: 'smooth' });
+      await new Promise(res => setTimeout(res, 180));
+      container.scrollTo({ left: start, behavior: 'smooth' });
+      await new Promise(res => setTimeout(res, 180));
     }
   }));
 

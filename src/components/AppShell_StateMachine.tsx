@@ -70,6 +70,7 @@ export function AppShell_StateMachine() {
   const [currentLiftingIndex, setCurrentLiftingIndex] = useState(-1);
   const [cardsArrived, setCardsArrived] = useState(0);
   const [liftingCardPositions, setLiftingCardPositions] = useState<DOMRect[]>([]);
+  const [animationPhase, setAnimationPhase] = useState<'idle' | 'scanning' | 'deploying'>('idle');
 
   const inventoryRef = useRef<ScrollContainerHandle>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -195,14 +196,19 @@ export function AppShell_StateMachine() {
     const uniqueStrains = Array.from(new Set(strainNames));
 
     // ========================================
-    // STATE 1: INVENTORY ALIGNMENT
+    // PHASE 1: PRE-MOTION SCAN (tray scroll)
     // ========================================
+    setAnimationPhase('scanning');
     setAnimationState('STATE_1_INVENTORY_ALIGNED');
+    await inventoryRef.current?.scrollScan();
 
-    // Scroll inventory to center selected strains
+    // ========================================
+    // STATE 1: INVENTORY ALIGNMENT (center targets)
+    // ========================================
+    setAnimationPhase('deploying');
     await inventoryRef.current?.scrollToCenter(uniqueStrains);
 
-    // Wait for scroll settle
+    // Wait for scroll settle (keep short)
     await new Promise(resolve => setTimeout(resolve, ANIMATION_TIMINGS.SCROLL_SETTLE));
 
     // Capture card positions from DOM (One position per CARD instance)
